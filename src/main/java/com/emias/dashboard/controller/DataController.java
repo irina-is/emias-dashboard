@@ -111,6 +111,19 @@ public class DataController {
         return reportService.getUploadedDates();
     }
 
+    /**
+     * Текущий прогресс обработки файла на сервере.
+     * Клиент опрашивает этот эндпоинт каждые 500 мс во время загрузки.
+     */
+    @GetMapping("/upload-progress")
+    public Map<String, Object> getUploadProgress() {
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("inProgress", reportService.isUploadInProgress());
+        result.put("current",    reportService.getProgressCurrent());
+        result.put("total",      reportService.getProgressTotal());
+        return result;
+    }
+
     @GetMapping("/settings")
     public Map<String, String> getSettings() {
         return Map.of(
