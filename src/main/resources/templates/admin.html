@@ -145,6 +145,8 @@
                 </div>
             </div>
 
+        </div>
+
         <!-- ── Таб 3: Логи ── -->
         <div class="tab-pane fade" id="tab-logs">
             <div class="card shadow-sm">
@@ -172,9 +174,27 @@
             </div>
         </div>
 
-        </div>
     </div>
 
+</div>
+
+<!-- Модальное окно ошибок валидации -->
+<div class="modal fade" id="errorsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Данные не загружены</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">Исправьте ошибки в файле и загрузите повторно:</p>
+                <ul id="errorsList" class="mb-0"></ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -283,13 +303,11 @@
     }
 
     function showErrors(errors) {
-        const el = document.getElementById('uploadStatus');
-        el.style.display = 'block';
-        el.className = 'alert alert-danger';
-        el.innerHTML = '<strong>Данные не загружены. Исправьте ошибки в файле:</strong>'
-            + '<ul class="mb-0 mt-2">'
-            + errors.map(e => '<li>' + e.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</li>').join('')
-            + '</ul>';
+        const list = document.getElementById('errorsList');
+        list.innerHTML = errors
+            .map(e => '<li>' + e.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</li>')
+            .join('');
+        new bootstrap.Modal(document.getElementById('errorsModal')).show();
     }
 
     function showSettingsStatus(type, message) {

@@ -1,0 +1,106 @@
+2026-05-22 13:20:46.604 INFO  [c.e.d.DashboardApplication] Starting DashboardApplication using Java 22.0.2 with PID 57178 (/Users/123ira456rambler.ru/IdeaProjects/emias-dashboard/target/classes started by 123ira456rambler.ru in /Users/123ira456rambler.ru/IdeaProjects/emias-dashboard)
+2026-05-22 13:20:46.605 DEBUG [c.e.d.DashboardApplication] Running with Spring Boot v3.3.0, Spring v6.1.8
+2026-05-22 13:20:46.605 INFO  [c.e.d.DashboardApplication] No active profile set, falling back to 1 default profile: "default"
+2026-05-22 13:20:46.799 INFO  [o.s.d.r.c.RepositoryConfigurationDelegate] Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-22 13:20:46.821 INFO  [o.s.d.r.c.RepositoryConfigurationDelegate] Finished Spring Data repository scanning in 19 ms. Found 3 JPA repository interfaces.
+2026-05-22 13:20:46.897 INFO  [c.u.j.c.EnableEncryptablePropertiesBeanFactoryPostProcessor] Post-processing PropertySource instances
+2026-05-22 13:20:46.898 INFO  [c.u.j.EncryptablePropertySourceConverter] Skipping PropertySource configurationProperties [class org.springframework.boot.context.properties.source.ConfigurationPropertySourcesPropertySource
+2026-05-22 13:20:46.898 INFO  [c.u.j.EncryptablePropertySourceConverter] Skipping PropertySource servletConfigInitParams [class org.springframework.core.env.PropertySource$StubPropertySource
+2026-05-22 13:20:46.898 INFO  [c.u.j.EncryptablePropertySourceConverter] Skipping PropertySource servletContextInitParams [class org.springframework.core.env.PropertySource$StubPropertySource
+2026-05-22 13:20:46.898 INFO  [c.u.j.EncryptablePropertySourceConverter] Converting PropertySource systemProperties [org.springframework.core.env.PropertiesPropertySource] to EncryptableMapPropertySourceWrapper
+2026-05-22 13:20:46.898 INFO  [c.u.j.EncryptablePropertySourceConverter] Converting PropertySource systemEnvironment [org.springframework.boot.env.SystemEnvironmentPropertySourceEnvironmentPostProcessor$OriginAwareSystemEnvironmentPropertySource] to EncryptableSystemEnvironmentPropertySourceWrapper
+2026-05-22 13:20:46.899 INFO  [c.u.j.EncryptablePropertySourceConverter] Converting PropertySource random [org.springframework.boot.env.RandomValuePropertySource] to EncryptablePropertySourceWrapper
+2026-05-22 13:20:46.899 INFO  [c.u.j.EncryptablePropertySourceConverter] Converting PropertySource Config resource 'class path resource [application.properties]' via location 'optional:classpath:/' [org.springframework.boot.env.OriginTrackedMapPropertySource] to EncryptableMapPropertySourceWrapper
+2026-05-22 13:20:46.943 INFO  [c.u.j.f.DefaultLazyPropertyFilter] Property Filter custom Bean not found with name 'encryptablePropertyFilter'. Initializing Default Property Filter
+2026-05-22 13:20:46.945 INFO  [c.u.j.r.DefaultLazyPropertyResolver] Property Resolver custom Bean not found with name 'encryptablePropertyResolver'. Initializing Default Property Resolver
+2026-05-22 13:20:46.946 INFO  [c.u.j.d.DefaultLazyPropertyDetector] Property Detector custom Bean not found with name 'encryptablePropertyDetector'. Initializing Default Property Detector
+2026-05-22 13:20:47.000 INFO  [o.s.b.w.e.t.TomcatWebServer] Tomcat initialized with port 8080 (http)
+2026-05-22 13:20:47.004 INFO  [o.a.c.core.StandardService] Starting service [Tomcat]
+2026-05-22 13:20:47.004 INFO  [o.a.c.core.StandardEngine] Starting Servlet engine: [Apache Tomcat/10.1.24]
+2026-05-22 13:20:47.021 INFO  [o.a.c.c.C.[.[localhost].[/]] Initializing Spring embedded WebApplicationContext
+2026-05-22 13:20:47.021 INFO  [o.s.b.w.s.c.ServletWebServerApplicationContext] Root WebApplicationContext: initialization completed in 404 ms
+2026-05-22 13:20:47.032 INFO  [c.z.hikari.HikariDataSource] HikariPool-1 - Starting...
+2026-05-22 13:20:47.172 INFO  [c.z.hikari.pool.HikariPool] HikariPool-1 - Added connection conn1: url=jdbc:h2:file:./data/emias_db user=SA
+2026-05-22 13:20:47.173 INFO  [c.z.hikari.HikariDataSource] HikariPool-1 - Start completed.
+2026-05-22 13:20:47.178 INFO  [o.s.b.a.h.H2ConsoleAutoConfiguration] H2 console available at '/h2-console'. Database available at 'jdbc:h2:file:./data/emias_db'
+2026-05-22 13:20:47.225 INFO  [o.h.j.internal.util.LogHelper] HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-22 13:20:47.244 INFO  [org.hibernate.Version] HHH000412: Hibernate ORM core version 6.5.2.Final
+2026-05-22 13:20:47.255 INFO  [o.h.c.i.RegionFactoryInitiator] HHH000026: Second-level cache disabled
+2026-05-22 13:20:47.355 INFO  [o.s.o.j.p.SpringPersistenceUnitInfo] No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-22 13:20:47.673 INFO  [o.h.e.t.j.p.i.JtaPlatformInitiator] HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-22 13:20:47.688 INFO  [o.s.o.j.LocalContainerEntityManagerFactoryBean] Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-22 13:20:47.790 INFO  [o.s.d.j.r.q.QueryEnhancerFactory] Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-22 13:20:47.955 WARN  [o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration] spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-22 13:20:47.969 INFO  [o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer] Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2026-05-22 13:20:47.991 INFO  [o.s.b.a.w.s.WelcomePageHandlerMapping] Adding welcome page template: index
+2026-05-22 13:20:48.047 INFO  [o.s.s.w.DefaultSecurityFilterChain] Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@1a370c7c, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@63f08f9f, org.springframework.security.web.context.SecurityContextHolderFilter@6b862f17, org.springframework.security.web.header.HeaderWriterFilter@6c7f3af6, org.springframework.web.filter.CorsFilter@6e21b6f8, org.springframework.security.web.csrf.CsrfFilter@b7952d2, org.springframework.security.web.authentication.logout.LogoutFilter@21312b5, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter@5ae5a507, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@62284954, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@16817bad, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@69a14512, org.springframework.security.web.access.ExceptionTranslationFilter@2b9bacb8, org.springframework.security.web.access.intercept.AuthorizationFilter@13198b8e]
+2026-05-22 13:20:48.124 INFO  [o.s.b.w.e.t.TomcatWebServer] Tomcat started on port 8080 (http) with context path '/'
+2026-05-22 13:20:48.124 INFO  [c.u.j.c.RefreshScopeRefreshedEventListener] Refreshing cached encryptable property sources on ServletWebServerInitializedEvent
+2026-05-22 13:20:48.124 INFO  [c.u.j.c.CachingDelegateEncryptablePropertySource] Property Source systemProperties refreshed
+2026-05-22 13:20:48.124 INFO  [c.u.j.c.CachingDelegateEncryptablePropertySource] Property Source systemEnvironment refreshed
+2026-05-22 13:20:48.124 INFO  [c.u.j.c.CachingDelegateEncryptablePropertySource] Property Source random refreshed
+2026-05-22 13:20:48.124 INFO  [c.u.j.c.CachingDelegateEncryptablePropertySource] Property Source Config resource 'class path resource [application.properties]' via location 'optional:classpath:/' refreshed
+2026-05-22 13:20:48.124 INFO  [c.u.j.EncryptablePropertySourceConverter] Skipping PropertySource configurationProperties [class org.springframework.boot.context.properties.source.ConfigurationPropertySourcesPropertySource
+2026-05-22 13:20:48.124 INFO  [c.u.j.EncryptablePropertySourceConverter] Skipping PropertySource servletConfigInitParams [class org.springframework.core.env.PropertySource$StubPropertySource
+2026-05-22 13:20:48.124 INFO  [c.u.j.EncryptablePropertySourceConverter] Converting PropertySource servletContextInitParams [org.springframework.web.context.support.ServletContextPropertySource] to EncryptableEnumerablePropertySourceWrapper
+2026-05-22 13:20:48.128 INFO  [c.e.d.DashboardApplication] Started DashboardApplication in 1.644 seconds (process running for 1.871)
+2026-05-22 13:20:58.420 INFO  [o.a.c.c.C.[.[localhost].[/]] Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-22 13:20:58.420 INFO  [o.s.w.s.DispatcherServlet] Initializing Servlet 'dispatcherServlet'
+2026-05-22 13:20:58.422 INFO  [o.s.w.s.DispatcherServlet] Completed initialization in 2 ms
+2026-05-22 13:21:28.265 INFO  [c.e.d.service.ReportService] === Начало загрузки файла 'Хлор 11.01 обновление.xlsx', дата отчёта: 2026-05-22, размер: 14276 байт ===
+2026-05-22 13:21:28.297 INFO  [c.e.d.service.ReportService] Файл сохранён на диск: /Users/123ira456rambler.ru/Downloads/emias-uploads/report_2026-05-22.xlsx
+2026-05-22 13:21:28.574 WARN  [c.e.d.service.ReportService] Файл не прошёл валидацию: 54 ошибок
+2026-05-22 13:21:28.574 WARN  [c.e.d.service.ReportService]   Строка 2, "Дата исследования": неверный формат даты "PROD"
+2026-05-22 13:21:28.574 WARN  [c.e.d.service.ReportService]   Строка 3: не заполнен МКАБ
+2026-05-22 13:21:28.574 WARN  [c.e.d.service.ReportService]   Строка 4: не заполнен МКАБ
+2026-05-22 13:21:28.574 WARN  [c.e.d.service.ReportService]   Строка 5: не заполнен МКАБ
+2026-05-22 13:21:28.574 WARN  [c.e.d.service.ReportService]   Строка 5, "Дата диспансеризации": неверный формат даты "В  ы  р а б о т к а"
+2026-05-22 13:21:28.574 WARN  [c.e.d.service.ReportService]   Строка 9, "Дата диспансеризации": неверный формат даты "44222212"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 9, "Дата исследования": неверный формат даты "44222212"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 9, "Дата закрытия карты": неверный формат даты "44222212"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 9, "Дата рождения": неверный формат даты "44222212"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 9, "Дата забора биоматериала": неверный формат даты "44"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 9, "Дата доставки": неверный формат даты "44"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 9, "Дата проведения исследования": неверный формат даты "44"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 10: не заполнен МКАБ
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 10, "Дата диспансеризации": неверный формат даты "44"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 10, "Дата исследования": неверный формат даты "44"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 10, "Дата закрытия карты": неверный формат даты "44"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 10, "Дата рождения": неверный формат даты "44"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 10, "Дата забора биоматериала": неверный формат даты "44"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 10, "Дата доставки": неверный формат даты "44"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 10, "Дата проведения исследования": неверный формат даты "44"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 11: не заполнен МКАБ
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 11, "Дата диспансеризации": неверный формат даты "44"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 11, "Дата исследования": неверный формат даты "44"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 11, "Дата закрытия карты": неверный формат даты "44"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 11, "Дата рождения": неверный формат даты "44"
+2026-05-22 13:21:28.575 WARN  [c.e.d.service.ReportService]   Строка 11, "Дата забора биоматериала": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 11, "Дата доставки": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 11, "Дата проведения исследования": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 12: не заполнен МКАБ
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 12, "Дата диспансеризации": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 12, "Дата исследования": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 12, "Дата закрытия карты": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 12, "Дата рождения": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 12, "Дата забора биоматериала": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 12, "Дата доставки": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 12, "Дата проведения исследования": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 13: не заполнен МКАБ
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 13, "Дата диспансеризации": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 13, "Дата исследования": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 13, "Дата закрытия карты": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 13, "Дата рождения": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 13, "Дата забора биоматериала": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 13, "Дата доставки": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 13, "Дата проведения исследования": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 14: не заполнен МКАБ
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 14, "Дата диспансеризации": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 14, "Дата исследования": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 14, "Дата закрытия карты": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 14, "Дата рождения": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 14, "Дата забора биоматериала": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 14, "Дата доставки": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 14, "Дата проведения исследования": неверный формат даты "44"
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 15: не заполнен МКАБ
+2026-05-22 13:21:28.576 WARN  [c.e.d.service.ReportService]   Строка 15, "Дата рождения": неверный формат даты "Бухтеева Е.И."
