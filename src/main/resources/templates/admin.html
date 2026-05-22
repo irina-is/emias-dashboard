@@ -37,6 +37,11 @@
                 Логи
             </button>
         </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-rawdata" onclick="initRawData()">
+                Исходные данные
+            </button>
+        </li>
     </ul>
 
     <div class="tab-content">
@@ -189,6 +194,38 @@
                          style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:6px;
                                 font-size:12px;max-height:600px;overflow-y:auto;white-space:pre-wrap;
                                 word-break:break-all;">Нажмите "Обновить" для загрузки логов</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Таб 4: Исходные данные ── -->
+        <div class="tab-pane fade" id="tab-rawdata">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                        <select id="rawDateSelect" class="form-select form-select-sm" style="width: auto;"
+                                onchange="rawDataPage = 0; loadRecords();">
+                            <option value="">— выберите дату —</option>
+                        </select>
+                        <select id="rawPageSize" class="form-select form-select-sm" style="width: auto;"
+                                onchange="rawDataPage = 0; loadRecords();">
+                            <option value="50" selected>50 строк</option>
+                            <option value="100">100 строк</option>
+                            <option value="200">200 строк</option>
+                        </select>
+                        <button id="rawDownloadBtn" class="btn btn-outline-success btn-sm" style="display:none;"
+                                onclick="downloadRawFile()">
+                            Скачать Excel
+                        </button>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" id="rawSearch" class="form-control form-control-sm"
+                               placeholder="Поиск по МКАБ..."
+                               oninput="debouncedRawSearch()">
+                    </div>
+                    <div id="rawDataContainer">
+                        <span class="text-muted">Выберите дату для просмотра данных</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -372,6 +409,168 @@
             clearInterval(autoRefreshTimer);
             autoRefreshTimer = null;
         }
+    }
+
+    // ── Исходные данные ──
+    let rawDataPage = 0;
+    let rawDataTotalPages = 0;
+    let rawDataInitialized = false;
+    let rawSortCol = '';
+    let rawSortDir = 'asc';
+    let rawSearchTimer = null;
+
+    const RAW_COLUMNS = [
+        {key: 'mkab',                  label: 'МКАБ'},
+        {key: 'lastName',              label: 'Фамилия'},
+        {key: 'firstName',             label: 'Имя'},
+        {key: 'middleName',            label: 'Отчество'},
+        {key: 'visitType',             label: 'Тип визита'},
+        {key: 'snils',                 label: 'СНИЛС'},
+        {key: 'omsPolicy',             label: 'Полис ОМС'},
+        {key: 'dispensarizationDate',  label: 'Дата диспансеризации'},
+        {key: 'researchDate',          label: 'Дата исследования'},
+        {key: 'cardClosingDate',       label: 'Дата закрытия карты'},
+        {key: 'birthDate',             label: 'Дата рождения'},
+        {key: 'tfomsServiceCode',      label: 'Код ТФОМС'},
+        {key: 'valueText',             label: 'Значение'},
+        {key: 'referralNumber',        label: '№ направления'},
+        {key: 'refusal',               label: 'Отказ'},
+        {key: 'researchResult',        label: 'Результат иссл.'},
+        {key: 'serviceCode',           label: 'Код услуги'},
+        {key: 'researchStatus',        label: 'Статус иссл.'},
+        {key: 'doctorName',            label: 'Врач'},
+        {key: 'ogrnFrom',              label: 'ОГРН откуда'},
+        {key: 'facilityFrom',          label: 'ЛПУ откуда'},
+        {key: 'ogrnTo',                label: 'ОГРН куда'},
+        {key: 'facilityTo',            label: 'ЛПУ куда'},
+        {key: 'pcrResult',             label: 'Результат ПЦР'},
+        {key: 'pcrDone',               label: 'ПЦР проводился'},
+        {key: 'ageAtExport',           label: 'Возраст (выгрузка)'},
+        {key: 'ageAtResearch',         label: 'Возраст (иссл.)'},
+        {key: 'biomaterialDate',       label: 'Дата забора'},
+        {key: 'deliveryDate',          label: 'Дата доставки'},
+        {key: 'researchConductedDate', label: 'Дата иссл. (лаб.)'},
+    ];
+
+    function initRawData() {
+        if (rawDataInitialized) return;
+        rawDataInitialized = true;
+        fetch(BASE_PATH + '/api/dates')
+            .then(r => r.json())
+            .then(dates => {
+                const sel = document.getElementById('rawDateSelect');
+                sel.innerHTML = '<option value="">— выберите дату —</option>';
+                dates.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d;
+                    opt.textContent = formatDate(d);
+                    sel.appendChild(opt);
+                });
+                if (dates.length > 0) {
+                    sel.value = dates[0];
+                    rawDataPage = 0;
+                    loadRecords();
+                }
+            });
+    }
+
+    function debouncedRawSearch() {
+        clearTimeout(rawSearchTimer);
+        rawSearchTimer = setTimeout(() => { rawDataPage = 0; loadRecords(); }, 350);
+    }
+
+    function loadRecords() {
+        const date   = document.getElementById('rawDateSelect').value;
+        const size   = parseInt(document.getElementById('rawPageSize').value);
+        const search = document.getElementById('rawSearch').value.trim();
+        if (!date) return;
+
+        const container = document.getElementById('rawDataContainer');
+        container.innerHTML = '<span class="text-muted">Загружаю...</span>';
+        document.getElementById('rawDownloadBtn').style.display = 'none';
+
+        let url = BASE_PATH + '/api/records?date=' + date + '&page=' + rawDataPage + '&size=' + size;
+        if (search)      url += '&search=' + encodeURIComponent(search);
+        if (rawSortCol)  url += '&sort=' + encodeURIComponent(rawSortCol) + '&dir=' + rawSortDir;
+
+        fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                rawDataTotalPages = data.totalPages;
+                renderRawTable(data, size);
+                document.getElementById('rawDownloadBtn').style.display = 'inline-block';
+            })
+            .catch(() => {
+                container.innerHTML = '<span class="text-danger">Ошибка загрузки данных</span>';
+            });
+    }
+
+    function setRawSort(col) {
+        if (rawSortCol === col) {
+            rawSortDir = rawSortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            rawSortCol = col;
+            rawSortDir = 'asc';
+        }
+        rawDataPage = 0;
+        loadRecords();
+    }
+
+    function renderRawTable(data, size) {
+        const from = rawDataPage * size + 1;
+        const to   = Math.min((rawDataPage + 1) * size, data.totalCount);
+
+        const thead = RAW_COLUMNS.map(c => {
+            const active = rawSortCol === c.key;
+            const icon   = active ? (rawSortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕';
+            const opacity = active ? '1' : '0.3';
+            return '<th class="text-nowrap px-2" onclick="setRawSort(\'' + c.key + '\')" ' +
+                   'style="cursor:pointer;user-select:none;white-space:nowrap">' +
+                   safeEsc(c.label) +
+                   '<span style="opacity:' + opacity + ';font-size:10px">' + icon + '</span></th>';
+        }).join('');
+
+        const tbody = data.records.length > 0
+            ? data.records.map(r =>
+                '<tr>' + RAW_COLUMNS.map(c => '<td class="text-nowrap px-2">' + safeEsc(r[c.key] || '') + '</td>').join('') + '</tr>'
+              ).join('')
+            : '<tr><td colspan="' + RAW_COLUMNS.length + '" class="text-center text-muted py-3">Ничего не найдено</td></tr>';
+
+        const prevDisabled = rawDataPage === 0 ? 'disabled' : '';
+        const nextDisabled = rawDataPage >= data.totalPages - 1 ? 'disabled' : '';
+
+        document.getElementById('rawDataContainer').innerHTML =
+            '<div class="d-flex align-items-center gap-3 mb-2 flex-wrap">' +
+                '<span class="text-muted small">Показано ' + from + '–' + to + ' из ' + data.totalCount + ' записей</span>' +
+                '<div class="ms-auto d-flex align-items-center gap-2">' +
+                    '<button class="btn btn-sm btn-outline-secondary" onclick="rawPrevPage()" ' + prevDisabled + '>← Назад</button>' +
+                    '<span class="text-muted small">стр. ' + (rawDataPage + 1) + ' из ' + data.totalPages + '</span>' +
+                    '<button class="btn btn-sm btn-outline-secondary" onclick="rawNextPage()" ' + nextDisabled + '>Вперёд →</button>' +
+                '</div>' +
+            '</div>' +
+            '<div style="overflow-x: auto; max-height: 560px; overflow-y: auto;">' +
+                '<table class="table table-sm table-bordered table-hover mb-0" style="font-size: 12px; min-width: max-content;">' +
+                    '<thead class="table-light sticky-top"><tr>' + thead + '</tr></thead>' +
+                    '<tbody>' + tbody + '</tbody>' +
+                '</table>' +
+            '</div>';
+    }
+
+    function safeEsc(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function rawPrevPage() {
+        if (rawDataPage > 0) { rawDataPage--; loadRecords(); }
+    }
+
+    function rawNextPage() {
+        if (rawDataPage < rawDataTotalPages - 1) { rawDataPage++; loadRecords(); }
+    }
+
+    function downloadRawFile() {
+        const date = document.getElementById('rawDateSelect').value;
+        if (date) window.location.href = BASE_PATH + '/api/download?date=' + date;
     }
 
 </script>

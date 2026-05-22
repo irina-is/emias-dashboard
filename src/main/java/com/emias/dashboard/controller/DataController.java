@@ -1,10 +1,18 @@
 package com.emias.dashboard.controller;
 
+import com.emias.dashboard.entity.Screening;
 import com.emias.dashboard.repository.ScreeningRepository;
 import com.emias.dashboard.service.FileValidationException;
 import com.emias.dashboard.service.ReportService;
 import com.emias.dashboard.service.SettingsService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,9 +21,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Контроллер для операций с файлами отчётов.
@@ -29,6 +40,9 @@ public class DataController {
 
     @Value("${app.upload-log.file:}")
     private String uploadLogFilePath;
+
+    @Value("${report.upload.dir}")
+    private String uploadDir;
 
     private final ReportService       reportService;
     private final ScreeningRepository screeningRepository;
@@ -117,6 +131,127 @@ public class DataController {
             return ResponseEntity.internalServerError().body("Ошибка: " + e.getMessage());
         }
     }
+
+    private static final Map<String, String> SORTABLE_FIELDS = Map.ofEntries(
+        Map.entry("mkab",                  "mkabNumber"),
+        Map.entry("lastName",              "lastName"),
+        Map.entry("firstName",             "firstName"),
+        Map.entry("middleName",            "middleName"),
+        Map.entry("visitType",             "visitType"),
+        Map.entry("snils",                 "snils"),
+        Map.entry("omsPolicy",             "omsPolicy"),
+        Map.entry("dispensarizationDate",  "dispensarizationDate"),
+        Map.entry("researchDate",          "researchDate"),
+        Map.entry("cardClosingDate",       "cardClosingDate"),
+        Map.entry("birthDate",             "birthDate"),
+        Map.entry("tfomsServiceCode",      "tfomsServiceCode"),
+        Map.entry("valueText",             "valueText"),
+        Map.entry("referralNumber",        "referralNumber"),
+        Map.entry("refusal",               "refusal"),
+        Map.entry("researchResult",        "researchResult"),
+        Map.entry("serviceCode",           "serviceCode"),
+        Map.entry("researchStatus",        "researchStatus"),
+        Map.entry("doctorName",            "doctorName"),
+        Map.entry("ogrnFrom",              "ogrnFrom"),
+        Map.entry("facilityFrom",          "facilityFrom"),
+        Map.entry("ogrnTo",                "ogrnTo"),
+        Map.entry("facilityTo",            "facilityTo"),
+        Map.entry("pcrResult",             "pcrResult"),
+        Map.entry("pcrDone",               "pcrDone"),
+        Map.entry("ageAtExport",           "ageAtExport"),
+        Map.entry("ageAtResearch",         "ageAtResearch"),
+        Map.entry("biomaterialDate",       "biomaterialDate"),
+        Map.entry("deliveryDate",          "deliveryDate"),
+        Map.entry("researchConductedDate", "researchConductedDate")
+    );
+
+    @GetMapping("/records")
+    public ResponseEntity<?> getRecords(
+            @RequestParam String date,
+            @RequestParam(defaultValue = "0")   int page,
+            @RequestParam(defaultValue = "50")  int size,
+            @RequestParam(defaultValue = "")    String search,
+            @RequestParam(defaultValue = "")    String sort,
+            @RequestParam(defaultValue = "asc") String dir) {
+        try {
+            LocalDate reportDate = LocalDate.parse(date);
+            Sort.Direction direction = "desc".equalsIgnoreCase(dir) ? Sort.Direction.DESC : Sort.Direction.ASC;
+            String fieldName = SORTABLE_FIELDS.getOrDefault(sort, "id");
+            PageRequest pageable = PageRequest.of(
+                    page, Math.min(size, 200), Sort.by(direction, fieldName));
+            Page<Screening> pageResult = screeningRepository.searchByReportDate(
+                    reportDate, search.trim(), pageable);
+            List<Map<String, String>> records = pageResult.getContent().stream()
+                    .map(this::screeningToMap)
+                    .collect(Collectors.toList());
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("records", records);
+            response.put("totalCount", pageResult.getTotalElements());
+            response.put("page", page);
+            response.put("size", size);
+            response.put("totalPages", pageResult.getTotalPages());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Ошибка: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/download")
+    public ResponseEntity<Resource> downloadFile(@RequestParam String date) {
+        try {
+            LocalDate.parse(date);
+            Path filePath = Paths.get(uploadDir).resolve("report_" + date + ".xlsx");
+            if (!Files.exists(filePath)) {
+                return ResponseEntity.notFound().build();
+            }
+            Resource resource = new FileSystemResource(filePath);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"report_" + date + ".xlsx\"")
+                    .contentType(MediaType.parseMediaType(
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    private Map<String, String> screeningToMap(Screening s) {
+        Map<String, String> m = new LinkedHashMap<>();
+        m.put("mkab",                  nvl(s.getMkabNumber()));
+        m.put("lastName",              nvl(s.getLastName()));
+        m.put("firstName",             nvl(s.getFirstName()));
+        m.put("middleName",            nvl(s.getMiddleName()));
+        m.put("visitType",             nvl(s.getVisitType()));
+        m.put("snils",                 nvl(s.getSnils()));
+        m.put("omsPolicy",             nvl(s.getOmsPolicy()));
+        m.put("dispensarizationDate",  nvl(s.getDispensarizationDate()));
+        m.put("researchDate",          nvl(s.getResearchDate()));
+        m.put("cardClosingDate",       nvl(s.getCardClosingDate()));
+        m.put("birthDate",             nvl(s.getBirthDate()));
+        m.put("tfomsServiceCode",      nvl(s.getTfomsServiceCode()));
+        m.put("valueText",             nvl(s.getValueText()));
+        m.put("referralNumber",        nvl(s.getReferralNumber()));
+        m.put("refusal",               nvl(s.getRefusal()));
+        m.put("researchResult",        nvl(s.getResearchResult()));
+        m.put("serviceCode",           nvl(s.getServiceCode()));
+        m.put("researchStatus",        nvl(s.getResearchStatus()));
+        m.put("doctorName",            nvl(s.getDoctorName()));
+        m.put("ogrnFrom",              nvl(s.getOgrnFrom()));
+        m.put("facilityFrom",          nvl(s.getFacilityFrom()));
+        m.put("ogrnTo",                nvl(s.getOgrnTo()));
+        m.put("facilityTo",            nvl(s.getFacilityTo()));
+        m.put("pcrResult",             nvl(s.getPcrResult()));
+        m.put("pcrDone",               nvl(s.getPcrDone()));
+        m.put("ageAtExport",           nvl(s.getAgeAtExport()));
+        m.put("ageAtResearch",         nvl(s.getAgeAtResearch()));
+        m.put("biomaterialDate",       nvl(s.getBiomaterialDate()));
+        m.put("deliveryDate",          nvl(s.getDeliveryDate()));
+        m.put("researchConductedDate", nvl(s.getResearchConductedDate()));
+        return m;
+    }
+
+    private String nvl(String v) { return v != null ? v : ""; }
 
     @GetMapping("/logs")
     public ResponseEntity<String> getLogs(@RequestParam(defaultValue = "100") int lines) {
