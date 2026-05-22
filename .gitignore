@@ -1,5 +1,6 @@
 target/
 data/
+logs/
 .DS_Store
 *.mv.db
 *.trace.db
