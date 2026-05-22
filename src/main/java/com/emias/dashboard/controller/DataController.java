@@ -3,10 +3,15 @@ package com.emias.dashboard.controller;
 import com.emias.dashboard.repository.ScreeningRepository;
 import com.emias.dashboard.service.ReportService;
 import com.emias.dashboard.service.SettingsService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +22,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class DataController {
+
+    @Value("${logging.file.name:}")
+    private String logFilePath;
 
     private final ReportService       reportService;
     private final ScreeningRepository screeningRepository;
@@ -100,6 +108,26 @@ public class DataController {
             return ResponseEntity.badRequest().body("Годовой план должен быть числом");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Ошибка: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/logs")
+    public ResponseEntity<String> getLogs(@RequestParam(defaultValue = "100") int lines) {
+        if (logFilePath == null || logFilePath.isBlank()) {
+            return ResponseEntity.ok("Логирование в файл не настроено (logging.file.name не задан)");
+        }
+        try {
+            Path path = Paths.get(logFilePath);
+            if (!Files.exists(path)) {
+                return ResponseEntity.ok("Лог-файл ещё не создан: " + path.toAbsolutePath());
+            }
+            List<String> allLines = Files.readAllLines(path);
+            int from = Math.max(0, allLines.size() - lines);
+            List<String> tail = allLines.subList(from, allLines.size());
+            return ResponseEntity.ok(String.join("\n", tail));
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError()
+                    .body("Ошибка чтения лог-файла: " + e.getMessage());
         }
     }
 

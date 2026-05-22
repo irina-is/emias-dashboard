@@ -12,6 +12,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +43,8 @@ import java.util.List;
 @Service
 public class ReportService {
 
+    private static final Logger log = LoggerFactory.getLogger(ReportService.class);
+
     @Value("${report.upload.dir}")
     private String uploadDir;
 
@@ -61,17 +65,28 @@ public class ReportService {
      */
     @Transactional
     public void saveUploadedFile(MultipartFile file, String date) throws IOException {
+        String originalName = file.getOriginalFilename();
+        long fileSize = file.getSize();
+        log.info("=== Начало загрузки файла '{}', дата отчёта: {}, размер: {} байт ===",
+                originalName, date, fileSize);
+
         // Шаг 1: сохраняем файл на диск как архив
         Path dir = Paths.get(uploadDir);
         Files.createDirectories(dir);
         Path destination = dir.resolve("report_" + date + ".xlsx");
         Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
+        log.info("Файл сохранён на диск: {}", destination.toAbsolutePath());
 
         // Шаг 2: парсим Excel
         List<PatientRecord> records = parseFile(destination.toString());
+        log.info("Парсинг завершён, успешно прочитано записей: {}", records.size());
 
         // Шаг 3: удаляем старые данные за эту дату (если были)
         LocalDate reportDate = LocalDate.parse(date);
+        long existingCount = screeningRepository.countByReportDate(reportDate);
+        if (existingCount > 0) {
+            log.info("Удаляю {} старых записей за {} (перезагрузка)", existingCount, reportDate);
+        }
         screeningRepository.deleteByReportDate(reportDate);
         uploadRepository.deleteByReportDate(reportDate);
 
@@ -113,9 +128,11 @@ public class ReportService {
             screenings.add(s);
         }
         screeningRepository.saveAll(screenings);
+        log.info("Сохранено {} записей в базу за {}", screenings.size(), reportDate);
 
         // Шаг 5: сохраняем запись о загрузке
         uploadRepository.save(new Upload(reportDate, records.size()));
+        log.info("=== Загрузка завершена успешно: {} записей за {} ===", records.size(), reportDate);
     }
 
     /**
@@ -171,59 +188,94 @@ public class ReportService {
     // Читает Excel-файл по пути и возвращает список записей
     private List<PatientRecord> parseFile(String filePath) throws IOException {
         List<PatientRecord> records = new ArrayList<>();
+        int skippedRows = 0;
 
+        log.info("Открываю Excel-файл: {}", filePath);
         FileInputStream fis = new FileInputStream(filePath);
         Workbook workbook = new XSSFWorkbook(fis);
         Sheet sheet = workbook.getSheetAt(0);
+        int totalRows = sheet.getLastRowNum();
+        log.info("Листов в книге: {}, используем лист 0. Строк данных (без заголовка): {}",
+                workbook.getNumberOfSheets(), totalRows);
 
         // Строка 0 — заголовок, начинаем с 1
-        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+        for (int i = 1; i <= totalRows; i++) {
             Row row = sheet.getRow(i);
 
             if (row == null) {
+                log.debug("Строка {} пустая (null), пропускаю", i);
+                skippedRows++;
                 continue;
             }
 
-            PatientRecord record = new PatientRecord(
-                    getCellValue(row, 0),   // Номер МКАБ
-                    getCellValue(row, 1),   // Фамилия
-                    getCellValue(row, 2),   // Имя
-                    getCellValue(row, 3),   // Отчество
-                    getCellValue(row, 4),   // Диспансеризация / профосмотр
-                    getCellValue(row, 5),   // СНИЛС
-                    getCellValue(row, 6),   // Полис ОМС
-                    getCellValue(row, 7),   // Дата диспансеризации
-                    getCellValue(row, 8),   // Дата исследования
-                    getCellValue(row, 9),   // Дата закрытия дисп. карты
-                    getCellValue(row, 10),  // Дата рождения
-                    getCellValue(row, 11),  // Код услуги ТФОМС
-                    getCellValue(row, 12),  // Значение (Текст)
-                    getCellValue(row, 13),  // Номер направления
-                    getCellValue(row, 14),  // Отказ
-                    getCellValue(row, 15),  // Результат исследования
-                    getCellValue(row, 16),  // Код услуги
-                    getCellValue(row, 17),  // Статус исследования
-                    getCellValue(row, 18),  // Врач
-                    getCellValue(row, 19),  // ОГРН откуда направили
-                    getCellValue(row, 20),  // ЛПУ откуда направили
-                    getCellValue(row, 21),  // ОГРН куда направили
-                    getCellValue(row, 22),  // ЛПУ куда направили
-                    getCellValue(row, 23),  // Результат ПЦР
-                    getCellValue(row, 24),  // Проводился ли ПЦР
-                    getCellValue(row, 25),  // Возраст на момент выгрузки
-                    getCellValue(row, 26),  // Возраст на момент исследования
-                    getCellValue(row, 27),  // Дата забора биоматериала
-                    getCellValue(row, 28),  // Дата доставки
-                    getCellValue(row, 29)   // Дата проведения исследования
-            );
+            try {
+                String mkab     = getCellValue(row, 0);
+                String lastName = getCellValue(row, 1);
+                String firstName = getCellValue(row, 2);
 
-            records.add(record);
+                if (mkab.isBlank() && lastName.isBlank()) {
+                    log.debug("Строка {} пустая (нет МКАБ и фамилии), пропускаю", i);
+                    skippedRows++;
+                    continue;
+                }
+
+                log.debug("Строка {}: МКАБ={}, {} {} {}",
+                        i, mkab, lastName, firstName, getCellValue(row, 3));
+
+                PatientRecord record = new PatientRecord(
+                        mkab,
+                        lastName,
+                        firstName,
+                        getCellValue(row, 3),   // Отчество
+                        getCellValue(row, 4),   // Диспансеризация / профосмотр
+                        getCellValue(row, 5),   // СНИЛС
+                        getCellValue(row, 6),   // Полис ОМС
+                        getCellValue(row, 7),   // Дата диспансеризации
+                        getCellValue(row, 8),   // Дата исследования
+                        getCellValue(row, 9),   // Дата закрытия дисп. карты
+                        getCellValue(row, 10),  // Дата рождения
+                        getCellValue(row, 11),  // Код услуги ТФОМС
+                        getCellValue(row, 12),  // Значение (Текст)
+                        getCellValue(row, 13),  // Номер направления
+                        getCellValue(row, 14),  // Отказ
+                        getCellValue(row, 15),  // Результат исследования
+                        getCellValue(row, 16),  // Код услуги
+                        getCellValue(row, 17),  // Статус исследования
+                        getCellValue(row, 18),  // Врач
+                        getCellValue(row, 19),  // ОГРН откуда направили
+                        getCellValue(row, 20),  // ЛПУ откуда направили
+                        getCellValue(row, 21),  // ОГРН куда направили
+                        getCellValue(row, 22),  // ЛПУ куда направили
+                        getCellValue(row, 23),  // Результат ПЦР
+                        getCellValue(row, 24),  // Проводился ли ПЦР
+                        getCellValue(row, 25),  // Возраст на момент выгрузки
+                        getCellValue(row, 26),  // Возраст на момент исследования
+                        getCellValue(row, 27),  // Дата забора биоматериала
+                        getCellValue(row, 28),  // Дата доставки
+                        getCellValue(row, 29)   // Дата проведения исследования
+                );
+
+                records.add(record);
+
+            } catch (Exception e) {
+                log.error("Ошибка парсинга строки {} (МКАБ='{}'): {}",
+                        i, getCellValueSafe(row, 0), e.getMessage(), e);
+                skippedRows++;
+            }
         }
 
         workbook.close();
         fis.close();
 
+        if (skippedRows > 0) {
+            log.warn("Пропущено строк при парсинге: {}", skippedRows);
+        }
+
         return records;
+    }
+
+    private String getCellValueSafe(Row row, int colIndex) {
+        try { return getCellValue(row, colIndex); } catch (Exception e) { return "?"; }
     }
 
     // Читает значение ячейки и возвращает его как строку
