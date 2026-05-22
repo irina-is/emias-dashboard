@@ -11,6 +11,7 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.util.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -208,6 +209,7 @@ public class ReportService {
     private List<String> validateFile(String filePath) throws IOException {
         List<String> errors = new ArrayList<>();
 
+        IOUtils.setByteArrayMaxOverride(Integer.MAX_VALUE);
         try (FileInputStream fis = new FileInputStream(filePath);
              Workbook workbook = new XSSFWorkbook(fis)) {
 
@@ -259,6 +261,7 @@ public class ReportService {
         int skippedRows = 0;
 
         log.info("Открываю Excel-файл: {}", filePath);
+        IOUtils.setByteArrayMaxOverride(Integer.MAX_VALUE);
         FileInputStream fis = new FileInputStream(filePath);
         Workbook workbook = new XSSFWorkbook(fis);
         Sheet sheet = workbook.getSheetAt(0);

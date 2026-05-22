@@ -1,7 +1,11 @@
 package com.emias.dashboard.controller;
 
+import com.emias.dashboard.entity.FacilityMapping;
+import com.emias.dashboard.entity.FacilityPlan;
 import com.emias.dashboard.entity.Screening;
 import com.emias.dashboard.repository.ScreeningRepository;
+import com.emias.dashboard.service.FacilityMappingService;
+import com.emias.dashboard.service.FacilityPlanService;
 import com.emias.dashboard.service.FileValidationException;
 import com.emias.dashboard.service.ReportService;
 import com.emias.dashboard.service.SettingsService;
@@ -44,16 +48,22 @@ public class DataController {
     @Value("${report.upload.dir}")
     private String uploadDir;
 
-    private final ReportService       reportService;
-    private final ScreeningRepository screeningRepository;
-    private final SettingsService     settingsService;
+    private final ReportService          reportService;
+    private final ScreeningRepository    screeningRepository;
+    private final SettingsService        settingsService;
+    private final FacilityPlanService    facilityPlanService;
+    private final FacilityMappingService facilityMappingService;
 
     public DataController(ReportService reportService,
                           ScreeningRepository screeningRepository,
-                          SettingsService settingsService) {
-        this.reportService       = reportService;
-        this.screeningRepository = screeningRepository;
-        this.settingsService     = settingsService;
+                          SettingsService settingsService,
+                          FacilityPlanService facilityPlanService,
+                          FacilityMappingService facilityMappingService) {
+        this.reportService          = reportService;
+        this.screeningRepository    = screeningRepository;
+        this.settingsService        = settingsService;
+        this.facilityPlanService    = facilityPlanService;
+        this.facilityMappingService = facilityMappingService;
     }
 
     /**
@@ -278,6 +288,121 @@ public class DataController {
         } catch (IOException e) {
             return ResponseEntity.internalServerError()
                     .body("Ошибка чтения лог-файла: " + e.getMessage());
+        }
+    }
+
+    // ── Планы по медицинским организациям ────────────────────────────────────
+
+    /**
+     * Принимает Excel-файл с планами скрининга по медицинским организациям.
+     * При загрузке все старые планы заменяются новыми.
+     */
+    @PostMapping("/upload-plans")
+    public ResponseEntity<?> uploadPlans(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("Файл не выбран");
+        }
+        String filename = file.getOriginalFilename();
+        if (filename == null || !filename.toLowerCase().endsWith(".xlsx")) {
+            return ResponseEntity.badRequest().body("Нужен файл формата .xlsx");
+        }
+        try {
+            int count = facilityPlanService.uploadPlans(file);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Планы загружены успешно: " + count + " организаций"));
+        } catch (FileValidationException e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "errors", e.getErrors()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("success", false, "errors", List.of("Ошибка при загрузке: " + e.getMessage())));
+        }
+    }
+
+    /**
+     * Возвращает список всех планов по медицинским организациям.
+     */
+    @GetMapping("/plans")
+    public ResponseEntity<?> getPlans() {
+        try {
+            List<FacilityPlan> plans = facilityPlanService.getAllPlans();
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (FacilityPlan p : plans) {
+                Map<String, Object> m = new LinkedHashMap<>();
+                m.put("facilityName",        p.getFacilityName());
+                m.put("annualPlan254545",     p.getAnnualPlan254545());
+                m.put("annualPlanAllAges",    p.getAnnualPlanAllAges());
+                m.put("annualPlanTotal",      p.getAnnualPlanTotal());
+                m.put("monthlyPlan254545",    p.getMonthlyPlan254545());
+                m.put("monthlyPlanAllAges",   p.getMonthlyPlanAllAges());
+                m.put("monthlyPlanTotal",     p.getMonthlyPlanTotal());
+                m.put("weeklyPlan254545",     p.getWeeklyPlan254545());
+                m.put("weeklyPlanAllAges",    p.getWeeklyPlanAllAges());
+                m.put("weeklyPlanTotal",      p.getWeeklyPlanTotal());
+                result.add(m);
+            }
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", "Ошибка: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Краткая сводка по загруженным планам (количество + дата загрузки).
+     */
+    @GetMapping("/plans/summary")
+    public ResponseEntity<?> getPlansSummary() {
+        return ResponseEntity.ok(facilityPlanService.getSummary());
+    }
+
+    // ── Соответствия названий ЛПУ ────────────────────────────────────────────
+
+    /**
+     * Загружает Excel-файл с таблицей соответствий названий ЛПУ.
+     * Столбец A — название в скрининге, столбец B — название в планах.
+     */
+    @PostMapping("/upload-mapping")
+    public ResponseEntity<?> uploadMapping(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("Файл не выбран");
+        }
+        String filename = file.getOriginalFilename();
+        if (filename == null || !filename.toLowerCase().endsWith(".xlsx")) {
+            return ResponseEntity.badRequest().body("Нужен файл формата .xlsx");
+        }
+        try {
+            int count = facilityMappingService.uploadMappings(file);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Соответствия загружены: " + count + " организаций"));
+        } catch (FileValidationException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "errors", e.getErrors()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("success", false, "errors", List.of("Ошибка: " + e.getMessage())));
+        }
+    }
+
+    /**
+     * Возвращает список всех соответствий.
+     */
+    @GetMapping("/mapping")
+    public ResponseEntity<?> getMapping() {
+        try {
+            List<FacilityMapping> list = facilityMappingService.getAllMappings();
+            List<Map<String, String>> result = new ArrayList<>();
+            for (FacilityMapping m : list) {
+                Map<String, String> row = new LinkedHashMap<>();
+                row.put("screeningName", m.getScreeningName());
+                row.put("planName",      m.getPlanName());
+                result.add(row);
+            }
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", "Ошибка: " + e.getMessage()));
         }
     }
 

@@ -649,6 +649,10 @@
                             <th style="width: 40px;">#</th>
                             <th>Медицинская организация</th>
                             <th class="text-end">Завершено</th>
+                            <th class="text-end">План (год)</th>
+                            <th class="text-end">% плана</th>
+                            <th class="text-end">План (мес)</th>
+                            <th class="text-end">План (нед)</th>
                             <th class="text-end">Без отклонений</th>
                             <th class="text-end">Выявлено отклонение</th>
                             <th class="text-end">Отказ</th>
@@ -660,6 +664,32 @@
                             <td class="text-muted" th:text="${stat.count}"></td>
                             <td th:text="${row.name}"></td>
                             <td class="text-end fw-bold text-success" th:text="${row.completed}"></td>
+
+                            <!-- План (год) -->
+                            <td class="text-end text-muted"
+                                th:text="${row.hasPlan()} ? ${#numbers.formatInteger(row.annualPlanTotal, 0, 'DEFAULT')} : '—'">
+                            </td>
+
+                            <!-- % выполнения с цветовой индикацией -->
+                            <td class="text-end fw-bold"
+                                th:if="${row.hasPlan()}"
+                                th:classappend="${row.completionPercent >= 100} ? ' text-success'
+                                              : (${row.completionPercent >= 50}  ? ' text-warning'
+                                              : ' text-danger')"
+                                th:text="${row.completionPercent} + '%'">
+                            </td>
+                            <td class="text-end text-muted" th:unless="${row.hasPlan()}">—</td>
+
+                            <!-- План (мес) -->
+                            <td class="text-end text-muted"
+                                th:text="${row.hasPlan()} ? ${#numbers.formatInteger(row.monthlyPlanTotal, 0, 'DEFAULT')} : '—'">
+                            </td>
+
+                            <!-- План (нед) -->
+                            <td class="text-end text-muted"
+                                th:text="${row.hasPlan()} ? ${#numbers.formatInteger(row.weeklyPlanTotal, 0, 'DEFAULT')} : '—'">
+                            </td>
+
                             <td class="text-end" th:text="${row.withoutDeviations}"></td>
                             <td class="text-end text-danger" th:text="${row.withDeviations}"></td>
                             <td class="text-end text-warning" th:text="${row.refusal}"></td>
@@ -739,15 +769,22 @@
         });
     }
 
-    // Сортировка рейтинга
-    let _sortAsc = false;
-    function sortRating() {
-        _sortAsc = !_sortAsc;
+    // Сортировка рейтинга (col 2 = Завершено, col 4 = % плана)
+    let _sortAsc   = false;
+    let _sortCol   = 2; // по умолчанию — по "Завершено"
+    function sortRating(col) {
+        if (col === undefined) col = _sortCol;
+        if (_sortCol === col) {
+            _sortAsc = !_sortAsc;
+        } else {
+            _sortCol = col;
+            _sortAsc = false;
+        }
         const tbody = document.querySelector('#rating-table tbody');
         const rows = Array.from(tbody.querySelectorAll('tr'));
         rows.sort((a, b) => {
-            const av = parseInt(a.cells[2].textContent.trim()) || 0;
-            const bv = parseInt(b.cells[2].textContent.trim()) || 0;
+            const av = parseFloat(a.cells[_sortCol].textContent.replace('%','').replace(/\s/g,'').replace('—','-1')) || 0;
+            const bv = parseFloat(b.cells[_sortCol].textContent.replace('%','').replace(/\s/g,'').replace('—','-1')) || 0;
             return _sortAsc ? av - bv : bv - av;
         });
         rows.forEach((row, i) => {
@@ -756,10 +793,10 @@
         });
         const btn = document.getElementById('sort-btn');
         if (_sortAsc) {
-            btn.title = 'Сортировка: худшие вверху — нажмите, чтобы показать лучших первыми';
+            btn.title = 'Сортировка по возрастанию — нажмите для смены';
             btn.querySelector('i').className = 'bi bi-sort-up';
         } else {
-            btn.title = 'Сортировка: лучшие вверху — нажмите, чтобы показать худших первыми';
+            btn.title = 'Сортировка по убыванию — нажмите для смены';
             btn.querySelector('i').className = 'bi bi-sort-down';
         }
     }

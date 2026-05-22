@@ -1,5 +1,6 @@
 package com.emias.dashboard.controller;
 
+import com.emias.dashboard.entity.FacilityPlan;
 import com.emias.dashboard.model.AgeDiagram;
 import com.emias.dashboard.model.Conclusions;
 import com.emias.dashboard.model.DashboardConfig;
@@ -8,6 +9,8 @@ import com.emias.dashboard.model.MonthlyChartData;
 import com.emias.dashboard.model.PatientRecord;
 import com.emias.dashboard.model.ScreeningStats;
 import com.emias.dashboard.service.DiagramService;
+import com.emias.dashboard.service.FacilityMappingService;
+import com.emias.dashboard.service.FacilityPlanService;
 import com.emias.dashboard.service.ReportService;
 import com.emias.dashboard.service.SettingsService;
 import org.springframework.stereotype.Controller;
@@ -23,16 +26,22 @@ import java.util.Map;
 @Controller
 public class PageController {
 
-    private final ReportService   reportService;
-    private final DiagramService  diagramService;
-    private final SettingsService settingsService;
+    private final ReportService          reportService;
+    private final DiagramService         diagramService;
+    private final SettingsService        settingsService;
+    private final FacilityMappingService facilityMappingService;
+    private final FacilityPlanService    facilityPlanService;
 
     public PageController(ReportService reportService,
                           DiagramService diagramService,
-                          SettingsService settingsService) {
-        this.reportService   = reportService;
-        this.diagramService  = diagramService;
-        this.settingsService = settingsService;
+                          SettingsService settingsService,
+                          FacilityMappingService facilityMappingService,
+                          FacilityPlanService facilityPlanService) {
+        this.reportService          = reportService;
+        this.diagramService         = diagramService;
+        this.settingsService        = settingsService;
+        this.facilityMappingService = facilityMappingService;
+        this.facilityPlanService    = facilityPlanService;
     }
 
     @GetMapping("/")
@@ -81,7 +90,14 @@ public class PageController {
             AgeDiagram diagram = diagramService.buildAgeDiagram(singleFile);
             model.addAttribute("diagram", diagram);
 
-            List<FacilityRating> rating = diagramService.buildFacilityRating(records);
+            // Загружаем маппинг и планы для обогащения рейтинга
+            Map<String, String> mappingMap = facilityMappingService.getMappingMap();
+            Map<String, FacilityPlan> plansByName = new LinkedHashMap<>();
+            for (FacilityPlan plan : facilityPlanService.getAllPlans()) {
+                plansByName.put(plan.getFacilityName(), plan);
+            }
+
+            List<FacilityRating> rating = diagramService.buildFacilityRating(records, mappingMap, plansByName);
             model.addAttribute("rating", rating);
 
             Conclusions conclusions = diagramService.buildConclusions(records, stats, rating, annualPlan);

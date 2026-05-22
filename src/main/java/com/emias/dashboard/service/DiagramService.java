@@ -1,5 +1,6 @@
 package com.emias.dashboard.service;
 
+import com.emias.dashboard.entity.FacilityPlan;
 import com.emias.dashboard.model.AgeDiagram;
 import com.emias.dashboard.model.AgeGroupChange;
 import com.emias.dashboard.model.Conclusions;
@@ -15,6 +16,7 @@ import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -195,13 +197,24 @@ public class DiagramService {
     }
 
     /**
-     * Строит рейтинг медицинских организаций.
-     * Дедупликация по МКАБ (один пациент — одна запись).
-     * Для каждой организации считает:
-     *   Завершено, Без отклонений, С отклонениями, Отказ, Нет данных.
-     * Сортировка по убыванию "Завершено".
+     * Строит рейтинг медицинских организаций без данных о планах.
      */
     public List<FacilityRating> buildFacilityRating(List<PatientRecord> records) {
+        return buildFacilityRating(records, Collections.emptyMap(), Collections.emptyMap());
+    }
+
+    /**
+     * Строит рейтинг медицинских организаций с данными о планах.
+     *
+     * @param records     записи скрининга
+     * @param mappingMap  словарь: screeningName → planName (из таблицы соответствий)
+     * @param plansByName словарь: planName → FacilityPlan (из файла планов)
+     */
+    public List<FacilityRating> buildFacilityRating(
+            List<PatientRecord> records,
+            Map<String, String> mappingMap,
+            Map<String, FacilityPlan> plansByName) {
+
         // Дедупликация: один МКАБ — одна запись (первое вхождение)
         Map<String, PatientRecord> uniquePatients = new LinkedHashMap<>();
         for (PatientRecord record : records) {
@@ -248,7 +261,23 @@ public class DiagramService {
         List<FacilityRating> rating = new ArrayList<>();
         for (Map.Entry<String, long[]> entry : counts.entrySet()) {
             long[] c = entry.getValue();
-            rating.add(new FacilityRating(entry.getKey(), c[0], c[1], c[2], c[3], c[4]));
+            FacilityRating row = new FacilityRating(entry.getKey(), c[0], c[1], c[2], c[3], c[4]);
+
+            // Сопоставляем план через таблицу соответствий
+            if (!mappingMap.isEmpty()) {
+                String screeningName = entry.getKey().trim();
+                String planName = mappingMap.get(screeningName);
+                if (planName != null) {
+                    FacilityPlan plan = plansByName.get(planName);
+                    if (plan != null) {
+                        row.setAnnualPlanTotal(plan.getAnnualPlanTotal());
+                        row.setMonthlyPlanTotal(plan.getMonthlyPlanTotal());
+                        row.setWeeklyPlanTotal(plan.getWeeklyPlanTotal());
+                    }
+                }
+            }
+
+            rating.add(row);
         }
 
         rating.sort((a, b) -> Long.compare(b.getCompleted(), a.getCompleted()));

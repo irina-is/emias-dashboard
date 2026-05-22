@@ -28,6 +28,16 @@
             </button>
         </li>
         <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-plans" onclick="initPlans()">
+                Планы по организациям
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-mapping" onclick="initMapping()">
+                Соответствия ЛПУ
+            </button>
+        </li>
+        <li class="nav-item">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-settings">
                 Настройка интерфейса
             </button>
@@ -83,7 +93,164 @@
             </div>
         </div>
 
-        <!-- ── Таб 2: Настройка интерфейса ── -->
+        <!-- ── Таб 2: Планы по организациям ── -->
+        <div class="tab-pane fade" id="tab-plans">
+            <div class="row g-4">
+
+                <!-- Загрузка файла планов -->
+                <div class="col-12 col-lg-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h6 class="mb-1">Загрузить файл планов</h6>
+                            <p class="text-muted small mb-3">
+                                Excel-файл (.xlsx) со строками организаций и столбцами планов.
+                                При загрузке все старые планы заменяются.
+                            </p>
+
+                            <div class="mb-3">
+                                <label class="form-label">Файл Excel (.xlsx)</label>
+                                <input type="file" id="plansFileInput" accept=".xlsx" class="form-control">
+                            </div>
+
+                            <button onclick="uploadPlansFile()" class="btn btn-primary w-100">Загрузить планы</button>
+                            <div id="plansUploadStatus" class="mt-3" style="display: none;"></div>
+
+                            <hr class="my-3">
+                            <h6 class="mb-2 text-muted" style="font-size: 13px;">Структура файла</h6>
+                            <div style="overflow-x:auto;">
+                                <table class="table table-bordered table-sm" style="font-size:11px; min-width:580px;">
+                                    <thead class="table-secondary">
+                                        <tr>
+                                            <th>№ п/п</th>
+                                            <th>Наименование ЛПУ</th>
+                                            <th>25,35,45 (год)</th>
+                                            <th>Все возр. (год)</th>
+                                            <th>Общий (год)</th>
+                                            <th>25,35,45 (мес)</th>
+                                            <th>Все возр. (мес)</th>
+                                            <th>Общий (мес)</th>
+                                            <th>25,35,45 (нед)</th>
+                                            <th>Все возр. (нед)</th>
+                                            <th>Общий (нед)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="text-muted">
+                                            <td>1</td>
+                                            <td>ГБУЗ МО "Название"</td>
+                                            <td>1200</td><td>3400</td><td>4600</td>
+                                            <td>100</td><td>283</td><td>383</td>
+                                            <td>25</td><td>71</td><td>96</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="text-muted mb-0" style="font-size:11px;">
+                                    Строка 1 — заголовок (B1 = «Наименование ЛПУ»), данные начинаются со строки 2.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Список загруженных планов -->
+                <div class="col-12 col-lg-8">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                                <h6 class="mb-0">Загруженные планы</h6>
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <input type="text" id="plansSearch" class="form-control form-control-sm"
+                                           placeholder="Поиск по названию..."
+                                           style="width: 200px;"
+                                           oninput="filterPlansTable()">
+                                    <span id="plansSummary" class="text-muted small"></span>
+                                </div>
+                            </div>
+                            <div id="plansContainer">
+                                <span class="text-muted">Загружаю данные...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ── Таб 3: Соответствия ЛПУ ── -->
+        <div class="tab-pane fade" id="tab-mapping">
+            <div class="row g-4">
+
+                <!-- Загрузка файла соответствий -->
+                <div class="col-12 col-lg-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h6 class="mb-1">Загрузить таблицу соответствий</h6>
+                            <p class="text-muted small mb-3">
+                                Excel-файл с двумя столбцами: название ЛПУ из скрининговых данных (A)
+                                и соответствующее название из файла планов (B).
+                                При загрузке все старые соответствия заменяются.
+                            </p>
+
+                            <div class="mb-3">
+                                <label class="form-label">Файл Excel (.xlsx)</label>
+                                <input type="file" id="mappingFileInput" accept=".xlsx" class="form-control">
+                            </div>
+
+                            <button onclick="uploadMappingFile()" class="btn btn-primary w-100">Загрузить соответствия</button>
+                            <div id="mappingUploadStatus" class="mt-3" style="display: none;"></div>
+
+                            <hr class="my-3">
+                            <h6 class="mb-2 text-muted" style="font-size: 13px;">Структура файла</h6>
+                            <table class="table table-bordered table-sm" style="font-size:11px;">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th>A — Название в скрининге</th>
+                                        <th>B — Название в планах</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-muted">
+                                    <tr>
+                                        <td>[010101] ГБУЗ МО «БАЛАШИХИНСКАЯ…»</td>
+                                        <td>ГБУЗ МО "БАЛАШИХИНСКАЯ БОЛЬНИЦА"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>[020101] ГБУЗ МО «ВОЛОКОЛАМСКАЯ…»</td>
+                                        <td>ГБУЗ МО "ВОЛОКОЛАМСКАЯ БОЛЬНИЦА"</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p class="text-muted mb-0" style="font-size:11px;">
+                                Строка 1 — заголовок, данные начинаются со строки 2.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Просмотр загруженных соответствий -->
+                <div class="col-12 col-lg-8">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                                <h6 class="mb-0">Загруженные соответствия</h6>
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <input type="text" id="mappingSearch" class="form-control form-control-sm"
+                                           placeholder="Поиск по названию..."
+                                           style="width: 220px;"
+                                           oninput="filterMappingTable()">
+                                    <span id="mappingSummary" class="text-muted small"></span>
+                                </div>
+                            </div>
+                            <div id="mappingContainer">
+                                <span class="text-muted">Загружаю данные...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ── Таб 4: Настройка интерфейса ── -->
         <div class="tab-pane fade" id="tab-settings">
             <div class="row g-4">
 
@@ -160,10 +327,9 @@
                 </div>
 
             </div>
-
         </div>
 
-        <!-- ── Таб 3: Логи ── -->
+        <!-- ── Таб 5: Логи ── -->
         <div class="tab-pane fade" id="tab-logs">
             <div class="card shadow-sm">
                 <div class="card-body p-4">
@@ -198,7 +364,7 @@
             </div>
         </div>
 
-        <!-- ── Таб 4: Исходные данные ── -->
+        <!-- ── Таб 6: Исходные данные ── -->
         <div class="tab-pane fade" id="tab-rawdata">
             <div class="card shadow-sm">
                 <div class="card-body p-4">
@@ -258,7 +424,8 @@
     const BASE_PATH = /*[[${basePath}]]*/ '';
 </script>
 <script>
-    // Дата по умолчанию — сегодня
+    // ── Общее ────────────────────────────────────────────────────────────────
+
     const today = new Date();
     const yyyy  = today.getFullYear();
     const mm    = String(today.getMonth() + 1).padStart(2, '0');
@@ -266,6 +433,19 @@
     document.getElementById('dateInput').value = yyyy + '-' + mm + '-' + dd;
 
     loadDates();
+
+    function safeEsc(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function formatDate(dateStr) {
+        const months = ['января','февраля','марта','апреля','мая','июня',
+                        'июля','августа','сентября','октября','ноября','декабря'];
+        const parts = dateStr.split('-');
+        return parts[2] + ' ' + months[parseInt(parts[1]) - 1] + ' ' + parts[0];
+    }
+
+    // ── Загрузка данных ──────────────────────────────────────────────────────
 
     function loadDates() {
         fetch(BASE_PATH + '/api/dates')
@@ -293,16 +473,12 @@
     function uploadFile() {
         const fileInput = document.getElementById('fileInput');
         const dateInput = document.getElementById('dateInput');
-
         if (!dateInput.value) { showStatus('warning', 'Выберите дату'); return; }
         if (!fileInput.files.length) { showStatus('warning', 'Выберите файл'); return; }
-
         showStatus('secondary', 'Загружаю...');
-
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
         formData.append('date', dateInput.value);
-
         fetch(BASE_PATH + '/api/upload', { method: 'POST', body: formData })
             .then(r => r.json())
             .then(data => {
@@ -316,6 +492,23 @@
             })
             .catch(err => showStatus('danger', '✗ Ошибка: ' + err.message));
     }
+
+    function showStatus(type, message) {
+        const el = document.getElementById('uploadStatus');
+        el.style.display = 'block';
+        el.className = 'alert alert-' + type;
+        el.textContent = message;
+    }
+
+    function showErrors(errors) {
+        const list = document.getElementById('errorsList');
+        list.innerHTML = errors
+            .map(e => '<li>' + e.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</li>')
+            .join('');
+        new bootstrap.Modal(document.getElementById('errorsModal')).show();
+    }
+
+    // ── Настройки ────────────────────────────────────────────────────────────
 
     function saveSettings() {
         const plan = parseInt(document.getElementById('s-plan').value);
@@ -344,34 +537,14 @@
         .catch(err => showSettingsStatus('danger', '✗ ' + err.message));
     }
 
-    function formatDate(dateStr) {
-        const months = ['января','февраля','марта','апреля','мая','июня',
-                        'июля','августа','сентября','октября','ноября','декабря'];
-        const parts = dateStr.split('-');
-        return parts[2] + ' ' + months[parseInt(parts[1]) - 1] + ' ' + parts[0];
-    }
-
-    function showStatus(type, message) {
-        const el = document.getElementById('uploadStatus');
-        el.style.display = 'block';
-        el.className = 'alert alert-' + type;
-        el.textContent = message;
-    }
-
-    function showErrors(errors) {
-        const list = document.getElementById('errorsList');
-        list.innerHTML = errors
-            .map(e => '<li>' + e.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</li>')
-            .join('');
-        new bootstrap.Modal(document.getElementById('errorsModal')).show();
-    }
-
     function showSettingsStatus(type, message) {
         const el = document.getElementById('settingsStatus');
         el.style.display = 'block';
         el.className = 'alert alert-' + type;
         el.textContent = message;
     }
+
+    // ── Логи ─────────────────────────────────────────────────────────────────
 
     let autoRefreshTimer = null;
 
@@ -411,7 +584,8 @@
         }
     }
 
-    // ── Исходные данные ──
+    // ── Исходные данные ──────────────────────────────────────────────────────
+
     let rawDataPage = 0;
     let rawDataTotalPages = 0;
     let rawDataInitialized = false;
@@ -484,15 +658,12 @@
         const size   = parseInt(document.getElementById('rawPageSize').value);
         const search = document.getElementById('rawSearch').value.trim();
         if (!date) return;
-
         const container = document.getElementById('rawDataContainer');
         container.innerHTML = '<span class="text-muted">Загружаю...</span>';
         document.getElementById('rawDownloadBtn').style.display = 'none';
-
         let url = BASE_PATH + '/api/records?date=' + date + '&page=' + rawDataPage + '&size=' + size;
-        if (search)      url += '&search=' + encodeURIComponent(search);
-        if (rawSortCol)  url += '&sort=' + encodeURIComponent(rawSortCol) + '&dir=' + rawSortDir;
-
+        if (search)     url += '&search=' + encodeURIComponent(search);
+        if (rawSortCol) url += '&sort=' + encodeURIComponent(rawSortCol) + '&dir=' + rawSortDir;
         fetch(url)
             .then(r => r.json())
             .then(data => {
@@ -519,26 +690,24 @@
     function renderRawTable(data, size) {
         const from = rawDataPage * size + 1;
         const to   = Math.min((rawDataPage + 1) * size, data.totalCount);
-
         const thead = RAW_COLUMNS.map(c => {
-            const active = rawSortCol === c.key;
-            const icon   = active ? (rawSortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕';
+            const active  = rawSortCol === c.key;
+            const icon    = active ? (rawSortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕';
             const opacity = active ? '1' : '0.3';
             return '<th class="text-nowrap px-2" onclick="setRawSort(\'' + c.key + '\')" ' +
                    'style="cursor:pointer;user-select:none;white-space:nowrap">' +
                    safeEsc(c.label) +
                    '<span style="opacity:' + opacity + ';font-size:10px">' + icon + '</span></th>';
         }).join('');
-
         const tbody = data.records.length > 0
             ? data.records.map(r =>
-                '<tr>' + RAW_COLUMNS.map(c => '<td class="text-nowrap px-2">' + safeEsc(r[c.key] || '') + '</td>').join('') + '</tr>'
+                '<tr>' + RAW_COLUMNS.map(c =>
+                    '<td class="text-nowrap px-2">' + safeEsc(r[c.key] || '') + '</td>'
+                ).join('') + '</tr>'
               ).join('')
             : '<tr><td colspan="' + RAW_COLUMNS.length + '" class="text-center text-muted py-3">Ничего не найдено</td></tr>';
-
         const prevDisabled = rawDataPage === 0 ? 'disabled' : '';
         const nextDisabled = rawDataPage >= data.totalPages - 1 ? 'disabled' : '';
-
         document.getElementById('rawDataContainer').innerHTML =
             '<div class="d-flex align-items-center gap-3 mb-2 flex-wrap">' +
                 '<span class="text-muted small">Показано ' + from + '–' + to + ' из ' + data.totalCount + ' записей</span>' +
@@ -548,29 +717,210 @@
                     '<button class="btn btn-sm btn-outline-secondary" onclick="rawNextPage()" ' + nextDisabled + '>Вперёд →</button>' +
                 '</div>' +
             '</div>' +
-            '<div style="overflow-x: auto; max-height: 560px; overflow-y: auto;">' +
-                '<table class="table table-sm table-bordered table-hover mb-0" style="font-size: 12px; min-width: max-content;">' +
+            '<div style="overflow-x:auto; max-height:560px; overflow-y:auto;">' +
+                '<table class="table table-sm table-bordered table-hover mb-0" style="font-size:12px; min-width:max-content;">' +
                     '<thead class="table-light sticky-top"><tr>' + thead + '</tr></thead>' +
                     '<tbody>' + tbody + '</tbody>' +
                 '</table>' +
             '</div>';
     }
 
-    function safeEsc(str) {
-        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-
-    function rawPrevPage() {
-        if (rawDataPage > 0) { rawDataPage--; loadRecords(); }
-    }
-
-    function rawNextPage() {
-        if (rawDataPage < rawDataTotalPages - 1) { rawDataPage++; loadRecords(); }
-    }
-
+    function rawPrevPage() { if (rawDataPage > 0) { rawDataPage--; loadRecords(); } }
+    function rawNextPage() { if (rawDataPage < rawDataTotalPages - 1) { rawDataPage++; loadRecords(); } }
     function downloadRawFile() {
         const date = document.getElementById('rawDateSelect').value;
         if (date) window.location.href = BASE_PATH + '/api/download?date=' + date;
+    }
+
+    // ── Планы по организациям ─────────────────────────────────────────────────
+
+    let allPlansData    = [];
+    let plansInitialized = false;
+
+    const PLAN_COLUMNS = [
+        { key: 'facilityName',       label: 'Мед. организация', wide: true },
+        { key: 'annualPlan254545',   label: '25,35,45 (год)' },
+        { key: 'annualPlanAllAges',  label: 'Все возр. (год)' },
+        { key: 'annualPlanTotal',    label: 'Общий (год)' },
+        { key: 'monthlyPlan254545',  label: '25,35,45 (мес)' },
+        { key: 'monthlyPlanAllAges', label: 'Все возр. (мес)' },
+        { key: 'monthlyPlanTotal',   label: 'Общий (мес)' },
+        { key: 'weeklyPlan254545',   label: '25,35,45 (нед)' },
+        { key: 'weeklyPlanAllAges',  label: 'Все возр. (нед)' },
+        { key: 'weeklyPlanTotal',    label: 'Общий (нед)' },
+    ];
+
+    function initPlans() {
+        if (!plansInitialized) { plansInitialized = true; loadPlans(); }
+    }
+
+    function loadPlans() {
+        fetch(BASE_PATH + '/api/plans')
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+                allPlansData = data;
+                renderPlansTable(data);
+                document.getElementById('plansSummary').textContent =
+                    data.length > 0 ? 'Организаций: ' + data.length : 'Нет данных';
+            })
+            .catch(err => {
+                document.getElementById('plansContainer').innerHTML =
+                    '<span class="text-danger">Ошибка: ' + safeEsc(err.message) + '</span>';
+            });
+    }
+
+    function filterPlansTable() {
+        const q = document.getElementById('plansSearch').value.trim().toLowerCase();
+        renderPlansTable(q
+            ? allPlansData.filter(p => p.facilityName && p.facilityName.toLowerCase().includes(q))
+            : allPlansData);
+    }
+
+    function renderPlansTable(data) {
+        const container = document.getElementById('plansContainer');
+        if (data.length === 0) {
+            container.innerHTML = '<span class="text-muted">Планы не загружены. Загрузите файл Excel.</span>';
+            return;
+        }
+        const thead = PLAN_COLUMNS.map(c =>
+            '<th class="px-2" style="font-size:12px;white-space:nowrap">' + safeEsc(c.label) + '</th>'
+        ).join('');
+        const tbody = data.map(row =>
+            '<tr>' + PLAN_COLUMNS.map(c => {
+                const val     = row[c.key];
+                const display = (val === null || val === undefined) ? '—' : safeEsc(String(val));
+                const style   = c.wide
+                    ? 'max-width:300px;white-space:normal;font-size:12px'
+                    : 'text-align:right;font-size:12px';
+                return '<td class="px-2" style="' + style + '">' + display + '</td>';
+            }).join('') + '</tr>'
+        ).join('');
+        container.innerHTML =
+            '<div style="overflow-x:auto; max-height:560px; overflow-y:auto;">' +
+                '<table class="table table-sm table-bordered table-hover mb-0" style="font-size:12px; min-width:max-content;">' +
+                    '<thead class="table-light sticky-top"><tr>' + thead + '</tr></thead>' +
+                    '<tbody>' + tbody + '</tbody>' +
+                '</table>' +
+            '</div>';
+    }
+
+    function uploadPlansFile() {
+        const fileInput = document.getElementById('plansFileInput');
+        if (!fileInput.files.length) { showPlansStatus('warning', 'Выберите файл'); return; }
+        showPlansStatus('secondary', 'Загружаю...');
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        fetch(BASE_PATH + '/api/upload-plans', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showPlansStatus('success', '✓ ' + data.message);
+                    fileInput.value = '';
+                    loadPlans();
+                } else {
+                    showPlansStatus('danger', '✗ Ошибки:<br>' +
+                        (data.errors || ['Неизвестная ошибка']).map(e => safeEsc(e)).join('<br>'));
+                }
+            })
+            .catch(err => showPlansStatus('danger', '✗ ' + safeEsc(err.message)));
+    }
+
+    function showPlansStatus(type, html) {
+        const el = document.getElementById('plansUploadStatus');
+        el.style.display = 'block';
+        el.className = 'alert alert-' + type;
+        el.innerHTML = html;
+    }
+
+    // ── Соответствия ЛПУ ─────────────────────────────────────────────────────
+
+    let allMappingData    = [];
+    let mappingInitialized = false;
+
+    function initMapping() {
+        if (!mappingInitialized) { mappingInitialized = true; loadMapping(); }
+    }
+
+    function loadMapping() {
+        fetch(BASE_PATH + '/api/mapping')
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+                allMappingData = data;
+                renderMappingTable(data);
+                document.getElementById('mappingSummary').textContent =
+                    data.length > 0 ? 'Записей: ' + data.length : 'Нет данных';
+            })
+            .catch(err => {
+                document.getElementById('mappingContainer').innerHTML =
+                    '<span class="text-danger">Ошибка: ' + safeEsc(err.message) + '</span>';
+            });
+    }
+
+    function filterMappingTable() {
+        const q = document.getElementById('mappingSearch').value.trim().toLowerCase();
+        renderMappingTable(q
+            ? allMappingData.filter(m =>
+                (m.screeningName && m.screeningName.toLowerCase().includes(q)) ||
+                (m.planName      && m.planName.toLowerCase().includes(q)))
+            : allMappingData);
+    }
+
+    function renderMappingTable(data) {
+        const container = document.getElementById('mappingContainer');
+        if (data.length === 0) {
+            container.innerHTML = '<span class="text-muted">Соответствия не загружены. Загрузите файл Excel.</span>';
+            return;
+        }
+        const tbody = data.map((row, idx) =>
+            '<tr>' +
+                '<td class="text-muted px-2" style="font-size:12px;width:40px">' + (idx + 1) + '</td>' +
+                '<td class="px-2" style="font-size:12px;max-width:380px;white-space:normal">' + safeEsc(row.screeningName || '') + '</td>' +
+                '<td class="px-2" style="font-size:12px;max-width:380px;white-space:normal">' + safeEsc(row.planName || '') + '</td>' +
+            '</tr>'
+        ).join('');
+        container.innerHTML =
+            '<div style="overflow-x:auto; max-height:560px; overflow-y:auto;">' +
+                '<table class="table table-sm table-bordered table-hover mb-0" style="font-size:12px;">' +
+                    '<thead class="table-light sticky-top">' +
+                        '<tr>' +
+                            '<th class="px-2" style="width:40px">№</th>' +
+                            '<th class="px-2">Название в скрининговых данных</th>' +
+                            '<th class="px-2">Название в файле планов</th>' +
+                        '</tr>' +
+                    '</thead>' +
+                    '<tbody>' + tbody + '</tbody>' +
+                '</table>' +
+            '</div>';
+    }
+
+    function uploadMappingFile() {
+        const fileInput = document.getElementById('mappingFileInput');
+        if (!fileInput.files.length) { showMappingStatus('warning', 'Выберите файл'); return; }
+        showMappingStatus('secondary', 'Загружаю...');
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        fetch(BASE_PATH + '/api/upload-mapping', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showMappingStatus('success', '✓ ' + data.message);
+                    fileInput.value = '';
+                    loadMapping();
+                } else {
+                    showMappingStatus('danger', '✗ Ошибки:<br>' +
+                        (data.errors || ['Неизвестная ошибка']).map(e => safeEsc(e)).join('<br>'));
+                }
+            })
+            .catch(err => showMappingStatus('danger', '✗ ' + safeEsc(err.message)));
+    }
+
+    function showMappingStatus(type, html) {
+        const el = document.getElementById('mappingUploadStatus');
+        el.style.display = 'block';
+        el.className = 'alert alert-' + type;
+        el.innerHTML = html;
     }
 
 </script>
