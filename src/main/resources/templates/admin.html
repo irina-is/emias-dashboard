@@ -228,8 +228,16 @@
         formData.append('date', dateInput.value);
 
         fetch(BASE_PATH + '/api/upload', { method: 'POST', body: formData })
-            .then(r => { if (!r.ok) return r.text().then(t => { throw new Error(t); }); return r.text(); })
-            .then(msg => { showStatus('success', '✓ ' + msg); fileInput.value = ''; loadDates(); })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showStatus('success', '✓ ' + data.message);
+                    fileInput.value = '';
+                    loadDates();
+                } else {
+                    showErrors(data.errors);
+                }
+            })
             .catch(err => showStatus('danger', '✗ Ошибка: ' + err.message));
     }
 
@@ -272,6 +280,16 @@
         el.style.display = 'block';
         el.className = 'alert alert-' + type;
         el.textContent = message;
+    }
+
+    function showErrors(errors) {
+        const el = document.getElementById('uploadStatus');
+        el.style.display = 'block';
+        el.className = 'alert alert-danger';
+        el.innerHTML = '<strong>Данные не загружены. Исправьте ошибки в файле:</strong>'
+            + '<ul class="mb-0 mt-2">'
+            + errors.map(e => '<li>' + e.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</li>').join('')
+            + '</ul>';
     }
 
     function showSettingsStatus(type, message) {

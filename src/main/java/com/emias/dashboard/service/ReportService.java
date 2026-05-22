@@ -45,6 +45,15 @@ public class ReportService {
 
     private static final Logger log = LoggerFactory.getLogger(ReportService.class);
 
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
+    private static final int[]    DATE_COL_INDICES = {7, 8, 9, 10, 27, 28, 29};
+    private static final String[] DATE_COL_NAMES   = {
+        "Дата диспансеризации", "Дата исследования", "Дата закрытия карты",
+        "Дата рождения", "Дата забора биоматериала", "Дата доставки",
+        "Дата проведения исследования"
+    };
+
     @Value("${report.upload.dir}")
     private String uploadDir;
 
@@ -77,11 +86,19 @@ public class ReportService {
         Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
         log.info("Файл сохранён на диск: {}", destination.toAbsolutePath());
 
-        // Шаг 2: парсим Excel
+        // Шаг 2: валидация перед парсингом
+        List<String> errors = validateFile(destination.toString());
+        if (!errors.isEmpty()) {
+            log.warn("Файл не прошёл валидацию: {} ошибок", errors.size());
+            errors.forEach(e -> log.warn("  {}", e));
+            throw new FileValidationException(errors);
+        }
+
+        // Шаг 3: парсим Excel
         List<PatientRecord> records = parseFile(destination.toString());
         log.info("Парсинг завершён, успешно прочитано записей: {}", records.size());
 
-        // Шаг 3: удаляем старые данные за эту дату (если были)
+        // Шаг 4: удаляем старые данные за эту дату (если были)
         LocalDate reportDate = LocalDate.parse(date);
         long existingCount = screeningRepository.countByReportDate(reportDate);
         if (existingCount > 0) {
@@ -90,7 +107,7 @@ public class ReportService {
         screeningRepository.deleteByReportDate(reportDate);
         uploadRepository.deleteByReportDate(reportDate);
 
-        // Шаг 4: сохраняем все строки в базу
+        // Шаг 5: сохраняем все строки в базу
         List<Screening> screenings = new ArrayList<>();
         for (PatientRecord record : records) {
             Screening s = new Screening();
@@ -130,7 +147,7 @@ public class ReportService {
         screeningRepository.saveAll(screenings);
         log.info("Сохранено {} записей в базу за {}", screenings.size(), reportDate);
 
-        // Шаг 5: сохраняем запись о загрузке
+        // Шаг 6: сохраняем запись о загрузке
         uploadRepository.save(new Upload(reportDate, records.size()));
         log.info("=== Загрузка завершена успешно: {} записей за {} ===", records.size(), reportDate);
     }
@@ -183,6 +200,49 @@ public class ReportService {
             return new ArrayList<>();
         }
         return readRecords(dates.get(0));
+    }
+
+    // Проверяет файл на ошибки. Возвращает список ошибок (пустой — если всё ок)
+    private List<String> validateFile(String filePath) throws IOException {
+        List<String> errors = new ArrayList<>();
+
+        try (FileInputStream fis = new FileInputStream(filePath);
+             Workbook workbook = new XSSFWorkbook(fis)) {
+
+            Sheet sheet = workbook.getSheetAt(0);
+
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (row == null) continue;
+
+                String mkab      = getCellValueSafe(row, 0);
+                String lastName  = getCellValueSafe(row, 1);
+                String firstName = getCellValueSafe(row, 2);
+
+                // Пустая строка — тихо пропускаем
+                if (mkab.isBlank() && lastName.isBlank() && firstName.isBlank()) continue;
+
+                // Есть данные, но нет МКАБ
+                if (mkab.isBlank()) {
+                    errors.add("Строка " + (i + 1) + ": не заполнен МКАБ");
+                }
+
+                // Проверяем форматы дат
+                for (int d = 0; d < DATE_COL_INDICES.length; d++) {
+                    String value = getCellValueSafe(row, DATE_COL_INDICES[d]);
+                    if (!value.isBlank()) {
+                        try {
+                            LocalDate.parse(value, DATE_FMT);
+                        } catch (Exception e) {
+                            errors.add("Строка " + (i + 1) + ", \"" + DATE_COL_NAMES[d]
+                                    + "\": неверный формат даты \"" + value + "\"");
+                        }
+                    }
+                }
+            }
+        }
+
+        return errors;
     }
 
     // Читает Excel-файл по пути и возвращает список записей

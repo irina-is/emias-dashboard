@@ -1,6 +1,7 @@
 package com.emias.dashboard.controller;
 
 import com.emias.dashboard.repository.ScreeningRepository;
+import com.emias.dashboard.service.FileValidationException;
 import com.emias.dashboard.service.ReportService;
 import com.emias.dashboard.service.SettingsService;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,9 +66,12 @@ public class DataController {
 
         try {
             reportService.saveUploadedFile(file, date);
-            return ResponseEntity.ok("Файл за " + date + " загружен успешно");
+            return ResponseEntity.ok(Map.of("success", true, "message", "Файл за " + date + " загружен успешно"));
+        } catch (FileValidationException e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "errors", e.getErrors()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Ошибка при сохранении: " + e.getMessage());
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("success", false, "errors", List.of("Ошибка при сохранении: " + e.getMessage())));
         }
     }
 
