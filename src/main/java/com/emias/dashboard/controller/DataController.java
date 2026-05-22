@@ -47,7 +47,7 @@ public class DataController {
      * @param date дата в формате "2026-05-16" (приходит из <input type="date">)
      */
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(
+    public ResponseEntity<?> uploadFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam("date") String date) {
 
