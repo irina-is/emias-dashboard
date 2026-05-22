@@ -74,7 +74,20 @@
                                 <input type="file" id="fileInput" accept=".xlsx" class="form-control">
                             </div>
 
-                            <button onclick="uploadFile()" class="btn btn-primary w-100">Загрузить</button>
+                            <button id="uploadBtn" onclick="uploadFile()" class="btn btn-primary w-100">Загрузить</button>
+
+                            <div id="uploadProgress" class="mt-3" style="display:none;">
+                                <div class="d-flex justify-content-between small text-muted mb-1">
+                                    <span id="uploadProgressLabel">Загружаю файл...</span>
+                                    <span id="uploadProgressPct"></span>
+                                </div>
+                                <div class="progress" style="height:8px;">
+                                    <div id="uploadProgressBar"
+                                         class="progress-bar progress-bar-striped progress-bar-animated"
+                                         role="progressbar" style="width:0%"></div>
+                                </div>
+                            </div>
+
                             <div id="uploadStatus" class="mt-3" style="display: none;"></div>
                         </div>
                     </div>
@@ -475,22 +488,103 @@
         const dateInput = document.getElementById('dateInput');
         if (!dateInput.value) { showStatus('warning', 'Выберите дату'); return; }
         if (!fileInput.files.length) { showStatus('warning', 'Выберите файл'); return; }
-        showStatus('secondary', 'Загружаю...');
+
+        const btn         = document.getElementById('uploadBtn');
+        const progressDiv = document.getElementById('uploadProgress');
+        const progressBar = document.getElementById('uploadProgressBar');
+        const progressLbl = document.getElementById('uploadProgressLabel');
+        const progressPct = document.getElementById('uploadProgressPct');
+
+        btn.disabled = true;
+        document.getElementById('uploadStatus').style.display = 'none';
+        progressDiv.style.display = 'block';
+        progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-primary';
+        progressBar.style.width = '0%';
+        progressLbl.textContent = 'Передаю файл на сервер…';
+        progressPct.textContent = '0%';
+
+        let pollTimer = null;
+
+        function stopPoll() {
+            if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+        }
+
+        function finishUpload() {
+            stopPoll();
+            progressDiv.style.display = 'none';
+            btn.disabled = false;
+        }
+
+        // Поллинг: спрашиваем сервер каждые 500 мс сколько записей сохранено
+        function startPoll() {
+            pollTimer = setInterval(function() {
+                fetch(BASE_PATH + '/api/upload-progress')
+                    .then(r => r.json())
+                    .then(function(p) {
+                        if (p.total > 0) {
+                            // Знаем сколько всего — показываем точный процент
+                            const pct = Math.min(Math.round(p.current / p.total * 100), 99);
+                            progressBar.style.width = pct + '%';
+                            progressBar.className = 'progress-bar bg-primary';
+                            progressLbl.textContent =
+                                'Сохраняю ' + p.current.toLocaleString('ru-RU') +
+                                ' из ' + p.total.toLocaleString('ru-RU') + ' записей…';
+                            progressPct.textContent = pct + '%';
+                        } else if (p.inProgress) {
+                            // Ещё парсим файл — total неизвестен
+                            progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-warning';
+                            progressBar.style.width = '100%';
+                            progressLbl.textContent = 'Читаю строки файла…';
+                            progressPct.textContent = '';
+                        }
+                    })
+                    .catch(function() {}); // молча игнорируем ошибки поллинга
+            }, 500);
+        }
+
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
         formData.append('date', dateInput.value);
-        fetch(BASE_PATH + '/api/upload', { method: 'POST', body: formData })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    showStatus('success', '✓ ' + data.message);
-                    fileInput.value = '';
-                    loadDates();
-                } else {
-                    showErrors(data.errors);
-                }
-            })
-            .catch(err => showStatus('danger', '✗ Ошибка: ' + err.message));
+
+        const xhr = new XMLHttpRequest();
+
+        // Фаза 1: передача файла (реальный %)
+        xhr.upload.onprogress = function(e) {
+            if (e.lengthComputable) {
+                const pct = Math.round(e.loaded / e.total * 100);
+                progressBar.style.width = pct + '%';
+                progressPct.textContent = pct + '%';
+            }
+        };
+
+        // Фаза 2: файл на сервере, начинаем поллинг
+        xhr.upload.onload = function() {
+            progressBar.style.width = '100%';
+            progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-warning';
+            progressLbl.textContent = 'Читаю строки файла…';
+            progressPct.textContent = '';
+            startPoll();
+        };
+
+        // Фаза 3: ответ получен
+        xhr.onload = function() {
+            finishUpload();
+            let data;
+            try { data = JSON.parse(xhr.responseText); }
+            catch (e) { showStatus('danger', '✗ Неожиданный ответ сервера'); return; }
+            if (xhr.status >= 200 && xhr.status < 300 && data.success) {
+                showStatus('success', '✓ ' + data.message);
+                fileInput.value = '';
+                loadDates();
+            } else {
+                showErrors(data.errors || ['Неизвестная ошибка']);
+            }
+        };
+
+        xhr.onerror = function() { finishUpload(); showStatus('danger', '✗ Ошибка соединения'); };
+
+        xhr.open('POST', BASE_PATH + '/api/upload');
+        xhr.send(formData);
     }
 
     function showStatus(type, message) {

@@ -7,23 +7,28 @@ import com.emias.dashboard.repository.ScreeningRepository;
 import com.emias.dashboard.repository.UploadRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.util.IOUtils;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
+import org.apache.poi.xssf.eventusermodel.XSSFReader;
+import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
+import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler;
+import org.apache.poi.xssf.model.StylesTable;
+import org.apache.poi.xssf.usermodel.XSSFComment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
 
-import java.io.FileInputStream;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,6 +36,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -60,6 +66,15 @@ public class ReportService {
     /** Размер порции для батч-сохранения в БД */
     private static final int BATCH_SIZE = 500;
 
+    // Прогресс текущей загрузки (читается из другого потока — volatile)
+    private volatile boolean uploadInProgress = false;
+    private volatile int     progressCurrent  = 0;
+    private volatile int     progressTotal    = 0;
+
+    public boolean isUploadInProgress() { return uploadInProgress; }
+    public int getProgressCurrent()     { return progressCurrent; }
+    public int getProgressTotal()       { return progressTotal; }
+
     @Value("${report.upload.dir}")
     private String uploadDir;
 
@@ -81,6 +96,17 @@ public class ReportService {
      */
     @Transactional
     public void saveUploadedFile(MultipartFile file, String date) throws IOException {
+        uploadInProgress = true;
+        progressCurrent  = 0;
+        progressTotal    = 0;
+        try {
+            doSaveUploadedFile(file, date);
+        } finally {
+            uploadInProgress = false;
+        }
+    }
+
+    private void doSaveUploadedFile(MultipartFile file, String date) throws IOException {
         String originalName = file.getOriginalFilename();
         long fileSize = file.getSize();
         log.info("=== Начало загрузки файла '{}', дата отчёта: {}, размер: {} байт ===",
@@ -96,7 +122,7 @@ public class ReportService {
         // Шаг 2: валидация + парсинг за один проход
         // (бросает FileValidationException если найдены ошибки)
         List<PatientRecord> records = validateAndParseFile(destination.toString());
-        log.info("Парсинг завершён, успешно прочитано записей: {}", records.size());
+        progressTotal = records.size(); // теперь клиент знает сколько всего
 
         // Шаг 3: удаляем старые данные за эту дату (если были)
         LocalDate reportDate = LocalDate.parse(date);
@@ -117,6 +143,7 @@ public class ReportService {
                 entityManager.flush();
                 entityManager.clear();
                 savedTotal += batch.size();
+                progressCurrent = savedTotal; // обновляем прогресс для клиента
                 log.info("Сохранено {}/{} записей...", savedTotal, records.size());
                 batch.clear();
             }
@@ -126,6 +153,7 @@ public class ReportService {
             entityManager.flush();
             entityManager.clear();
             savedTotal += batch.size();
+            progressCurrent = savedTotal;
         }
         log.info("Итого сохранено {} записей в базу за {}", savedTotal, reportDate);
 
@@ -182,103 +210,109 @@ public class ReportService {
     // ─── Приватные методы ────────────────────────────────────────────────────
 
     /**
-     * Читает Excel ОДИН РАЗ — одновременно проверяет ошибки и парсит записи.
+     * Читает Excel потоковым SAX-парсером — одновременно проверяет ошибки и парсит записи.
+     * В отличие от XSSFWorkbook, держит в памяти только текущую строку (не весь файл).
      * Бросает FileValidationException если найдены ошибки формата.
      */
     private List<PatientRecord> validateAndParseFile(String filePath) throws IOException {
-        List<String> errors  = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
         List<PatientRecord> records = new ArrayList<>();
+        log.info("Открываю Excel-файл (потоковое чтение): {}", filePath);
 
-        log.info("Открываю Excel-файл (один проход): {}", filePath);
-        IOUtils.setByteArrayMaxOverride(Integer.MAX_VALUE);
-
-        try (FileInputStream fis = new FileInputStream(filePath);
-             Workbook workbook = new XSSFWorkbook(fis)) {
-
-            Sheet sheet    = workbook.getSheetAt(0);
-            int   totalRows = sheet.getLastRowNum();
-            log.info("Листов: {}, строк данных (без заголовка): {}",
-                    workbook.getNumberOfSheets(), totalRows);
-
-            for (int i = 1; i <= totalRows; i++) {
-                Row row = sheet.getRow(i);
-                if (row == null) continue;
-
-                String mkab      = getCellValueSafe(row, 0);
-                String lastName  = getCellValueSafe(row, 1);
-                String firstName = getCellValueSafe(row, 2);
-
-                // Полностью пустая строка — пропускаем
-                if (mkab.isBlank() && lastName.isBlank() && firstName.isBlank()) continue;
-
-                // ── Валидация (не более MAX_ERRORS ошибок) ───────────────────
-                if (errors.size() < MAX_ERRORS) {
-                    if (mkab.isBlank()) {
-                        errors.add("Строка " + (i + 1) + ": не заполнен МКАБ");
+        try (OPCPackage pkg = OPCPackage.open(new java.io.File(filePath))) {
+            XSSFReader xssfReader    = new XSSFReader(pkg);
+            ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(pkg);
+            StylesTable styles       = xssfReader.getStylesTable();
+            // Переопределяем DataFormatter: числовые ячейки с датовым форматом
+            // всегда возвращаем в виде dd.MM.yyyy, независимо от формата в Excel
+            DataFormatter formatter = new DataFormatter() {
+                @Override
+                public String formatRawCellContents(double value, int formatIndex, String formatString) {
+                    if (DateUtil.isADateFormat(formatIndex, formatString)) {
+                        return DateUtil.getLocalDateTime(value, false).toLocalDate().format(DATE_FMT);
                     }
-                    for (int d = 0; d < DATE_COL_INDICES.length && errors.size() < MAX_ERRORS; d++) {
-                        String value = getCellValueSafe(row, DATE_COL_INDICES[d]);
-                        if (!value.isBlank()) {
-                            try {
-                                LocalDate.parse(value, DATE_FMT);
-                            } catch (Exception e) {
-                                errors.add("Строка " + (i + 1) + ", \"" + DATE_COL_NAMES[d]
-                                        + "\": неверный формат даты \"" + value + "\"");
+                    return super.formatRawCellContents(value, formatIndex, formatString);
+                }
+            };
+
+            XSSFReader.SheetIterator iter = (XSSFReader.SheetIterator) xssfReader.getSheetsData();
+            if (!iter.hasNext()) throw new IOException("Excel-файл не содержит листов");
+
+            try (InputStream sheetStream = iter.next()) {
+                SheetContentsHandler rowHandler = new SheetContentsHandler() {
+                    private final String[] row = new String[30];
+
+                    @Override
+                    public void startRow(int rowNum) {
+                        Arrays.fill(row, "");
+                    }
+
+                    @Override
+                    public void endRow(int rowNum) {
+                        if (rowNum == 0) return; // заголовок
+                        String mkab = row[0], lastName = row[1], firstName = row[2];
+                        if (mkab.isBlank() && lastName.isBlank() && firstName.isBlank()) return;
+
+                        if (errors.size() < MAX_ERRORS) {
+                            if (mkab.isBlank()) {
+                                errors.add("Строка " + (rowNum + 1) + ": не заполнен МКАБ");
+                            }
+                            for (int d = 0; d < DATE_COL_INDICES.length && errors.size() < MAX_ERRORS; d++) {
+                                String val = row[DATE_COL_INDICES[d]];
+                                if (!val.isBlank()) {
+                                    try { LocalDate.parse(val, DATE_FMT); }
+                                    catch (Exception e) {
+                                        errors.add("Строка " + (rowNum + 1) + ", \"" + DATE_COL_NAMES[d]
+                                                + "\": неверный формат даты \"" + val + "\"");
+                                    }
+                                }
+                            }
+                            if (errors.size() >= MAX_ERRORS) {
+                                errors.add("Показаны первые " + MAX_ERRORS
+                                        + " ошибок. Исправьте их и загрузите файл повторно.");
                             }
                         }
-                    }
-                    if (errors.size() >= MAX_ERRORS) {
-                        errors.add("Показаны первые " + MAX_ERRORS
-                                + " ошибок. Исправьте их и загрузите файл повторно.");
-                    }
-                }
 
-                // ── Парсинг ───────────────────────────────────────────────────
-                try {
-                    records.add(new PatientRecord(
-                            getCellValue(row, 0),   // МКАБ
-                            getCellValue(row, 1),   // Фамилия
-                            getCellValue(row, 2),   // Имя
-                            getCellValue(row, 3),   // Отчество
-                            getCellValue(row, 4),   // Диспансеризация / профосмотр
-                            getCellValue(row, 5),   // СНИЛС
-                            getCellValue(row, 6),   // Полис ОМС
-                            getCellValue(row, 7),   // Дата диспансеризации
-                            getCellValue(row, 8),   // Дата исследования
-                            getCellValue(row, 9),   // Дата закрытия карты
-                            getCellValue(row, 10),  // Дата рождения
-                            getCellValue(row, 11),  // Код услуги ТФОМС
-                            getCellValue(row, 12),  // Значение (Текст)
-                            getCellValue(row, 13),  // Номер направления
-                            getCellValue(row, 14),  // Отказ
-                            getCellValue(row, 15),  // Результат исследования
-                            getCellValue(row, 16),  // Код услуги
-                            getCellValue(row, 17),  // Статус исследования
-                            getCellValue(row, 18),  // Врач
-                            getCellValue(row, 19),  // ОГРН откуда направили
-                            getCellValue(row, 20),  // ЛПУ откуда направили
-                            getCellValue(row, 21),  // ОГРН куда направили
-                            getCellValue(row, 22),  // ЛПУ куда направили
-                            getCellValue(row, 23),  // Результат ПЦР
-                            getCellValue(row, 24),  // Проводился ли ПЦР
-                            getCellValue(row, 25),  // Возраст на момент выгрузки
-                            getCellValue(row, 26),  // Возраст на момент исследования
-                            getCellValue(row, 27),  // Дата забора биоматериала
-                            getCellValue(row, 28),  // Дата доставки
-                            getCellValue(row, 29)   // Дата проведения исследования
-                    ));
-                } catch (Exception e) {
-                    log.warn("Строка {}: ошибка парсинга, пропускаю: {}", i + 1, e.getMessage());
-                }
+                        try {
+                            records.add(new PatientRecord(
+                                    row[0], row[1], row[2], row[3], row[4], row[5], row[6],
+                                    row[7], row[8], row[9], row[10], row[11], row[12], row[13],
+                                    row[14], row[15], row[16], row[17], row[18], row[19], row[20],
+                                    row[21], row[22], row[23], row[24], row[25], row[26], row[27],
+                                    row[28], row[29]
+                            ));
+                        } catch (Exception e) {
+                            log.warn("Строка {}: ошибка парсинга, пропускаю: {}", rowNum + 1, e.getMessage());
+                        }
+                    }
+
+                    @Override
+                    public void cell(String cellRef, String formattedValue, XSSFComment comment) {
+                        if (cellRef == null || formattedValue == null) return;
+                        int col = CellReference.convertColStringToIndex(cellRef.replaceAll("[0-9]", ""));
+                        if (col >= 0 && col < row.length) row[col] = formattedValue.trim();
+                    }
+                };
+
+                SAXParserFactory factory = SAXParserFactory.newInstance();
+                factory.setNamespaceAware(true);
+                XMLReader xmlReader = factory.newSAXParser().getXMLReader();
+                xmlReader.setContentHandler(
+                        new XSSFSheetXMLHandler(styles, null, strings, rowHandler, formatter, false));
+                xmlReader.parse(new InputSource(sheetStream));
             }
+        } catch (org.xml.sax.SAXException | javax.xml.parsers.ParserConfigurationException |
+                 org.apache.poi.openxml4j.exceptions.OpenXML4JException e) {
+            throw new IOException("Ошибка чтения Excel: " + e.getMessage(), e);
         }
+
+        log.info("Парсинг завершён, прочитано записей: {}", records.size());
 
         if (!errors.isEmpty()) {
             log.error("Файл не прошёл валидацию: {} ошибок", errors.size());
             errors.forEach(e -> log.error("  {}", e));
             throw new FileValidationException(errors);
         }
-
         return records;
     }
 
@@ -319,36 +353,4 @@ public class ReportService {
         return s;
     }
 
-    private String getCellValueSafe(Row row, int colIndex) {
-        try { return getCellValue(row, colIndex); } catch (Exception e) { return ""; }
-    }
-
-    private String getCellValue(Row row, int colIndex) {
-        Cell cell = row.getCell(colIndex);
-        if (cell == null) return "";
-
-        if (cell.getCellType() == CellType.STRING) {
-            return cell.getStringCellValue().trim();
-        }
-        if (cell.getCellType() == CellType.NUMERIC) {
-            if (DateUtil.isCellDateFormatted(cell)) {
-                return cell.getLocalDateTimeCellValue()
-                        .toLocalDate()
-                        .format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
-            }
-            return String.valueOf((long) cell.getNumericCellValue());
-        }
-        if (cell.getCellType() == CellType.BOOLEAN) {
-            return String.valueOf(cell.getBooleanCellValue());
-        }
-        if (cell.getCellType() == CellType.FORMULA) {
-            if (cell.getCachedFormulaResultType() == CellType.NUMERIC) {
-                return String.valueOf((int) cell.getNumericCellValue());
-            }
-            if (cell.getCachedFormulaResultType() == CellType.STRING) {
-                return cell.getStringCellValue().trim();
-            }
-        }
-        return "";
-    }
 }
