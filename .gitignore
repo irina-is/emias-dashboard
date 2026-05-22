@@ -1,0 +1,10 @@
+target/
+data/
+.DS_Store
+*.mv.db
+*.trace.db
+.idea/
+*.iml
+*.iws
+*.ipr
+application-prod.properties
