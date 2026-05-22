@@ -1,0 +1,12 @@
+[Unit]
+Description=EMIAS Dashboard
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/emias-dashboard
+ExecStart=java -jar /opt/emias-dashboard/dashboard-1.0.0.jar --spring.profiles.active=prod
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

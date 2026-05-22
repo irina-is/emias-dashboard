@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Панель администратора</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<!-- Центрируем форму по вертикали и горизонтали -->
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card shadow-sm" style="width: 360px;">
+        <div class="card-body p-4">
+            <h5 class="card-title mb-4 text-center">Панель администратора</h5>
+
+            <!-- Показываем ошибку если Spring Security передал ?error в URL -->
+            <div th:if="${param.error}" class="alert alert-danger">
+                Неверный логин или пароль
+            </div>
+
+            <!--
+                th:action="@{/login}" — Thymeleaf подставит правильный URL и добавит CSRF-токен.
+                Spring Security сам обработает POST на /login и проверит логин/пароль.
+            -->
+            <form th:action="${basePath + '/login'}" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Логин</label>
+                    <!-- name="username" — обязательно, Spring Security ожидает именно это имя -->
+                    <input type="text" name="username" class="form-control" autofocus>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Пароль</label>
+                    <!-- name="password" — обязательно, Spring Security ожидает именно это имя -->
+                    <input type="password" name="password" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Войти</button>
+            </form>
+
+            <div class="mt-3 text-center">
+                <a th:href="${basePath + '/'}" class="text-muted small">← Вернуться к дашборду</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

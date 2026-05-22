@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная</title>
+    <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('emias-theme')||'light')}catch(e){}</script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%233B5BD8'/><rect x='4' y='18' width='6' height='10' rx='1' fill='white'/><rect x='13' y='10' width='6' height='18' rx='1' fill='white'/><rect x='22' y='6' width='6' height='22' rx='1' fill='white'/></svg>">
+    <link th:href="${basePath + '/css/fonts.css'}" rel="stylesheet">
+    <link th:href="${basePath + '/css/bootstrap.min.css'}" rel="stylesheet">
+    <link th:href="${basePath + '/css/bootstrap-icons.css'}" rel="stylesheet">
+    <style>
+        :root {
+            --emias-blue:    #3B5BD8;
+            --emias-blue-lt: #EDF2FF;
+            --emias-border:  #E8ECF5;
+            --emias-bg:      #F4F6FB;
+            --emias-text:    #1A1A2E;
+            --emias-muted:   #868E96;
+        }
+
+        body {
+            background-color: var(--emias-bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--emias-text);
+        }
+        body::before {
+            content: '';
+            display: block;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--emias-blue);
+            z-index: 9999;
+        }
+
+        .tile-card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px 24px;
+            text-align: center;
+            height: 210px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 1px solid var(--emias-border);
+        }
+        .tile-active {
+            color: var(--emias-blue);
+            text-decoration: none;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .tile-active:hover {
+            border-color: var(--emias-blue);
+            background: var(--emias-blue-lt);
+            color: var(--emias-blue);
+        }
+        .tile-disabled { color: #ADB5BD; }
+        .tile-icon {
+            font-size: 2.8rem;
+            margin-bottom: 14px;
+            line-height: 1;
+        }
+        .tile-title {
+            font-size: 0.88rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        .tile-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 0.68rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: var(--emias-blue-lt);
+            color: var(--emias-blue);
+            font-weight: 500;
+        }
+        .btn-admin {
+            color: var(--emias-muted);
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-decoration: none;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+        .btn-admin:hover { color: var(--emias-blue); text-decoration: none; }
+
+        .theme-btn {
+            color: var(--emias-muted);
+            font-size: 0.85rem;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            line-height: 1;
+            vertical-align: middle;
+        }
+        .theme-btn:hover { color: var(--emias-blue); }
+
+        /* Чипы истории загрузок */
+        .date-chip {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--emias-border);
+            background: #fff;
+            color: var(--emias-muted);
+            font-size: 0.75rem;
+            text-decoration: none;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+            white-space: nowrap;
+        }
+        .date-chip:hover { border-color: var(--emias-blue); color: var(--emias-blue); }
+        .date-chip.active { border-color: var(--emias-blue); color: var(--emias-blue); background: var(--emias-blue-lt); }
+        html[data-theme="dark"] .date-chip { background: #161B22; border-color: #21262D; color: #6A7280; }
+        html[data-theme="dark"] .date-chip:hover { border-color: var(--emias-blue); color: var(--emias-blue); }
+        html[data-theme="dark"] .date-chip.active { background: #141D35; border-color: var(--emias-blue); color: var(--emias-blue); }
+
+        /* ═══ Ночная тема ═══ */
+        html[data-theme="dark"] {
+            --emias-bg:      #0D1117;
+            --emias-text:    #C9D1D9;
+            --emias-border:  #21262D;
+            --emias-muted:   #6A7280;
+            --emias-blue-lt: #141D35;
+        }
+        html[data-theme="dark"] body        { background: var(--emias-bg); color: var(--emias-text); }
+        html[data-theme="dark"] .tile-card  { background: #161B22; border-color: var(--emias-border); }
+        html[data-theme="dark"] .tile-active { color: var(--emias-blue); }
+        html[data-theme="dark"] .tile-active:hover { background: var(--emias-blue-lt); border-color: var(--emias-blue); }
+        html[data-theme="dark"] .tile-disabled { color: #3A3F4A; }
+        html[data-theme="dark"] .tile-badge { background: var(--emias-blue-lt); color: var(--emias-blue); }
+        html[data-theme="dark"] .btn-admin  { color: var(--emias-muted); }
+        html[data-theme="dark"] .btn-admin:hover  { color: var(--emias-blue); }
+        html[data-theme="dark"] .theme-btn  { color: var(--emias-muted); }
+        html[data-theme="dark"] .theme-btn:hover  { color: var(--emias-blue); }
+    </style>
+</head>
+<body>
+
+<div class="container" style="max-width: 860px; padding-top: 15vh;">
+
+    <div class="row g-3 justify-content-center">
+
+        <!-- Плитка 1 — активная -->
+        <div class="col-md-4 col-sm-6">
+            <a th:href="${basePath + '/dashboard'}" class="tile-card tile-active d-flex">
+                <div class="tile-icon"><i class="bi bi-clipboard2-pulse-fill"></i></div>
+                <div class="tile-title" th:text="${tile1Name}">Контроль выполнения плана скрининга ХВГС</div>
+                <div th:if="${lastUploadDate}" style="font-size: 0.72rem; margin-top: 10px; color: var(--emias-muted); font-weight: 400;">
+                    Последнее обновление: <span th:text="${lastUploadDate}"></span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Плитка 2 — в разработке -->
+        <div class="col-md-4 col-sm-6">
+            <div class="tile-card tile-disabled">
+                <span class="tile-badge">В разработке</span>
+                <div class="tile-icon"><i class="bi bi-journal-medical"></i></div>
+                <div class="tile-title" th:text="${tile2Name}">Регистры</div>
+            </div>
+        </div>
+
+        <!-- Плитка 3 — в разработке -->
+        <div class="col-md-4 col-sm-6">
+            <div class="tile-card tile-disabled">
+                <span class="tile-badge">В разработке</span>
+                <div class="tile-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                <div class="tile-title" th:text="${tile3Name}">Доступ к записям спецконтингента</div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="text-center mt-4" style="display: flex; align-items: center; justify-content: center; gap: 16px;">
+        <a th:href="${basePath + '/admin'}" class="btn-admin">Панель администратора</a>
+        <button class="theme-btn" onclick="toggleTheme()" title="Сменить тему">
+            <i id="theme-icon" class="bi bi-moon-stars-fill"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        try { localStorage.setItem('emias-theme', theme); } catch(e) {}
+        const icon = document.getElementById('theme-icon');
+        if (icon) icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+    }
+    function toggleTheme() {
+        const cur = document.documentElement.getAttribute('data-theme') || 'light';
+        applyTheme(cur === 'dark' ? 'light' : 'dark');
+    }
+    applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+</script>
+
+</body>
+</html>

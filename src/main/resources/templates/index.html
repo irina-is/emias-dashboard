@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${config.dashboardTitle}">Дашборд</title>
+    <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('emias-theme')||'light')}catch(e){}</script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%233B5BD8'/><rect x='4' y='18' width='6' height='10' rx='1' fill='white'/><rect x='13' y='10' width='6' height='18' rx='1' fill='white'/><rect x='22' y='6' width='6' height='22' rx='1' fill='white'/></svg>">
+    <link th:href="${basePath + '/css/fonts.css'}" rel="stylesheet">
+    <link th:href="${basePath + '/css/bootstrap.min.css'}" rel="stylesheet">
+    <link th:href="${basePath + '/css/bootstrap-icons.css'}" rel="stylesheet">
+    <script th:src="${basePath + '/js/highcharts.js'}"></script>
+    <script th:src="${basePath + '/js/sortable.min.js'}"></script>
+    <style>
+        :root {
+            --emias-blue:    #3B5BD8;
+            --emias-blue-lt: #EDF2FF;
+            --emias-border:  #E8ECF5;
+            --emias-bg:      #F4F6FB;
+            --emias-text:    #1A1A2E;
+            --emias-muted:   #868E96;
+            --emias-success: #2F9E44;
+            --emias-danger:  #E03131;
+            --emias-warning: #F59F00;
+        }
+
+        body {
+            background-color: var(--emias-bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--emias-text);
+        }
+        body::before {
+            content: '';
+            display: block;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--emias-blue);
+            z-index: 9999;
+        }
+
+        /* Переопределяем Bootstrap-цвета */
+        .text-primary { color: var(--emias-blue)   !important; }
+        .text-success { color: var(--emias-success) !important; }
+        .text-danger  { color: var(--emias-danger)  !important; }
+        .text-warning { color: var(--emias-warning) !important; }
+        .text-muted   { color: var(--emias-muted)   !important; }
+
+        /* Карточки статистики */
+        .card-stat {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px 28px;
+            border: 1px solid var(--emias-border);
+            height: 100%;
+            position: relative;
+        }
+
+        .stat-label {
+            font-size: 0.82rem;
+            color: var(--emias-muted);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 400;
+            color: var(--emias-text);
+            line-height: 1.1;
+        }
+        .stat-plan {
+            font-size: 0.82rem;
+            color: var(--emias-muted);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        /* Прогресс-бар */
+        .progress { border-radius: 6px; background: var(--emias-blue-lt); }
+        .progress-bar {
+            background-color: var(--emias-blue) !important;
+            border-radius: 6px;
+            width: 0%;
+            transition: width 1s ease-out;
+        }
+
+        /* Блоки с графиками и рейтингом */
+        .chart-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--emias-border);
+            position: relative;
+        }
+        .chart { height: 400px; }
+
+        /* Кнопка ⓘ */
+        .info-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            color: #CED4DA;
+            font-size: 1rem;
+            line-height: 1;
+            cursor: default;
+            border: none;
+            background: none;
+            padding: 0;
+            z-index: 10;
+        }
+        .info-btn:hover { color: var(--emias-muted); }
+
+        /* Тултип */
+        .tooltip-light .tooltip-arrow { display: none; }
+        .tooltip-light .tooltip-inner {
+            background-color: #fff;
+            color: #495057;
+            border: 1px solid var(--emias-border);
+            box-shadow: 0 4px 16px rgba(59,91,216,0.08);
+            max-width: 280px;
+            text-align: left;
+            font-size: 0.79rem;
+            font-family: 'Inter', sans-serif;
+        }
+        .tooltip-light.bs-tooltip-top .tooltip-arrow::before    { border-top-color: var(--emias-border); }
+        .tooltip-light.bs-tooltip-bottom .tooltip-arrow::before { border-bottom-color: var(--emias-border); }
+        .tooltip-light.bs-tooltip-start .tooltip-arrow::before  { border-left-color: var(--emias-border); }
+        .tooltip-light.bs-tooltip-end .tooltip-arrow::before    { border-right-color: var(--emias-border); }
+
+        /* Иконочные кнопки */
+        .btn-icon {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border: 1px solid var(--emias-border);
+            border-radius: 8px;
+            color: var(--emias-muted);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: border-color 0.15s, color 0.15s;
+            text-decoration: none;
+        }
+        .btn-icon:hover { border-color: var(--emias-blue); color: var(--emias-blue); }
+        .btn-icon-warning { }
+
+        /* Кнопки навигации */
+        .btn-emias-outline {
+            color: #fff;
+            background: var(--emias-blue);
+            border: none;
+            border-radius: 8px;
+            font-size: 0.84rem;
+            padding: 6px 16px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.15s;
+        }
+        .btn-emias-outline:hover {
+            background: #2F4EC0;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        /* Алерты */
+        .alert {
+            border-radius: 10px;
+            border: none;
+            font-size: 0.88rem;
+        }
+        .alert-danger  { background: #FFF5F5; color: #C92A2A; }
+        .alert-success { background: #EBFBEE; color: #2B8A3E; }
+        .alert-warning { background: #FFF9DB; color: #856404; }
+
+        /* Заголовок страницы */
+        h2 {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 2rem;
+            line-height: 1.25;
+            color: var(--emias-text);
+        }
+        h5 { font-weight: 600; font-size: 1rem; color: var(--emias-text); }
+
+        /* Drag-and-drop */
+        #sortable { display: flex; flex-direction: column; gap: 24px; }
+
+        .drag-block { position: relative; }
+
+        .drag-handle {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #CED4DA;
+            font-size: 1.2rem;
+            cursor: grab;
+            opacity: 0.2;
+            transition: opacity 0.15s;
+            user-select: none;
+            z-index: 20;
+            line-height: 1;
+        }
+        .drag-block:hover .drag-handle { opacity: 0.55; }
+        .drag-handle:active { cursor: grabbing; }
+
+        .sortable-ghost { opacity: 0.35; }
+        .sortable-ghost .chart-box,
+        .sortable-ghost .card-stat,
+        .sortable-ghost .row {
+            outline: 2px dashed var(--emias-blue);
+            outline-offset: 2px;
+            border-radius: 12px;
+        }
+        .sortable-chosen { cursor: grabbing !important; }
+
+        /* Печать */
+        @media print {
+            @page { size: A4 portrait; margin: 14mm 14mm 14mm 14mm; }
+
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+            body { background: #fff !important; font-size: 11px; }
+            .container { max-width: 100% !important; padding: 0 !important; }
+
+            /* Скрываем интерактивные элементы */
+            .no-print  { display: none !important; }
+            .info-btn  { display: none !important; }
+            .drag-handle { display: none !important; }
+
+            /* Три блока статистики — без карточек, просто текст в колонках */
+            .card-stat {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 12px 0 0 !important;
+            }
+            .stat-label { font-size: 0.75rem !important; margin-bottom: 2px !important; }
+            .stat-value { font-size: 1.5rem !important; }
+            .stat-plan  { font-size: 0.75rem !important; margin-top: 2px !important; }
+            .progress   { display: none !important; }
+
+            /* Графики — масштабируем SVG под ширину страницы */
+            .chart { height: 220px !important; overflow: hidden !important; }
+            .highcharts-container,
+            .highcharts-container svg {
+                width: 100% !important;
+                height: 220px !important;
+            }
+            .chart-box {
+                border: 1px solid #e0e0e0 !important;
+                border-radius: 6px !important;
+                padding: 10px 12px !important;
+                margin-bottom: 10px !important;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            /* Скрываем цветные плашки при печати */
+            .alert-danger, .alert-warning { display: none !important; }
+            .alert-success {
+                padding: 6px 10px !important;
+                margin-bottom: 6px !important;
+                font-size: 0.78rem !important;
+                border-radius: 6px !important;
+            }
+
+            /* Таблица — компактная */
+            .table { font-size: 0.72rem !important; }
+            .table thead th { padding: 4px 6px !important; font-size: 0.65rem !important; }
+            .table tbody td { padding: 3px 6px !important; }
+
+            #sortable { gap: 12px; }
+        }
+
+        /* Алерт «нет даты» */
+        .alert-nodate { background: #FFF9DB; color: #856404; }
+        .badge-archive { background: #FFF9DB; color: #856404; font-weight: 500; padding: 3px 10px; border-radius: 6px; font-size: 0.8rem; }
+
+        /* Список выводов */
+        .conclusions-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .conclusions-list li {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            font-size: 0.88rem;
+            line-height: 1.55;
+        }
+        .conclusions-list li::before {
+            content: '●';
+            font-size: 0.65rem;
+            flex-shrink: 0;
+            position: relative;
+            top: -1px;
+        }
+        .conclusion-risk          { color: var(--emias-danger); }
+        .conclusion-risk::before  { color: var(--emias-danger); }
+        .conclusion-ok            { color: var(--emias-success); }
+        .conclusion-ok::before    { color: var(--emias-success); }
+
+        /* ═══ Ночная тема ═══ */
+        html[data-theme="dark"] {
+            --emias-bg:      #0D1117;
+            --emias-text:    #C9D1D9;
+            --emias-border:  #21262D;
+            --emias-muted:   #6A7280;
+            --emias-blue-lt: #141D35;
+        }
+        html[data-theme="dark"] body       { background: var(--emias-bg); color: var(--emias-text); }
+        html[data-theme="dark"] h2,
+        html[data-theme="dark"] h5         { color: var(--emias-text); }
+        html[data-theme="dark"] .card-stat { background: #161B22; border-color: var(--emias-border); }
+        html[data-theme="dark"] .chart-box { background: #161B22; border-color: var(--emias-border); }
+        html[data-theme="dark"] .progress  { background: var(--emias-blue-lt); }
+        html[data-theme="dark"] .stat-label,
+        html[data-theme="dark"] .stat-plan { color: var(--emias-muted); }
+        html[data-theme="dark"] .stat-value { color: var(--emias-text); }
+        html[data-theme="dark"] .btn-icon  { background: #161B22; border-color: var(--emias-border); color: var(--emias-muted); }
+        html[data-theme="dark"] .btn-icon:hover { border-color: var(--emias-blue); color: var(--emias-blue); }
+        html[data-theme="dark"] .alert-danger  { background: #2A1515; color: #FC8989; }
+        html[data-theme="dark"] .alert-success { background: #0F2018; color: #6EE7B7; }
+        html[data-theme="dark"] .alert-warning { background: #241C00; color: #FFD43B; }
+        html[data-theme="dark"] .alert-nodate  { background: #241C00; color: #FFD43B; }
+        html[data-theme="dark"] .badge-archive { background: #241C00; color: #FFD43B; }
+        html[data-theme="dark"] .btn-icon-warning { }
+        html[data-theme="dark"] .conclusion-risk,
+        html[data-theme="dark"] .conclusion-risk::before { color: #FC8989; }
+        html[data-theme="dark"] .conclusion-ok,
+        html[data-theme="dark"] .conclusion-ok::before   { color: #6EE7B7; }
+        html[data-theme="dark"] .table {
+            --bs-table-bg: transparent;
+            --bs-table-color: var(--emias-text);
+            color: var(--emias-text);
+        }
+        html[data-theme="dark"] .table thead th { color: var(--emias-muted); border-color: var(--emias-border); }
+        html[data-theme="dark"] .table tbody td { border-color: var(--emias-border); }
+        html[data-theme="dark"] .table-hover > tbody > tr:hover > * {
+            --bs-table-hover-color: var(--emias-text);
+            background-color: var(--emias-blue-lt);
+        }
+        html[data-theme="dark"] .tooltip-light .tooltip-inner {
+            background-color: #1C2030 !important;
+            color: #C9D1D9 !important;
+            border-color: #21262D !important;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        html[data-theme="dark"] .tooltip-light.bs-tooltip-top .tooltip-arrow::before    { border-top-color:    #21262D !important; }
+        html[data-theme="dark"] .tooltip-light.bs-tooltip-bottom .tooltip-arrow::before { border-bottom-color: #21262D !important; }
+        html[data-theme="dark"] .tooltip-light.bs-tooltip-start .tooltip-arrow::before  { border-left-color:   #21262D !important; }
+        html[data-theme="dark"] .tooltip-light.bs-tooltip-end .tooltip-arrow::before    { border-right-color:  #21262D !important; }
+        html[data-theme="dark"] .drag-handle { color: #444C5A; }
+        html[data-theme="dark"] .info-btn { color: #444C5A; }
+
+        /* Dropdown истории дат */
+        .dropdown-menu {
+            border: 1px solid var(--emias-border);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(59,91,216,0.10);
+            padding: 6px;
+            min-width: 170px;
+        }
+        .dropdown-item {
+            font-size: 0.84rem;
+            border-radius: 6px;
+            color: var(--emias-text);
+            padding: 6px 12px;
+        }
+        .dropdown-item:hover, .dropdown-item:focus { background: var(--emias-blue-lt); color: var(--emias-blue); }
+        .dropdown-item.active, .dropdown-item:active { background: var(--emias-blue); color: #fff; }
+        html[data-theme="dark"] .dropdown-menu { background: #1C2030; border-color: #21262D; }
+        html[data-theme="dark"] .dropdown-item { color: #C9D1D9; }
+        html[data-theme="dark"] .dropdown-item:hover { background: #141D35; color: var(--emias-blue); }
+        html[data-theme="dark"] .dropdown-item.active { background: var(--emias-blue); color: #fff; }
+
+        /* Поиск по таблице */
+        .filter-wrap {
+            position: relative;
+            width: 250px;
+        }
+        .filter-wrap .bi-search {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--emias-muted);
+            font-size: 0.82rem;
+            pointer-events: none;
+        }
+        .filter-input {
+            width: 100%;
+            padding: 7px 12px 7px 30px;
+            font-size: 0.84rem;
+            font-family: 'Inter', sans-serif;
+            border: 1px solid var(--emias-border);
+            border-radius: 8px;
+            background: var(--emias-bg);
+            color: var(--emias-text);
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .filter-input:focus { border-color: var(--emias-blue); }
+        .filter-input::placeholder { color: var(--emias-muted); }
+        html[data-theme="dark"] .filter-input { background: #0D1117; border-color: #21262D; color: #C9D1D9; }
+        html[data-theme="dark"] .filter-input::placeholder { color: #6A7280; }
+
+        /* Таблица */
+        .table { font-size: 0.86rem; }
+        .table thead th {
+            color: var(--emias-muted);
+            font-weight: 500;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 1px solid var(--emias-border);
+            background: transparent;
+        }
+        .table tbody td { border-color: var(--emias-border); vertical-align: middle; }
+        .table-hover tbody tr:hover { background-color: var(--emias-blue-lt); }
+    </style>
+</head>
+<body>
+
+<div class="container py-4">
+
+    <!-- Заголовок -->
+    <div class="mb-4">
+        <h2 class="mb-0" th:text="${config.dashboardTitle}">Дашборд</h2>
+        <div th:if="${lastUploadDate}" style="font-size: 0.82rem; margin-top: 4px;">
+            <span th:if="${isLatest}" style="color: var(--emias-muted); font-weight: 500; font-size: 0.8rem;">
+                Последнее обновление: <span th:text="${lastUploadDate}"></span>
+            </span>
+            <span th:unless="${isLatest}" class="badge-archive">
+                <i class="bi bi-clock-history"></i> Архивная версия, актуальная на <span th:text="${lastUploadDate}"></span>
+            </span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between no-print" style="margin-top: 12px;">
+            <a th:href="${basePath + '/'}" class="btn-emias-outline">← Назад</a>
+            <div class="d-flex gap-2 align-items-center">
+                <div class="dropdown" th:if="${uploadedDates != null and #lists.size(uploadedDates) > 1}">
+                    <button class="btn-icon" th:classappend="${isLatest == false} ? ' btn-icon-warning'" data-bs-toggle="dropdown" aria-expanded="false" title="История загрузок">
+                        <i class="bi bi-clock-history"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li th:each="d, i : ${uploadedDates}">
+                            <a class="dropdown-item"
+                               th:href="@{/dashboard(date=${d})}"
+                               th:text="${uploadedDatesFormatted[i.index]}"
+                               th:classappend="${d == selectedDateRaw} ? ' active' : ''">
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <button class="btn-icon" onclick="window.print()" title="Сохранить как PDF">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                </button>
+                <button class="btn-icon" onclick="location.reload()" title="Обновить данные">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+                <button class="btn-icon" onclick="toggleTheme()" title="Сменить тему" id="theme-btn">
+                    <i id="theme-icon" class="bi bi-moon-stars-fill"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Если файл не загружен — подсказка -->
+    <div th:if="${error}" class="alert alert-warning" th:text="${error}"></div>
+
+    <!-- Основные блоки (перетаскиваемые) -->
+    <div id="sortable" th:unless="${error}">
+
+        <!-- Блок 1: Три карточки статистики -->
+        <div class="drag-block">
+            <div class="drag-handle no-print"><i class="bi bi-grip-horizontal"></i></div>
+            <div class="row g-3">
+
+                <!-- Выполнено скринингов -->
+                <div class="col-md-4">
+                    <div class="card-stat">
+                        <button class="info-btn" data-bs-toggle="tooltip" data-bs-placement="left"
+                                data-bs-custom-class="tooltip-light"
+                                title="Уникальные МКАБ со статусом «Завершено» за текущий год. Если пациент встречается в файле несколько раз — учитывается один раз.">
+                            <i class="bi bi-info-circle"></i>
+                        </button>
+                        <div class="stat-label">Выполнено скринингов</div>
+                        <div class="stat-value" th:text="${#numbers.formatInteger(stats.completedCount, 0, 'DEFAULT')}" th:attr="data-val=${stats.completedCount}">0</div>
+                        <div class="stat-plan" th:text="'из ' + ${#numbers.formatInteger(stats.plan, 0, 'DEFAULT')} + ' по плану'"></div>
+                        <div class="progress mt-3" style="height: 8px;">
+                            <div class="progress-bar"
+                                 role="progressbar"
+                                 th:attr="data-width=${stats.completionPercent}, aria-valuenow=${stats.completionPercent}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                        <div class="stat-plan mt-1" th:text="${stats.completionPercent} + '% от плана'"></div>
+                    </div>
+                </div>
+
+                <!-- Осталось до плана -->
+                <div class="col-md-4">
+                    <div class="card-stat">
+                        <button class="info-btn" data-bs-toggle="tooltip" data-bs-placement="left"
+                                data-bs-custom-class="tooltip-light"
+                                title="Разница между годовым планом и количеством уже выполненных скринингов (уникальных МКАБ со статусом «Завершено»).">
+                            <i class="bi bi-info-circle"></i>
+                        </button>
+                        <div class="stat-label">Осталось скринингов до плана</div>
+                        <div class="stat-value text-danger" th:text="${#numbers.formatInteger(stats.remainingCount, 0, 'DEFAULT')}" th:attr="data-val=${stats.remainingCount}">0</div>
+                        <div class="stat-plan">до конца года</div>
+                    </div>
+                </div>
+
+                <!-- Необходимый темп -->
+                <div class="col-md-4">
+                    <div class="card-stat">
+                        <button class="info-btn" data-bs-toggle="tooltip" data-bs-placement="left"
+                                data-bs-custom-class="tooltip-light"
+                                title="Сколько скринингов нужно проводить каждый день, чтобы выполнить план до 31 декабря текущего года.">
+                            <i class="bi bi-info-circle"></i>
+                        </button>
+                        <div class="stat-label">Необходимый темп исследований</div>
+                        <div class="stat-value text-primary" th:text="${#numbers.formatInteger(stats.dailyRateNeeded, 0, 'DEFAULT')}" th:attr="data-val=${stats.dailyRateNeeded}">0</div>
+                        <div class="stat-plan">в сутки до конца года</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Блок 2: График план / факт по месяцам -->
+        <div class="drag-block" th:if="${config.chartMonthlyEnabled}">
+            <div class="chart-box">
+                <div class="drag-handle no-print"><i class="bi bi-grip-horizontal"></i></div>
+                <button class="info-btn" data-bs-toggle="tooltip" data-bs-placement="left"
+                        data-bs-custom-class="tooltip-light"
+                        title="Уникальные МКАБ со статусом «Завершено», по месяцу даты исследования. Пунктирная линия — равномерный план на месяц.">
+                    <i class="bi bi-info-circle"></i>
+                </button>
+                <div id="chart-monthly" class="chart"></div>
+            </div>
+            <div th:if="${monthly != null and monthly.noDateCount gt 0}"
+                 class="alert alert-nodate mt-2">
+                В загруженном файле есть записи со статусом «Завершено», у которых не заполнено поле «Дата исследования».<br>
+                Такие записи не учтены в графике.
+                Всего неучтенных записей: <strong th:text="${monthly.noDateCount}"></strong>.
+            </div>
+        </div>
+
+        <!-- Блок 3: График возрастного распределения -->
+        <div class="drag-block" th:if="${config.chartAgesEnabled}">
+            <div class="chart-box">
+                <div class="drag-handle no-print"><i class="bi bi-grip-horizontal"></i></div>
+                <button class="info-btn" data-bs-toggle="tooltip" data-bs-placement="left"
+                        data-bs-custom-class="tooltip-light"
+                        title="Распределение пациентов из последнего загруженного файла по возрастным группам. Возраст рассчитывается на текущую дату.">
+                    <i class="bi bi-info-circle"></i>
+                </button>
+                <div id="chart-ages" class="chart"></div>
+            </div>
+        </div>
+
+        <!-- Блок 4: Выводы -->
+        <div class="drag-block" th:if="${conclusions}">
+            <div class="chart-box">
+                <div class="drag-handle no-print"><i class="bi bi-grip-horizontal"></i></div>
+                <button class="info-btn" data-bs-toggle="tooltip" data-bs-placement="left"
+                        data-bs-custom-class="tooltip-light"
+                        title="Автоматически формируемые выводы на основе загруженных данных. Возможные сигналы: риск невыполнения годового плана скрининга; высокая доля отказов от исследования; большое число записей без результата; снижение темпа в текущем месяце по сравнению с предыдущим.">
+                    <i class="bi bi-info-circle"></i>
+                </button>
+                <h5 class="mb-3 text-center">Выводы</h5>
+                <ul class="conclusions-list">
+
+                    <li th:if="${conclusions.planAtRisk}" class="conclusion-risk">
+                        Есть риск невыполнения плана региона.
+                        По графику на сегодня должно быть выполнено
+                        <strong th:text="${#numbers.formatInteger(conclusions.projected, 0, 'DEFAULT')}"></strong>
+                        скринингов, отставание составляет
+                        <strong th:text="${conclusions.lagPercent} + '%'"></strong>
+                    </li>
+
+                    <li th:unless="${conclusions.planAtRisk}" class="conclusion-ok">
+                        План выполняется в соответствии с графиком
+                    </li>
+
+                    <li th:if="${conclusions.highRefusals}" class="conclusion-risk">
+                        Много отказов от исследования —
+                        <strong th:text="${conclusions.refusalPercent} + '%'"></strong>
+                        от всех пациентов
+                        <span th:if="${!#strings.isEmpty(conclusions.topRefusalFacility)}">
+                            — больше всего в: <strong th:text="${conclusions.topRefusalFacility}"></strong>
+                        </span>
+                    </li>
+
+                    <li th:if="${conclusions.highNoData}" class="conclusion-risk">
+                        Нет данных по результату исследования:
+                        <strong th:text="${conclusions.noDataPercent} + '%'"></strong>
+                        записей без результата. Возможна проблема с заполнением данных
+                    </li>
+
+                    <li th:if="${conclusions.slowingDown}" class="conclusion-risk">
+                        Темп в текущем месяце снижается — в текущем месяце выполнено
+                        <strong th:text="${conclusions.currentMonthCount}"></strong>
+                        скринингов, тогда как в прошлом месяце было
+                        <strong th:text="${conclusions.previousMonthCount}"></strong>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+        <!-- Блок 5: Рейтинг медицинских организаций -->
+        <div class="drag-block" th:if="${rating}">
+            <div class="chart-box">
+                <div class="drag-handle no-print"><i class="bi bi-grip-horizontal"></i></div>
+                <button class="info-btn" data-bs-toggle="tooltip" data-bs-placement="left"
+                        data-bs-custom-class="tooltip-light"
+                        title="Только записи со статусом «Завершено». Если пациент встречается несколько раз — учитывается одна запись. Результаты показаны в разбивке: Без отклонений, Выявлено отклонение, Отказ, Нет данных. По умолчанию отсортировано по убыванию числа завершённых скринингов.">
+                    <i class="bi bi-info-circle"></i>
+                </button>
+                <h5 class="mb-3 text-center">Рейтинг медицинских организаций по количеству скринингов</h5>
+                <div class="d-flex align-items-center justify-content-end gap-2 mb-3 no-print">
+                    <button class="btn-icon" id="sort-btn" onclick="sortRating()" title="Сортировка: лучшие вверху — нажмите, чтобы показать худших первыми" style="flex-shrink: 0;">
+                        <i class="bi bi-sort-down"></i>
+                    </button>
+                    <button class="btn-icon" onclick="exportRatingCSV()" title="Скачать CSV" style="flex-shrink: 0;">
+                        <i class="bi bi-download"></i>
+                    </button>
+                    <div class="filter-wrap">
+                        <i class="bi bi-search"></i>
+                        <input type="text" class="filter-input" id="facility-filter"
+                               placeholder="Поиск по организации..."
+                               oninput="filterRating(this.value)">
+                    </div>
+                </div>
+                <table id="rating-table" class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;">#</th>
+                            <th>Медицинская организация</th>
+                            <th class="text-end">Завершено</th>
+                            <th class="text-end">Без отклонений</th>
+                            <th class="text-end">Выявлено отклонение</th>
+                            <th class="text-end">Отказ</th>
+                            <th class="text-end">Нет данных</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="row, stat : ${rating}">
+                            <td class="text-muted" th:text="${stat.count}"></td>
+                            <td th:text="${row.name}"></td>
+                            <td class="text-end fw-bold text-success" th:text="${row.completed}"></td>
+                            <td class="text-end" th:text="${row.withoutDeviations}"></td>
+                            <td class="text-end text-danger" th:text="${row.withDeviations}"></td>
+                            <td class="text-end text-warning" th:text="${row.refusal}"></td>
+                            <td class="text-end text-muted" th:text="${row.noData}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script th:src="${basePath + '/js/bootstrap.bundle.min.js'}"></script>
+<script>
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+        new bootstrap.Tooltip(el, { trigger: 'hover' });
+    });
+
+    // Ночная тема
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        try { localStorage.setItem('emias-theme', theme); } catch(e) {}
+        const icon = document.getElementById('theme-icon');
+        if (icon) icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+        if (typeof Highcharts !== 'undefined') {
+            const dark = theme === 'dark';
+            Highcharts.charts.forEach(c => {
+                if (!c) return;
+                c.update({
+                    chart: { backgroundColor: dark ? '#161B22' : '#ffffff' },
+                    title: { style: { color: dark ? '#C9D1D9' : '#1A1A2E' } },
+                    xAxis: { lineColor: dark ? '#21262D' : '#E8ECF5', tickColor: dark ? '#21262D' : '#E8ECF5',
+                             labels: { style: { color: dark ? '#6A7280' : '#868E96' } } },
+                    yAxis: { gridLineColor: dark ? '#21262D' : '#F0F4FF',
+                             labels: { style: { color: dark ? '#6A7280' : '#868E96' } } },
+                    legend: { itemStyle: { color: dark ? '#C9D1D9' : '#1A1A2E' } }
+                }, true);
+            });
+        }
+    }
+    function toggleTheme() {
+        const cur = document.documentElement.getAttribute('data-theme') || 'light';
+        applyTheme(cur === 'dark' ? 'light' : 'dark');
+    }
+    // Синхронизируем иконку с текущей темой при загрузке
+    applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+
+    // Анимация прогресс-бара
+    document.querySelectorAll('.progress-bar[data-width]').forEach(bar => {
+        setTimeout(() => { bar.style.width = bar.dataset.width + '%'; }, 120);
+    });
+
+    // Счётчик — старт с 98%, быстро→плавно
+    document.querySelectorAll('.stat-value[data-val]').forEach(el => {
+        const target = parseInt(el.dataset.val, 10);
+        if (!target) return;
+        const from = Math.round(target * 0.98);
+        const duration = 1200;
+        const t0 = performance.now();
+        function tick(now) {
+            const p = Math.min((now - t0) / duration, 1);
+            const ease = 1 - Math.pow(1 - p, 5);
+            const cur = Math.round(from + (target - from) * ease);
+            el.textContent = cur.toLocaleString('ru-RU', {maximumFractionDigits: 0});
+            if (p < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+    });
+
+    // Фильтр таблицы рейтинга
+    function filterRating(val) {
+        const q = val.toLowerCase();
+        document.querySelectorAll('#rating-table tbody tr').forEach(row => {
+            row.style.display = row.cells[1].textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    }
+
+    // Сортировка рейтинга
+    let _sortAsc = false;
+    function sortRating() {
+        _sortAsc = !_sortAsc;
+        const tbody = document.querySelector('#rating-table tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort((a, b) => {
+            const av = parseInt(a.cells[2].textContent.trim()) || 0;
+            const bv = parseInt(b.cells[2].textContent.trim()) || 0;
+            return _sortAsc ? av - bv : bv - av;
+        });
+        rows.forEach((row, i) => {
+            row.cells[0].textContent = i + 1;
+            tbody.appendChild(row);
+        });
+        const btn = document.getElementById('sort-btn');
+        if (_sortAsc) {
+            btn.title = 'Сортировка: худшие вверху — нажмите, чтобы показать лучших первыми';
+            btn.querySelector('i').className = 'bi bi-sort-up';
+        } else {
+            btn.title = 'Сортировка: лучшие вверху — нажмите, чтобы показать худших первыми';
+            btn.querySelector('i').className = 'bi bi-sort-down';
+        }
+    }
+
+    // Экспорт таблицы в CSV
+    function exportRatingCSV() {
+        const table = document.getElementById('rating-table');
+        const rows = Array.from(table.querySelectorAll('tr'));
+        const csv = rows
+            .filter(r => r.style.display !== 'none')
+            .map(r => Array.from(r.querySelectorAll('th, td'))
+                .map(c => '"' + c.textContent.trim().replace(/"/g, '""') + '"')
+                .join(','))
+            .join('\n');
+        const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'rating.csv';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+
+    // Drag-and-drop блоков
+    const sortableEl = document.getElementById('sortable');
+    if (sortableEl) {
+        Sortable.create(sortableEl, {
+            animation: 200,
+            handle: '.drag-handle',
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            onEnd: function() {
+                if (typeof Highcharts !== 'undefined') {
+                    Highcharts.charts.forEach(c => c && c.reflow());
+                }
+            }
+        });
+    }
+</script>
+
+<script th:inline="javascript" th:if="${error == null and (config.chartMonthlyEnabled or config.chartAgesEnabled)}">
+
+    // Глобальная тема Highcharts — учитываем текущую тему при инициализации
+    const _dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    Highcharts.setOptions({
+        chart: {
+            style: { fontFamily: "'Inter', sans-serif" },
+            backgroundColor: _dark ? '#161B22' : '#ffffff',
+            plotBorderWidth: 0,
+            spacingTop: 20,
+            spacingBottom: 16
+        },
+        colors: ['#3B5BD8', '#748FFC', '#4DABF7', '#69DB7C', '#FFA94D', '#F783AC'],
+        title: {
+            style: { fontSize: '16px', fontWeight: '600',
+                     color: _dark ? '#C9D1D9' : '#1A1A2E',
+                     fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif" },
+            align: 'center'
+        },
+        xAxis: {
+            lineColor: _dark ? '#21262D' : '#E8ECF5',
+            tickColor: _dark ? '#21262D' : '#E8ECF5',
+            labels: { style: { color: _dark ? '#6A7280' : '#868E96', fontSize: '12px' } },
+            title: { style: { color: _dark ? '#6A7280' : '#868E96', fontSize: '12px' } }
+        },
+        yAxis: {
+            gridLineColor: _dark ? '#21262D' : '#F0F4FF',
+            lineWidth: 0,
+            tickWidth: 0,
+            labels: { style: { color: _dark ? '#6A7280' : '#868E96', fontSize: '12px' } },
+            title: { style: { color: _dark ? '#6A7280' : '#868E96', fontSize: '12px' } }
+        },
+        legend: {
+            itemStyle: { color: _dark ? '#C9D1D9' : '#1A1A2E', fontWeight: '500', fontSize: '12px' },
+            itemHoverStyle: { color: '#3B5BD8' }
+        },
+        tooltip: {
+            backgroundColor: _dark ? '#1C2030' : '#ffffff',
+            borderColor: _dark ? '#21262D' : '#E8ECF5',
+            borderRadius: 10,
+            shadow: { color: 'rgba(59,91,216,0.08)', offsetX: 0, offsetY: 4, opacity: 1, width: 16 },
+            style: { color: _dark ? '#C9D1D9' : '#1A1A2E', fontSize: '12px', fontFamily: "'Inter', sans-serif" }
+        },
+        plotOptions: {
+            column: { borderRadius: 4, borderWidth: 0 },
+            series: { animation: { duration: 600 } }
+        },
+        credits: { enabled: false }
+    });
+
+    const monthLabels       = /*[[${monthly.labels}]]*/ [];
+    const monthFact         = /*[[${monthly.fact}]]*/ [];
+    const monthPlan         = /*[[${monthly.monthlyPlan}]]*/ 0;
+    const chartMonthlyTitle = /*[[${config.chartMonthlyTitle}]]*/ '';
+
+    const planLine = monthLabels.map(() => monthPlan);
+
+    if (document.getElementById('chart-monthly')) {
+        Highcharts.chart('chart-monthly', {
+            chart: { type: 'column' },
+            title: { text: chartMonthlyTitle },
+            xAxis: { categories: monthLabels, crosshair: { color: '#EDF2FF', width: 1 } },
+            yAxis: { title: { text: null }, allowDecimals: false },
+            tooltip: { shared: true },
+            series: [
+                { name: 'Факт', type: 'column', data: monthFact, color: '#3B5BD8' },
+                { name: 'План (в месяц)', type: 'line', data: planLine, color: '#E03131',
+                  dashStyle: 'ShortDash', marker: { enabled: false }, lineWidth: 2 }
+            ]
+        });
+    }
+
+    const labels         = /*[[${diagram.labels}]]*/ [];
+    const series         = /*[[${diagram.series}]]*/ [];
+    const chartAgesTitle = /*[[${config.chartAgesTitle}]]*/ '';
+
+    if (document.getElementById('chart-ages')) {
+        const hcSeries = [];
+        for (let i = 0; i < series.length; i++) {
+            hcSeries.push({ name: series[i].weekName, data: series[i].values });
+        }
+        Highcharts.chart('chart-ages', {
+            chart: { type: 'column' },
+            title: { text: chartAgesTitle },
+            xAxis: { categories: labels, title: { text: 'Возраст' } },
+            yAxis: { title: { text: null }, allowDecimals: false },
+            series: hcSeries
+        });
+    }
+</script>
+
+</body>
+</html>
