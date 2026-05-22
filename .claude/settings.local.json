@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /s /b \"C:\\\\Users\\\\Stepler\\\\IdeaProjects\\\\emias-dashboard\\\\src\\\\main\\\\java\\\\com\\\\emias\\\\dashboard\\\\service\\\\*.java\")",
+      "Bash(mvn compile *)"
+    ]
+  }
+}
