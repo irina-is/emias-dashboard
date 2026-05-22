@@ -89,8 +89,8 @@ public class ReportService {
         // Шаг 2: валидация перед парсингом
         List<String> errors = validateFile(destination.toString());
         if (!errors.isEmpty()) {
-            log.warn("Файл не прошёл валидацию: {} ошибок", errors.size());
-            errors.forEach(e -> log.warn("  {}", e));
+            log.error("Файл не прошёл валидацию: {} ошибок", errors.size());
+            errors.forEach(e -> log.error("  {}", e));
             throw new FileValidationException(errors);
         }
 
@@ -202,6 +202,8 @@ public class ReportService {
         return readRecords(dates.get(0));
     }
 
+    private static final int MAX_ERRORS = 20;
+
     // Проверяет файл на ошибки. Возвращает список ошибок (пустой — если всё ок)
     private List<String> validateFile(String filePath) throws IOException {
         List<String> errors = new ArrayList<>();
@@ -212,6 +214,11 @@ public class ReportService {
             Sheet sheet = workbook.getSheetAt(0);
 
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                if (errors.size() >= MAX_ERRORS) {
+                    errors.add("Показаны первые " + MAX_ERRORS + " ошибок. Исправьте их и загрузите файл повторно.");
+                    break;
+                }
+
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
@@ -229,6 +236,7 @@ public class ReportService {
 
                 // Проверяем форматы дат
                 for (int d = 0; d < DATE_COL_INDICES.length; d++) {
+                    if (errors.size() >= MAX_ERRORS) break;
                     String value = getCellValueSafe(row, DATE_COL_INDICES[d]);
                     if (!value.isBlank()) {
                         try {

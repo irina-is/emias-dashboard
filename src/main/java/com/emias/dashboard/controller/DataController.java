@@ -27,6 +27,9 @@ public class DataController {
     @Value("${logging.file.name:}")
     private String logFilePath;
 
+    @Value("${app.upload-log.file:}")
+    private String uploadLogFilePath;
+
     private final ReportService       reportService;
     private final ScreeningRepository screeningRepository;
     private final SettingsService     settingsService;
@@ -117,18 +120,26 @@ public class DataController {
 
     @GetMapping("/logs")
     public ResponseEntity<String> getLogs(@RequestParam(defaultValue = "100") int lines) {
-        if (logFilePath == null || logFilePath.isBlank()) {
-            return ResponseEntity.ok("Логирование в файл не настроено (logging.file.name не задан)");
+        return readLogFile(logFilePath, lines);
+    }
+
+    @GetMapping("/upload-logs")
+    public ResponseEntity<String> getUploadLogs(@RequestParam(defaultValue = "100") int lines) {
+        return readLogFile(uploadLogFilePath, lines);
+    }
+
+    private ResponseEntity<String> readLogFile(String filePath, int lines) {
+        if (filePath == null || filePath.isBlank()) {
+            return ResponseEntity.ok("Лог-файл не настроен");
         }
         try {
-            Path path = Paths.get(logFilePath);
+            Path path = Paths.get(filePath);
             if (!Files.exists(path)) {
                 return ResponseEntity.ok("Лог-файл ещё не создан: " + path.toAbsolutePath());
             }
             List<String> allLines = Files.readAllLines(path);
             int from = Math.max(0, allLines.size() - lines);
-            List<String> tail = allLines.subList(from, allLines.size());
-            return ResponseEntity.ok(String.join("\n", tail));
+            return ResponseEntity.ok(String.join("\n", allLines.subList(from, allLines.size())));
         } catch (IOException e) {
             return ResponseEntity.internalServerError()
                     .body("Ошибка чтения лог-файла: " + e.getMessage());

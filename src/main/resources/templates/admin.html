@@ -7,7 +7,7 @@
 </head>
 <body class="bg-light">
 
-<div class="container py-4" style="max-width: 900px;">
+<div class="container-fluid px-3 px-md-4 py-4">
 
     <!-- Шапка -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -43,106 +43,117 @@
 
         <!-- ── Таб 1: Загрузка данных ── -->
         <div class="tab-pane fade show active" id="tab-data">
+            <div class="row g-4">
+                <div class="col-12 col-lg-5 col-xl-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h6 class="mb-3">Загрузить отчёт</h6>
 
-            <div class="card shadow-sm mb-4">
-                <div class="card-body p-4">
-                    <h6 class="mb-3">Загрузить отчёт</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Дата отчёта</label>
+                                <input type="date" id="dateInput" class="form-control">
+                            </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Дата отчёта</label>
-                        <input type="date" id="dateInput" class="form-control">
-                    </div>
+                            <div class="mb-3">
+                                <label class="form-label">Файл Excel (.xlsx)</label>
+                                <input type="file" id="fileInput" accept=".xlsx" class="form-control">
+                            </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Файл Excel (.xlsx)</label>
-                        <input type="file" id="fileInput" accept=".xlsx" class="form-control">
-                    </div>
-
-                    <button onclick="uploadFile()" class="btn btn-primary w-100">Загрузить</button>
-                    <div id="uploadStatus" class="mt-3" style="display: none;"></div>
-                </div>
-            </div>
-
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h6 class="mb-3">Загруженные файлы</h6>
-                    <div id="datesList">
-                        <span class="text-muted">Загружаю список...</span>
+                            <button onclick="uploadFile()" class="btn btn-primary w-100">Загрузить</button>
+                            <div id="uploadStatus" class="mt-3" style="display: none;"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
+                <div class="col-12 col-lg-7 col-xl-8">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h6 class="mb-3">Загруженные файлы</h6>
+                            <div id="datesList">
+                                <span class="text-muted">Загружаю список...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- ── Таб 2: Настройка интерфейса ── -->
         <div class="tab-pane fade" id="tab-settings">
+            <div class="row g-4">
 
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
+                <div class="col-12 col-lg-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h6 class="mb-3">Дашборд</h6>
 
-                    <h6 class="mb-3">Дашборд</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Название дашборда</label>
+                                <input type="text" id="s-title" class="form-control"
+                                       th:value="${config.dashboardTitle}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Годовой план (количество скринингов)</label>
+                                <input type="number" id="s-plan" class="form-control" min="1"
+                                       th:value="${config.annualPlan}">
+                            </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Название дашборда</label>
-                        <input type="text" id="s-title" class="form-control"
-                               th:value="${config.dashboardTitle}">
-                    </div>
+                            <hr class="my-3">
+                            <h6 class="mb-3">Плитки главного экрана</h6>
 
-                    <div class="mb-3">
-                        <label class="form-label">Годовой план (количество скринингов)</label>
-                        <input type="number" id="s-plan" class="form-control" min="1"
-                               th:value="${config.annualPlan}">
-                    </div>
-
-                    <hr class="my-3">
-                    <h6 class="mb-3">Плитки главного экрана</h6>
-
-                    <div class="mb-2">
-                        <label class="form-label">Плитка 1 (активная)</label>
-                        <input type="text" id="s-tile1" class="form-control" th:value="${tile1Name}">
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Плитка 2</label>
-                        <input type="text" id="s-tile2" class="form-control" th:value="${tile2Name}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Плитка 3</label>
-                        <input type="text" id="s-tile3" class="form-control" th:value="${tile3Name}">
-                    </div>
-
-                    <hr class="my-3">
-                    <h6 class="mb-3">Диаграммы</h6>
-
-                    <div class="mb-2 d-flex align-items-center gap-3">
-                        <div class="form-check form-switch mb-0">
-                            <input class="form-check-input" type="checkbox" id="s-monthly-enabled"
-                                   th:checked="${config.chartMonthlyEnabled}">
-                            <label class="form-check-label" for="s-monthly-enabled">Показывать график по месяцам</label>
+                            <div class="mb-2">
+                                <label class="form-label">Плитка 1 (активная)</label>
+                                <input type="text" id="s-tile1" class="form-control" th:value="${tile1Name}">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Плитка 2</label>
+                                <input type="text" id="s-tile2" class="form-control" th:value="${tile2Name}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Плитка 3</label>
+                                <input type="text" id="s-tile3" class="form-control" th:value="${tile3Name}">
+                            </div>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <input type="text" id="s-monthly-title" class="form-control"
-                               placeholder="Название графика по месяцам"
-                               th:value="${config.chartMonthlyTitle}">
-                    </div>
-
-                    <div class="mb-2 d-flex align-items-center gap-3">
-                        <div class="form-check form-switch mb-0">
-                            <input class="form-check-input" type="checkbox" id="s-ages-enabled"
-                                   th:checked="${config.chartAgesEnabled}">
-                            <label class="form-check-label" for="s-ages-enabled">Показывать график по возрасту</label>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <input type="text" id="s-ages-title" class="form-control"
-                               placeholder="Название графика по возрасту"
-                               th:value="${config.chartAgesTitle}">
-                    </div>
-
-                    <button onclick="saveSettings()" class="btn btn-success w-100">Сохранить настройки</button>
-                    <div id="settingsStatus" class="mt-3" style="display: none;"></div>
-
                 </div>
+
+                <div class="col-12 col-lg-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h6 class="mb-3">Диаграммы</h6>
+
+                            <div class="mb-2 d-flex align-items-center gap-3">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" id="s-monthly-enabled"
+                                           th:checked="${config.chartMonthlyEnabled}">
+                                    <label class="form-check-label" for="s-monthly-enabled">Показывать график по месяцам</label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <input type="text" id="s-monthly-title" class="form-control"
+                                       placeholder="Название графика по месяцам"
+                                       th:value="${config.chartMonthlyTitle}">
+                            </div>
+
+                            <div class="mb-2 d-flex align-items-center gap-3">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" id="s-ages-enabled"
+                                           th:checked="${config.chartAgesEnabled}">
+                                    <label class="form-check-label" for="s-ages-enabled">Показывать график по возрасту</label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <input type="text" id="s-ages-title" class="form-control"
+                                       placeholder="Название графика по возрасту"
+                                       th:value="${config.chartAgesTitle}">
+                            </div>
+
+                            <button onclick="saveSettings()" class="btn btn-success w-100 mt-3">Сохранить настройки</button>
+                            <div id="settingsStatus" class="mt-3" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -152,8 +163,16 @@
             <div class="card shadow-sm">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
-                        <h6 class="mb-0">Логи приложения</h6>
-                        <select id="logLines" class="form-select form-select-sm" style="width: auto;">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <input type="radio" class="btn-check" name="logType" id="logTypeAll"
+                                   value="logs" checked onchange="loadLogs()">
+                            <label class="btn btn-outline-secondary" for="logTypeAll">Все логи</label>
+                            <input type="radio" class="btn-check" name="logType" id="logTypeUpload"
+                                   value="upload-logs" onchange="loadLogs()">
+                            <label class="btn btn-outline-secondary" for="logTypeUpload">Загрузка файлов</label>
+                        </div>
+                        <select id="logLines" class="form-select form-select-sm" style="width: auto;"
+                                onchange="loadLogs()">
                             <option value="100" selected>100 строк</option>
                             <option value="500">500 строк</option>
                             <option value="1000">1000 строк</option>
@@ -320,13 +339,26 @@
     let autoRefreshTimer = null;
 
     function loadLogs() {
-        const lines = document.getElementById('logLines').value;
+        const lines  = document.getElementById('logLines').value;
+        const type   = document.querySelector('input[name="logType"]:checked').value;
         const output = document.getElementById('logsOutput');
         output.textContent = 'Загружаю...';
-        fetch(BASE_PATH + '/api/logs?lines=' + lines)
+        fetch(BASE_PATH + '/api/' + type + '?lines=' + lines)
             .then(r => r.text())
             .then(text => {
-                output.textContent = text;
+                const escaped = text
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+                output.innerHTML = escaped.split('\n').map(line => {
+                    if (line.includes(' ERROR '))
+                        return '<span style="color:#ff6b6b">' + line + '</span>';
+                    if (line.includes(' WARN  '))
+                        return '<span style="color:#ffd93d">' + line + '</span>';
+                    if (line.includes('Загрузка завершена успешно'))
+                        return '<span style="color:#6bcb77">' + line + '</span>';
+                    return line;
+                }).join('\n');
                 output.scrollTop = output.scrollHeight;
             })
             .catch(() => { output.textContent = 'Ошибка загрузки логов'; });
@@ -342,11 +374,6 @@
         }
     }
 
-    document.getElementById('logLines').addEventListener('change', function() {
-        if (document.getElementById('logsOutput').textContent !== 'Нажмите "Обновить" для загрузки логов') {
-            loadLogs();
-        }
-    });
 </script>
 
 </body>
