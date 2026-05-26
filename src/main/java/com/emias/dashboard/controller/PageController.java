@@ -1,5 +1,9 @@
 package com.emias.dashboard.controller;
 
+<<<<<<< HEAD
+=======
+import com.emias.dashboard.entity.FacilityPlan;
+>>>>>>> dev
 import com.emias.dashboard.model.AgeDiagram;
 import com.emias.dashboard.model.Conclusions;
 import com.emias.dashboard.model.DashboardConfig;
@@ -8,14 +12,23 @@ import com.emias.dashboard.model.MonthlyChartData;
 import com.emias.dashboard.model.PatientRecord;
 import com.emias.dashboard.model.ScreeningStats;
 import com.emias.dashboard.service.DiagramService;
+<<<<<<< HEAD
+=======
+import com.emias.dashboard.service.FacilityMappingService;
+import com.emias.dashboard.service.FacilityPlanService;
+>>>>>>> dev
 import com.emias.dashboard.service.ReportService;
 import com.emias.dashboard.service.SettingsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+<<<<<<< HEAD
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
+=======
+
+>>>>>>> dev
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +36,7 @@ import java.util.Map;
 @Controller
 public class PageController {
 
+<<<<<<< HEAD
     private final ReportService   reportService;
     private final DiagramService  diagramService;
     private final SettingsService settingsService;
@@ -33,6 +47,24 @@ public class PageController {
         this.reportService   = reportService;
         this.diagramService  = diagramService;
         this.settingsService = settingsService;
+=======
+    private final ReportService          reportService;
+    private final DiagramService         diagramService;
+    private final SettingsService        settingsService;
+    private final FacilityMappingService facilityMappingService;
+    private final FacilityPlanService    facilityPlanService;
+
+    public PageController(ReportService reportService,
+                          DiagramService diagramService,
+                          SettingsService settingsService,
+                          FacilityMappingService facilityMappingService,
+                          FacilityPlanService facilityPlanService) {
+        this.reportService          = reportService;
+        this.diagramService         = diagramService;
+        this.settingsService        = settingsService;
+        this.facilityMappingService = facilityMappingService;
+        this.facilityPlanService    = facilityPlanService;
+>>>>>>> dev
     }
 
     @GetMapping("/")
@@ -53,7 +85,11 @@ public class PageController {
     }
 
     @GetMapping("/dashboard")
+<<<<<<< HEAD
     public String index(@RequestParam(required = false) String date, Model model) {
+=======
+    public String index(Model model) {
+>>>>>>> dev
         DashboardConfig config = settingsService.getConfig();
         model.addAttribute("config", config);
 
@@ -64,10 +100,15 @@ public class PageController {
                 throw new Exception("Нет загруженных файлов");
             }
 
+<<<<<<< HEAD
             String selectedDate = (date != null && dates.contains(date)) ? date : dates.get(0);
             boolean isLatest = selectedDate.equals(dates.get(0));
 
             List<PatientRecord> records = reportService.readRecords(selectedDate);
+=======
+            // Агрегируем данные по всем загруженным месяцам
+            List<PatientRecord> records = reportService.readAllRecords();
+>>>>>>> dev
             long annualPlan = config.getAnnualPlan();
 
             ScreeningStats stats = diagramService.buildStats(records, annualPlan);
@@ -77,6 +118,7 @@ public class PageController {
             model.addAttribute("monthly", monthly);
 
             Map<String, List<PatientRecord>> singleFile = new LinkedHashMap<>();
+<<<<<<< HEAD
             singleFile.put(formatDate(selectedDate), records);
             AgeDiagram diagram = diagramService.buildAgeDiagram(singleFile);
             model.addAttribute("diagram", diagram);
@@ -94,6 +136,28 @@ public class PageController {
             List<String> formattedDates = new ArrayList<>();
             for (String d : dates) formattedDates.add(formatDate(d));
             model.addAttribute("uploadedDatesFormatted", formattedDates);
+=======
+            singleFile.put("Все данные", records);
+            AgeDiagram diagram = diagramService.buildAgeDiagram(singleFile);
+            model.addAttribute("diagram", diagram);
+
+            Map<String, String> mappingMap = facilityMappingService.getMappingMap();
+            Map<String, FacilityPlan> plansByName = new LinkedHashMap<>();
+            for (FacilityPlan plan : facilityPlanService.getAllPlans()) {
+                plansByName.put(plan.getFacilityName(), plan);
+            }
+
+            List<FacilityRating> rating = diagramService.buildFacilityRating(records, mappingMap, plansByName);
+            // Факт месяц — данные последнего загруженного месяца
+            List<PatientRecord> monthlyRecords = reportService.readRecordsForMonth(dates.get(0));
+            diagramService.enrichWithMonthlyFact(rating, monthlyRecords);
+            model.addAttribute("rating", rating);
+
+            Conclusions conclusions = diagramService.buildConclusions(records, stats, rating, annualPlan, dates.get(0));
+            model.addAttribute("conclusions", conclusions);
+
+            model.addAttribute("lastUploadDate", formatMonth(dates.get(0)));
+>>>>>>> dev
 
         } catch (Exception e) {
             model.addAttribute("error", "Файл отчёта не загружен. Перейдите в панель администратора и загрузите файл.");
@@ -126,4 +190,15 @@ public class PageController {
         int month = Integer.parseInt(parts[1]) - 1;
         return parts[2] + " " + months[month] + " " + parts[0];
     }
+<<<<<<< HEAD
+=======
+
+    private String formatMonth(String date) {
+        String[] months = {"Январь","Февраль","Март","Апрель","Май","Июнь",
+                           "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"};
+        String[] parts = date.split("-");
+        int month = Integer.parseInt(parts[1]) - 1;
+        return months[month] + " " + parts[0];
+    }
+>>>>>>> dev
 }

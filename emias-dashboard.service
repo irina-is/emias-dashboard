@@ -4,7 +4,11 @@ After=network.target
 
 [Service]
 WorkingDirectory=/opt/emias-dashboard
+<<<<<<< HEAD
 ExecStart=java -jar /opt/emias-dashboard/dashboard-1.0.0.jar --spring.profiles.active=prod
+=======
+ExecStart=java -Xms64m -Xmx512m -jar /opt/emias-dashboard/dashboard-1.0.0.jar --spring.profiles.active=prod
+>>>>>>> dev
 Restart=always
 RestartSec=5
 

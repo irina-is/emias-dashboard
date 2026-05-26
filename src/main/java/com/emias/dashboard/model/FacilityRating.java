@@ -2,6 +2,10 @@ package com.emias.dashboard.model;
 
 /**
  * Одна строка рейтинга медицинской организации.
+<<<<<<< HEAD
+=======
+ * Содержит фактические показатели скрининга и плановые значения (если загружены).
+>>>>>>> dev
  */
 public class FacilityRating {
 
@@ -12,6 +16,16 @@ public class FacilityRating {
     private long refusal;            // Отказ (результат)
     private long noData;             // Нет данных (результат)
 
+<<<<<<< HEAD
+=======
+    private long monthlyCompleted;    // Факт месяц — выполнено в текущем календарном месяце
+
+    // Плановые значения (null = план не загружен для этой организации)
+    private Long annualPlanTotal;    // Годовой план (общий)
+    private Long monthlyPlanTotal;   // Месячный план (общий)
+    private Long weeklyPlanTotal;    // Недельный план (общий)
+
+>>>>>>> dev
     public FacilityRating(String name, long completed, long withoutDeviations,
                           long withDeviations, long refusal, long noData) {
         this.name               = name;
@@ -22,10 +36,49 @@ public class FacilityRating {
         this.noData             = noData;
     }
 
+<<<<<<< HEAD
     public String getName()              { return name; }
     public long   getCompleted()         { return completed; }
+=======
+    // ── Геттеры факта ────────────────────────────────────────────────────────
+
+    public String getName()              { return name; }
+    public long   getCompleted()         { return completed; }
+    public long   getMonthlyCompleted()  { return monthlyCompleted; }
+>>>>>>> dev
     public long   getWithoutDeviations() { return withoutDeviations; }
     public long   getWithDeviations()    { return withDeviations; }
     public long   getRefusal()           { return refusal; }
     public long   getNoData()            { return noData; }
+<<<<<<< HEAD
+=======
+
+    // ── Геттеры плана ────────────────────────────────────────────────────────
+
+    public Long getAnnualPlanTotal()  { return annualPlanTotal; }
+    public Long getMonthlyPlanTotal() { return monthlyPlanTotal; }
+    public Long getWeeklyPlanTotal()  { return weeklyPlanTotal; }
+
+    /**
+     * Процент выполнения годового плана. Возвращает null если план не задан.
+     */
+    public Integer getCompletionPercent() {
+        if (annualPlanTotal == null || annualPlanTotal == 0) return null;
+        return (int) Math.min(100L, completed * 100L / annualPlanTotal);
+    }
+
+    /**
+     * true если план загружен для этой организации.
+     */
+    public boolean hasPlan() {
+        return annualPlanTotal != null;
+    }
+
+    // ── Сеттеры плана ────────────────────────────────────────────────────────
+
+    public void setMonthlyCompleted(long v) { monthlyCompleted = v; }
+    public void setAnnualPlanTotal(Long v)  { annualPlanTotal  = v; }
+    public void setMonthlyPlanTotal(Long v) { monthlyPlanTotal = v; }
+    public void setWeeklyPlanTotal(Long v)  { weeklyPlanTotal  = v; }
+>>>>>>> dev
 }

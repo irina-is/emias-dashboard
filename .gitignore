@@ -1,5 +1,9 @@
 target/
 data/
+<<<<<<< HEAD
+=======
+logs/
+>>>>>>> dev
 .DS_Store
 *.mv.db
 *.trace.db

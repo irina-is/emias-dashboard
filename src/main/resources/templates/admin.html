@@ -7,7 +7,11 @@
 </head>
 <body class="bg-light">
 
+<<<<<<< HEAD
 <div class="container py-4" style="max-width: 640px;">
+=======
+<div class="container-fluid px-3 px-md-4 py-4">
+>>>>>>> dev
 
     <!-- Шапка -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -28,16 +32,43 @@
             </button>
         </li>
         <li class="nav-item">
+<<<<<<< HEAD
+=======
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-plans" onclick="initPlans()">
+                Планы по организациям
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-mapping" onclick="initMapping()">
+                Соответствия ЛПУ
+            </button>
+        </li>
+        <li class="nav-item">
+>>>>>>> dev
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-settings">
                 Настройка интерфейса
             </button>
         </li>
+<<<<<<< HEAD
+=======
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-logs" onclick="loadLogs()">
+                Логи
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-rawdata" onclick="initRawData()">
+                Исходные данные
+            </button>
+        </li>
+>>>>>>> dev
     </ul>
 
     <div class="tab-content">
 
         <!-- ── Таб 1: Загрузка данных ── -->
         <div class="tab-pane fade show active" id="tab-data">
+<<<<<<< HEAD
 
             <div class="card shadow-sm mb-4">
                 <div class="card-body p-4">
@@ -141,10 +172,364 @@
             </div>
 
         </div>
+=======
+            <div class="row g-4">
+                <div class="col-12 col-lg-5 col-xl-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h6 class="mb-3">Загрузить отчёт</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label">Месяц отчёта</label>
+                                <input type="month" id="dateInput" class="form-control">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Файл Excel (.xlsx)</label>
+                                <input type="file" id="fileInput" accept=".xlsx" class="form-control">
+                            </div>
+
+                            <button id="uploadBtn" onclick="uploadFile()" class="btn btn-primary w-100">Загрузить</button>
+
+                            <div id="uploadProgress" class="mt-3" style="display:none;">
+                                <div class="d-flex justify-content-between small text-muted mb-1">
+                                    <span id="uploadProgressLabel">Загружаю файл...</span>
+                                    <span id="uploadProgressPct"></span>
+                                </div>
+                                <div class="progress" style="height:8px;">
+                                    <div id="uploadProgressBar"
+                                         class="progress-bar progress-bar-striped progress-bar-animated"
+                                         role="progressbar" style="width:0%"></div>
+                                </div>
+                            </div>
+
+                            <div id="uploadStatus" class="mt-3" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-7 col-xl-8">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h6 class="mb-3">Загруженные файлы</h6>
+                            <div id="datesList">
+                                <span class="text-muted">Загружаю список...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Таб 2: Планы по организациям ── -->
+        <div class="tab-pane fade" id="tab-plans">
+            <div class="row g-4">
+
+                <!-- Загрузка файла планов -->
+                <div class="col-12 col-lg-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h6 class="mb-1">Загрузить файл планов</h6>
+                            <p class="text-muted small mb-3">
+                                Excel-файл (.xlsx) со строками организаций и столбцами планов.
+                                При загрузке все старые планы заменяются.
+                            </p>
+
+                            <div class="mb-3">
+                                <label class="form-label">Файл Excel (.xlsx)</label>
+                                <input type="file" id="plansFileInput" accept=".xlsx" class="form-control">
+                            </div>
+
+                            <button onclick="uploadPlansFile()" class="btn btn-primary w-100">Загрузить планы</button>
+                            <div id="plansUploadStatus" class="mt-3" style="display: none;"></div>
+
+                            <hr class="my-3">
+                            <h6 class="mb-2 text-muted" style="font-size: 13px;">Структура файла</h6>
+                            <div style="overflow-x:auto;">
+                                <table class="table table-bordered table-sm" style="font-size:11px; min-width:580px;">
+                                    <thead class="table-secondary">
+                                        <tr>
+                                            <th>№ п/п</th>
+                                            <th>Наименование ЛПУ</th>
+                                            <th>25,35,45 (год)</th>
+                                            <th>Все возр. (год)</th>
+                                            <th>Общий (год)</th>
+                                            <th>25,35,45 (мес)</th>
+                                            <th>Все возр. (мес)</th>
+                                            <th>Общий (мес)</th>
+                                            <th>25,35,45 (нед)</th>
+                                            <th>Все возр. (нед)</th>
+                                            <th>Общий (нед)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="text-muted">
+                                            <td>1</td>
+                                            <td>ГБУЗ МО "Название"</td>
+                                            <td>1200</td><td>3400</td><td>4600</td>
+                                            <td>100</td><td>283</td><td>383</td>
+                                            <td>25</td><td>71</td><td>96</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="text-muted mb-0" style="font-size:11px;">
+                                    Строка 1 — заголовок (B1 = «Наименование ЛПУ»), данные начинаются со строки 2.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Список загруженных планов -->
+                <div class="col-12 col-lg-8">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                                <h6 class="mb-0">Загруженные планы</h6>
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <input type="text" id="plansSearch" class="form-control form-control-sm"
+                                           placeholder="Поиск по названию..."
+                                           style="width: 200px;"
+                                           oninput="filterPlansTable()">
+                                    <span id="plansSummary" class="text-muted small"></span>
+                                </div>
+                            </div>
+                            <div id="plansContainer">
+                                <span class="text-muted">Загружаю данные...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ── Таб 3: Соответствия ЛПУ ── -->
+        <div class="tab-pane fade" id="tab-mapping">
+            <div class="row g-4">
+
+                <!-- Загрузка файла соответствий -->
+                <div class="col-12 col-lg-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h6 class="mb-1">Загрузить таблицу соответствий</h6>
+                            <p class="text-muted small mb-3">
+                                Excel-файл с двумя столбцами: название ЛПУ из скрининговых данных (A)
+                                и соответствующее название из файла планов (B).
+                                При загрузке все старые соответствия заменяются.
+                            </p>
+
+                            <div class="mb-3">
+                                <label class="form-label">Файл Excel (.xlsx)</label>
+                                <input type="file" id="mappingFileInput" accept=".xlsx" class="form-control">
+                            </div>
+
+                            <button onclick="uploadMappingFile()" class="btn btn-primary w-100">Загрузить соответствия</button>
+                            <div id="mappingUploadStatus" class="mt-3" style="display: none;"></div>
+
+                            <hr class="my-3">
+                            <h6 class="mb-2 text-muted" style="font-size: 13px;">Структура файла</h6>
+                            <table class="table table-bordered table-sm" style="font-size:11px;">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th>A — Название в скрининге</th>
+                                        <th>B — Название в планах</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-muted">
+                                    <tr>
+                                        <td>[010101] ГБУЗ МО «БАЛАШИХИНСКАЯ…»</td>
+                                        <td>ГБУЗ МО "БАЛАШИХИНСКАЯ БОЛЬНИЦА"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>[020101] ГБУЗ МО «ВОЛОКОЛАМСКАЯ…»</td>
+                                        <td>ГБУЗ МО "ВОЛОКОЛАМСКАЯ БОЛЬНИЦА"</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p class="text-muted mb-0" style="font-size:11px;">
+                                Строка 1 — заголовок, данные начинаются со строки 2.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Просмотр загруженных соответствий -->
+                <div class="col-12 col-lg-8">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                                <h6 class="mb-0">Загруженные соответствия</h6>
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <input type="text" id="mappingSearch" class="form-control form-control-sm"
+                                           placeholder="Поиск по названию..."
+                                           style="width: 220px;"
+                                           oninput="filterMappingTable()">
+                                    <span id="mappingSummary" class="text-muted small"></span>
+                                </div>
+                            </div>
+                            <div id="mappingContainer">
+                                <span class="text-muted">Загружаю данные...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ── Таб 4: Настройка интерфейса ── -->
+        <div class="tab-pane fade" id="tab-settings">
+            <div class="row g-4">
+
+                <div class="col-12 col-lg-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h6 class="mb-3">Дашборд</h6>
+
+                            <div class="mb-3">
+                                <label class="form-label">Название дашборда</label>
+                                <input type="text" id="s-title" class="form-control"
+                                       th:value="${config.dashboardTitle}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Годовой план (количество скринингов)</label>
+                                <input type="number" id="s-plan" class="form-control" min="1"
+                                       th:value="${config.annualPlan}">
+                            </div>
+
+                            <hr class="my-3">
+                            <h6 class="mb-3">Плитки главного экрана</h6>
+
+                            <div class="mb-2">
+                                <label class="form-label">Плитка 1 (активная)</label>
+                                <input type="text" id="s-tile1" class="form-control" th:value="${tile1Name}">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Плитка 2</label>
+                                <input type="text" id="s-tile2" class="form-control" th:value="${tile2Name}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Плитка 3</label>
+                                <input type="text" id="s-tile3" class="form-control" th:value="${tile3Name}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <h6 class="mb-3">Диаграммы</h6>
+
+                            <div class="mb-2 d-flex align-items-center gap-3">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" id="s-monthly-enabled"
+                                           th:checked="${config.chartMonthlyEnabled}">
+                                    <label class="form-check-label" for="s-monthly-enabled">Показывать график по месяцам</label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <input type="text" id="s-monthly-title" class="form-control"
+                                       placeholder="Название графика по месяцам"
+                                       th:value="${config.chartMonthlyTitle}">
+                            </div>
+
+                            <div class="mb-2 d-flex align-items-center gap-3">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" id="s-ages-enabled"
+                                           th:checked="${config.chartAgesEnabled}">
+                                    <label class="form-check-label" for="s-ages-enabled">Показывать график по возрасту</label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <input type="text" id="s-ages-title" class="form-control"
+                                       placeholder="Название графика по возрасту"
+                                       th:value="${config.chartAgesTitle}">
+                            </div>
+
+                            <button onclick="saveSettings()" class="btn btn-success w-100 mt-3">Сохранить настройки</button>
+                            <div id="settingsStatus" class="mt-3" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ── Таб 5: Логи ── -->
+        <div class="tab-pane fade" id="tab-logs">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <input type="radio" class="btn-check" name="logType" id="logTypeAll"
+                                   value="logs" checked onchange="loadLogs()">
+                            <label class="btn btn-outline-secondary" for="logTypeAll">Все логи</label>
+                            <input type="radio" class="btn-check" name="logType" id="logTypeUpload"
+                                   value="upload-logs" onchange="loadLogs()">
+                            <label class="btn btn-outline-secondary" for="logTypeUpload">Загрузка файлов</label>
+                        </div>
+                        <select id="logLines" class="form-select form-select-sm" style="width: auto;"
+                                onchange="loadLogs()">
+                            <option value="100" selected>100 строк</option>
+                            <option value="500">500 строк</option>
+                            <option value="1000">1000 строк</option>
+                            <option value="5000">5000 строк</option>
+                        </select>
+                        <button onclick="loadLogs()" class="btn btn-outline-secondary btn-sm">Обновить</button>
+                        <div class="form-check form-switch mb-0 ms-auto">
+                            <input class="form-check-input" type="checkbox" id="autoRefresh"
+                                   onchange="toggleAutoRefresh()">
+                            <label class="form-check-label" for="autoRefresh">Авто-обновление (5с)</label>
+                        </div>
+                    </div>
+                    <pre id="logsOutput"
+                         style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:6px;
+                                font-size:12px;max-height:600px;overflow-y:auto;white-space:pre-wrap;
+                                word-break:break-all;">Нажмите "Обновить" для загрузки логов</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Таб 6: Исходные данные ── -->
+        <div class="tab-pane fade" id="tab-rawdata">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                        <select id="rawDateSelect" class="form-select form-select-sm" style="width: auto;"
+                                onchange="rawDataPage = 0; loadRecords();">
+                            <option value="">— выберите дату —</option>
+                        </select>
+                        <select id="rawPageSize" class="form-select form-select-sm" style="width: auto;"
+                                onchange="rawDataPage = 0; loadRecords();">
+                            <option value="50" selected>50 строк</option>
+                            <option value="100">100 строк</option>
+                            <option value="200">200 строк</option>
+                        </select>
+                        <button id="rawDownloadBtn" class="btn btn-outline-success btn-sm" style="display:none;"
+                                onclick="downloadRawFile()">
+                            Скачать Excel
+                        </button>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" id="rawSearch" class="form-control form-control-sm"
+                               placeholder="Поиск по МКАБ..."
+                               oninput="debouncedRawSearch()">
+                    </div>
+                    <div id="rawDataContainer">
+                        <span class="text-muted">Выберите дату для просмотра данных</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+>>>>>>> dev
     </div>
 
 </div>
 
+<<<<<<< HEAD
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // Дата по умолчанию — сегодня
@@ -162,13 +547,84 @@
             .then(dates => {
                 const container = document.getElementById('datesList');
                 if (dates.length === 0) {
+=======
+<!-- Модальное окно ошибок валидации -->
+<div class="modal fade" id="errorsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Данные не загружены</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">Исправьте ошибки в файле и загрузите повторно:</p>
+                <ul id="errorsList" class="mb-0"></ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    const BASE_PATH = /*[[${basePath}]]*/ '';
+</script>
+<script>
+    // ── Общее ────────────────────────────────────────────────────────────────
+
+    const today = new Date();
+    const yyyy  = today.getFullYear();
+    const mm    = String(today.getMonth() + 1).padStart(2, '0');
+    document.getElementById('dateInput').value = yyyy + '-' + mm;
+
+    loadDates();
+
+    function safeEsc(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function formatDate(dateStr) {
+        const months = ['Январь','Февраль','Март','Апрель','Май','Июнь',
+                        'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+        const parts = dateStr.split('-');
+        return months[parseInt(parts[1]) - 1] + ' ' + parts[0];
+    }
+
+    // ── Загрузка данных ──────────────────────────────────────────────────────
+
+    function loadDates() {
+        fetch(BASE_PATH + '/api/uploads')
+            .then(r => r.json())
+            .then(uploads => {
+                const container = document.getElementById('datesList');
+                if (uploads.length === 0) {
+>>>>>>> dev
                     container.innerHTML = '<span class="text-muted">Файлов ещё нет</span>';
                     return;
                 }
                 let html = '<ul class="list-group">';
+<<<<<<< HEAD
                 for (let i = 0; i < dates.length; i++) {
                     const label = i === 0 ? ' <span class="badge bg-primary ms-2">последний</span>' : '';
                     html += '<li class="list-group-item">' + formatDate(dates[i]) + label + '</li>';
+=======
+                for (let i = 0; i < uploads.length; i++) {
+                    const u = uploads[i];
+                    const badge = i === 0 ? ' <span class="badge bg-primary ms-2">последний</span>' : '';
+                    const name  = u.fileName ? '<span class="text-muted small ms-2">' + safeEsc(u.fileName) + '</span>' : '';
+                    const count = '<span class="text-muted small">' + u.recordCount.toLocaleString('ru') + ' записей</span>';
+                    html += '<li class="list-group-item d-flex align-items-center gap-2">'
+                          + '<span>' + formatDate(u.date) + '</span>'
+                          + badge + name
+                          + '<span class="ms-auto d-flex align-items-center gap-2">'
+                          + count
+                          + '<button class="btn btn-outline-danger btn-sm" onclick="deleteUpload(\'' + u.date + '\')" title="Удалить данные за эту дату">'
+                          + '<i class="bi bi-trash"></i></button>'
+                          + '</span>'
+                          + '</li>';
+>>>>>>> dev
                 }
                 html += '</ul>';
                 container.innerHTML = html;
@@ -179,6 +635,7 @@
             });
     }
 
+<<<<<<< HEAD
     function uploadFile() {
         const fileInput = document.getElementById('fileInput');
         const dateInput = document.getElementById('dateInput');
@@ -198,6 +655,143 @@
             .catch(err => showStatus('danger', '✗ Ошибка: ' + err.message));
     }
 
+=======
+    function deleteUpload(date) {
+        if (!confirm('Удалить все данные за ' + formatDate(date) + '?\nЭто действие нельзя отменить.')) return;
+        fetch(BASE_PATH + '/api/uploads/' + date, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    loadDates();
+                } else {
+                    alert('Ошибка: ' + data.message);
+                }
+            })
+            .catch(() => alert('Ошибка соединения'));
+    }
+
+    function uploadFile() {
+        const fileInput = document.getElementById('fileInput');
+        const dateInput = document.getElementById('dateInput');
+        if (!dateInput.value) { showStatus('warning', 'Выберите месяц'); return; }
+        if (!fileInput.files.length) { showStatus('warning', 'Выберите файл'); return; }
+
+        const btn         = document.getElementById('uploadBtn');
+        const progressDiv = document.getElementById('uploadProgress');
+        const progressBar = document.getElementById('uploadProgressBar');
+        const progressLbl = document.getElementById('uploadProgressLabel');
+        const progressPct = document.getElementById('uploadProgressPct');
+
+        btn.disabled = true;
+        document.getElementById('uploadStatus').style.display = 'none';
+        progressDiv.style.display = 'block';
+        progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-primary';
+        progressBar.style.width = '0%';
+        progressLbl.textContent = 'Передаю файл на сервер…';
+        progressPct.textContent = '0%';
+
+        let pollTimer = null;
+
+        function stopPoll() {
+            if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+        }
+
+        function finishUpload() {
+            stopPoll();
+            progressDiv.style.display = 'none';
+            btn.disabled = false;
+        }
+
+        // Поллинг: спрашиваем сервер каждые 500 мс сколько записей сохранено
+        function startPoll() {
+            pollTimer = setInterval(function() {
+                fetch(BASE_PATH + '/api/upload-progress')
+                    .then(r => r.json())
+                    .then(function(p) {
+                        if (p.total > 0) {
+                            // Знаем сколько всего — показываем точный процент
+                            const pct = Math.min(Math.round(p.current / p.total * 100), 99);
+                            progressBar.style.width = pct + '%';
+                            progressBar.className = 'progress-bar bg-primary';
+                            progressLbl.textContent =
+                                'Сохраняю ' + p.current.toLocaleString('ru-RU') +
+                                ' из ' + p.total.toLocaleString('ru-RU') + ' записей…';
+                            progressPct.textContent = pct + '%';
+                        } else if (p.inProgress) {
+                            // Ещё парсим файл — total неизвестен
+                            progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-warning';
+                            progressBar.style.width = '100%';
+                            progressLbl.textContent = 'Читаю строки файла…';
+                            progressPct.textContent = '';
+                        }
+                    })
+                    .catch(function() {}); // молча игнорируем ошибки поллинга
+            }, 500);
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('date', dateInput.value + '-01');
+
+        const xhr = new XMLHttpRequest();
+
+        // Фаза 1: передача файла (реальный %)
+        xhr.upload.onprogress = function(e) {
+            if (e.lengthComputable) {
+                const pct = Math.round(e.loaded / e.total * 100);
+                progressBar.style.width = pct + '%';
+                progressPct.textContent = pct + '%';
+            }
+        };
+
+        // Фаза 2: файл на сервере, начинаем поллинг
+        xhr.upload.onload = function() {
+            progressBar.style.width = '100%';
+            progressBar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-warning';
+            progressLbl.textContent = 'Читаю строки файла…';
+            progressPct.textContent = '';
+            startPoll();
+        };
+
+        // Фаза 3: ответ получен
+        xhr.onload = function() {
+            finishUpload();
+            let data;
+            try { data = JSON.parse(xhr.responseText); }
+            catch (e) { showStatus('danger', '✗ Неожиданный ответ сервера'); return; }
+            if (xhr.status >= 200 && xhr.status < 300 && data.success) {
+                showStatus('success', '✓ ' + data.message);
+                fileInput.value = '';
+                loadDates();
+            } else {
+                showErrors(data.errors || ['Неизвестная ошибка']);
+            }
+        };
+
+        xhr.onerror = function() { finishUpload(); showStatus('danger', '✗ Ошибка соединения'); };
+
+        xhr.open('POST', BASE_PATH + '/api/upload');
+        xhr.send(formData);
+    }
+
+    function showStatus(type, message) {
+        const el = document.getElementById('uploadStatus');
+        el.style.display = 'block';
+        el.className = 'alert alert-' + type;
+        el.textContent = message;
+    }
+
+    function showErrors(errors) {
+        const list = document.getElementById('errorsList');
+        list.innerHTML = errors
+            .map(e => '<li>' + e.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</li>')
+            .join('');
+        new bootstrap.Modal(document.getElementById('errorsModal')).show();
+    }
+
+    // ── Настройки ────────────────────────────────────────────────────────────
+
+>>>>>>> dev
     function saveSettings() {
         const plan = parseInt(document.getElementById('s-plan').value);
         if (!plan || plan <= 0) {
@@ -215,7 +809,11 @@
             'tile.2.name':           document.getElementById('s-tile2').value.trim(),
             'tile.3.name':           document.getElementById('s-tile3').value.trim()
         };
+<<<<<<< HEAD
         fetch('/api/settings', {
+=======
+        fetch(BASE_PATH + '/api/settings', {
+>>>>>>> dev
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -225,6 +823,7 @@
         .catch(err => showSettingsStatus('danger', '✗ ' + err.message));
     }
 
+<<<<<<< HEAD
     function formatDate(dateStr) {
         const months = ['января','февраля','марта','апреля','мая','июня',
                         'июля','августа','сентября','октября','ноября','декабря'];
@@ -239,12 +838,397 @@
         el.textContent = message;
     }
 
+=======
+>>>>>>> dev
     function showSettingsStatus(type, message) {
         const el = document.getElementById('settingsStatus');
         el.style.display = 'block';
         el.className = 'alert alert-' + type;
         el.textContent = message;
     }
+<<<<<<< HEAD
+=======
+
+    // ── Логи ─────────────────────────────────────────────────────────────────
+
+    let autoRefreshTimer = null;
+
+    function loadLogs() {
+        const lines  = document.getElementById('logLines').value;
+        const type   = document.querySelector('input[name="logType"]:checked').value;
+        const output = document.getElementById('logsOutput');
+        output.textContent = 'Загружаю...';
+        fetch(BASE_PATH + '/api/' + type + '?lines=' + lines)
+            .then(r => r.text())
+            .then(text => {
+                const escaped = text
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+                output.innerHTML = escaped.split('\n').map(line => {
+                    if (line.includes(' ERROR '))
+                        return '<span style="color:#ff6b6b">' + line + '</span>';
+                    if (line.includes(' WARN  '))
+                        return '<span style="color:#ffd93d">' + line + '</span>';
+                    if (line.includes('Загрузка завершена успешно'))
+                        return '<span style="color:#6bcb77">' + line + '</span>';
+                    return line;
+                }).join('\n');
+                output.scrollTop = output.scrollHeight;
+            })
+            .catch(() => { output.textContent = 'Ошибка загрузки логов'; });
+    }
+
+    function toggleAutoRefresh() {
+        if (document.getElementById('autoRefresh').checked) {
+            loadLogs();
+            autoRefreshTimer = setInterval(loadLogs, 5000);
+        } else {
+            clearInterval(autoRefreshTimer);
+            autoRefreshTimer = null;
+        }
+    }
+
+    // ── Исходные данные ──────────────────────────────────────────────────────
+
+    let rawDataPage = 0;
+    let rawDataTotalPages = 0;
+    let rawDataInitialized = false;
+    let rawSortCol = '';
+    let rawSortDir = 'asc';
+    let rawSearchTimer = null;
+
+    const RAW_COLUMNS = [
+        {key: 'mkab',                  label: 'МКАБ'},
+        {key: 'lastName',              label: 'Фамилия'},
+        {key: 'firstName',             label: 'Имя'},
+        {key: 'middleName',            label: 'Отчество'},
+        {key: 'visitType',             label: 'Тип визита'},
+        {key: 'snils',                 label: 'СНИЛС'},
+        {key: 'omsPolicy',             label: 'Полис ОМС'},
+        {key: 'dispensarizationDate',  label: 'Дата диспансеризации'},
+        {key: 'researchDate',          label: 'Дата исследования'},
+        {key: 'cardClosingDate',       label: 'Дата закрытия карты'},
+        {key: 'birthDate',             label: 'Дата рождения'},
+        {key: 'tfomsServiceCode',      label: 'Код ТФОМС'},
+        {key: 'valueText',             label: 'Значение'},
+        {key: 'referralNumber',        label: '№ направления'},
+        {key: 'refusal',               label: 'Отказ'},
+        {key: 'researchResult',        label: 'Результат иссл.'},
+        {key: 'serviceCode',           label: 'Код услуги'},
+        {key: 'researchStatus',        label: 'Статус иссл.'},
+        {key: 'doctorName',            label: 'Врач'},
+        {key: 'ogrnFrom',              label: 'ОГРН откуда'},
+        {key: 'facilityFrom',          label: 'ЛПУ откуда'},
+        {key: 'ogrnTo',                label: 'ОГРН куда'},
+        {key: 'facilityTo',            label: 'ЛПУ куда'},
+        {key: 'pcrResult',             label: 'Результат ПЦР'},
+        {key: 'pcrDone',               label: 'ПЦР проводился'},
+        {key: 'ageAtExport',           label: 'Возраст (выгрузка)'},
+        {key: 'ageAtResearch',         label: 'Возраст (иссл.)'},
+        {key: 'biomaterialDate',       label: 'Дата забора'},
+        {key: 'deliveryDate',          label: 'Дата доставки'},
+        {key: 'researchConductedDate', label: 'Дата иссл. (лаб.)'},
+    ];
+
+    function initRawData() {
+        if (rawDataInitialized) return;
+        rawDataInitialized = true;
+        fetch(BASE_PATH + '/api/dates')
+            .then(r => r.json())
+            .then(dates => {
+                const sel = document.getElementById('rawDateSelect');
+                sel.innerHTML = '<option value="">— выберите дату —</option>';
+                dates.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d;
+                    opt.textContent = formatDate(d);
+                    sel.appendChild(opt);
+                });
+                if (dates.length > 0) {
+                    sel.value = dates[0];
+                    rawDataPage = 0;
+                    loadRecords();
+                }
+            });
+    }
+
+    function debouncedRawSearch() {
+        clearTimeout(rawSearchTimer);
+        rawSearchTimer = setTimeout(() => { rawDataPage = 0; loadRecords(); }, 350);
+    }
+
+    function loadRecords() {
+        const date   = document.getElementById('rawDateSelect').value;
+        const size   = parseInt(document.getElementById('rawPageSize').value);
+        const search = document.getElementById('rawSearch').value.trim();
+        if (!date) return;
+        const container = document.getElementById('rawDataContainer');
+        container.innerHTML = '<span class="text-muted">Загружаю...</span>';
+        document.getElementById('rawDownloadBtn').style.display = 'none';
+        let url = BASE_PATH + '/api/records?date=' + date + '&page=' + rawDataPage + '&size=' + size;
+        if (search)     url += '&search=' + encodeURIComponent(search);
+        if (rawSortCol) url += '&sort=' + encodeURIComponent(rawSortCol) + '&dir=' + rawSortDir;
+        fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                rawDataTotalPages = data.totalPages;
+                renderRawTable(data, size);
+                document.getElementById('rawDownloadBtn').style.display = 'inline-block';
+            })
+            .catch(() => {
+                container.innerHTML = '<span class="text-danger">Ошибка загрузки данных</span>';
+            });
+    }
+
+    function setRawSort(col) {
+        if (rawSortCol === col) {
+            rawSortDir = rawSortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            rawSortCol = col;
+            rawSortDir = 'asc';
+        }
+        rawDataPage = 0;
+        loadRecords();
+    }
+
+    function renderRawTable(data, size) {
+        const from = rawDataPage * size + 1;
+        const to   = Math.min((rawDataPage + 1) * size, data.totalCount);
+        const thead = RAW_COLUMNS.map(c => {
+            const active  = rawSortCol === c.key;
+            const icon    = active ? (rawSortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕';
+            const opacity = active ? '1' : '0.3';
+            return '<th class="text-nowrap px-2" onclick="setRawSort(\'' + c.key + '\')" ' +
+                   'style="cursor:pointer;user-select:none;white-space:nowrap">' +
+                   safeEsc(c.label) +
+                   '<span style="opacity:' + opacity + ';font-size:10px">' + icon + '</span></th>';
+        }).join('');
+        const tbody = data.records.length > 0
+            ? data.records.map(r =>
+                '<tr>' + RAW_COLUMNS.map(c =>
+                    '<td class="text-nowrap px-2">' + safeEsc(r[c.key] || '') + '</td>'
+                ).join('') + '</tr>'
+              ).join('')
+            : '<tr><td colspan="' + RAW_COLUMNS.length + '" class="text-center text-muted py-3">Ничего не найдено</td></tr>';
+        const prevDisabled = rawDataPage === 0 ? 'disabled' : '';
+        const nextDisabled = rawDataPage >= data.totalPages - 1 ? 'disabled' : '';
+        document.getElementById('rawDataContainer').innerHTML =
+            '<div class="d-flex align-items-center gap-3 mb-2 flex-wrap">' +
+                '<span class="text-muted small">Показано ' + from + '–' + to + ' из ' + data.totalCount + ' записей</span>' +
+                '<div class="ms-auto d-flex align-items-center gap-2">' +
+                    '<button class="btn btn-sm btn-outline-secondary" onclick="rawPrevPage()" ' + prevDisabled + '>← Назад</button>' +
+                    '<span class="text-muted small">стр. ' + (rawDataPage + 1) + ' из ' + data.totalPages + '</span>' +
+                    '<button class="btn btn-sm btn-outline-secondary" onclick="rawNextPage()" ' + nextDisabled + '>Вперёд →</button>' +
+                '</div>' +
+            '</div>' +
+            '<div style="overflow-x:auto; max-height:560px; overflow-y:auto;">' +
+                '<table class="table table-sm table-bordered table-hover mb-0" style="font-size:12px; min-width:max-content;">' +
+                    '<thead class="table-light sticky-top"><tr>' + thead + '</tr></thead>' +
+                    '<tbody>' + tbody + '</tbody>' +
+                '</table>' +
+            '</div>';
+    }
+
+    function rawPrevPage() { if (rawDataPage > 0) { rawDataPage--; loadRecords(); } }
+    function rawNextPage() { if (rawDataPage < rawDataTotalPages - 1) { rawDataPage++; loadRecords(); } }
+    function downloadRawFile() {
+        const date = document.getElementById('rawDateSelect').value;
+        if (date) window.location.href = BASE_PATH + '/api/download?date=' + date;
+    }
+
+    // ── Планы по организациям ─────────────────────────────────────────────────
+
+    let allPlansData    = [];
+    let plansInitialized = false;
+
+    const PLAN_COLUMNS = [
+        { key: 'facilityName',       label: 'Мед. организация', wide: true },
+        { key: 'annualPlan254545',   label: '25,35,45 (год)' },
+        { key: 'annualPlanAllAges',  label: 'Все возр. (год)' },
+        { key: 'annualPlanTotal',    label: 'Общий (год)' },
+        { key: 'monthlyPlan254545',  label: '25,35,45 (мес)' },
+        { key: 'monthlyPlanAllAges', label: 'Все возр. (мес)' },
+        { key: 'monthlyPlanTotal',   label: 'Общий (мес)' },
+        { key: 'weeklyPlan254545',   label: '25,35,45 (нед)' },
+        { key: 'weeklyPlanAllAges',  label: 'Все возр. (нед)' },
+        { key: 'weeklyPlanTotal',    label: 'Общий (нед)' },
+    ];
+
+    function initPlans() {
+        if (!plansInitialized) { plansInitialized = true; loadPlans(); }
+    }
+
+    function loadPlans() {
+        fetch(BASE_PATH + '/api/plans')
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+                allPlansData = data;
+                renderPlansTable(data);
+                document.getElementById('plansSummary').textContent =
+                    data.length > 0 ? 'Организаций: ' + data.length : 'Нет данных';
+            })
+            .catch(err => {
+                document.getElementById('plansContainer').innerHTML =
+                    '<span class="text-danger">Ошибка: ' + safeEsc(err.message) + '</span>';
+            });
+    }
+
+    function filterPlansTable() {
+        const q = document.getElementById('plansSearch').value.trim().toLowerCase();
+        renderPlansTable(q
+            ? allPlansData.filter(p => p.facilityName && p.facilityName.toLowerCase().includes(q))
+            : allPlansData);
+    }
+
+    function renderPlansTable(data) {
+        const container = document.getElementById('plansContainer');
+        if (data.length === 0) {
+            container.innerHTML = '<span class="text-muted">Планы не загружены. Загрузите файл Excel.</span>';
+            return;
+        }
+        const thead = PLAN_COLUMNS.map(c =>
+            '<th class="px-2" style="font-size:12px;white-space:nowrap">' + safeEsc(c.label) + '</th>'
+        ).join('');
+        const tbody = data.map(row =>
+            '<tr>' + PLAN_COLUMNS.map(c => {
+                const val     = row[c.key];
+                const display = (val === null || val === undefined) ? '—' : safeEsc(String(val));
+                const style   = c.wide
+                    ? 'max-width:300px;white-space:normal;font-size:12px'
+                    : 'text-align:right;font-size:12px';
+                return '<td class="px-2" style="' + style + '">' + display + '</td>';
+            }).join('') + '</tr>'
+        ).join('');
+        container.innerHTML =
+            '<div style="overflow-x:auto; max-height:560px; overflow-y:auto;">' +
+                '<table class="table table-sm table-bordered table-hover mb-0" style="font-size:12px; min-width:max-content;">' +
+                    '<thead class="table-light sticky-top"><tr>' + thead + '</tr></thead>' +
+                    '<tbody>' + tbody + '</tbody>' +
+                '</table>' +
+            '</div>';
+    }
+
+    function uploadPlansFile() {
+        const fileInput = document.getElementById('plansFileInput');
+        if (!fileInput.files.length) { showPlansStatus('warning', 'Выберите файл'); return; }
+        showPlansStatus('secondary', 'Загружаю...');
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        fetch(BASE_PATH + '/api/upload-plans', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showPlansStatus('success', '✓ ' + data.message);
+                    fileInput.value = '';
+                    loadPlans();
+                } else {
+                    showPlansStatus('danger', '✗ Ошибки:<br>' +
+                        (data.errors || ['Неизвестная ошибка']).map(e => safeEsc(e)).join('<br>'));
+                }
+            })
+            .catch(err => showPlansStatus('danger', '✗ ' + safeEsc(err.message)));
+    }
+
+    function showPlansStatus(type, html) {
+        const el = document.getElementById('plansUploadStatus');
+        el.style.display = 'block';
+        el.className = 'alert alert-' + type;
+        el.innerHTML = html;
+    }
+
+    // ── Соответствия ЛПУ ─────────────────────────────────────────────────────
+
+    let allMappingData    = [];
+    let mappingInitialized = false;
+
+    function initMapping() {
+        if (!mappingInitialized) { mappingInitialized = true; loadMapping(); }
+    }
+
+    function loadMapping() {
+        fetch(BASE_PATH + '/api/mapping')
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+                allMappingData = data;
+                renderMappingTable(data);
+                document.getElementById('mappingSummary').textContent =
+                    data.length > 0 ? 'Записей: ' + data.length : 'Нет данных';
+            })
+            .catch(err => {
+                document.getElementById('mappingContainer').innerHTML =
+                    '<span class="text-danger">Ошибка: ' + safeEsc(err.message) + '</span>';
+            });
+    }
+
+    function filterMappingTable() {
+        const q = document.getElementById('mappingSearch').value.trim().toLowerCase();
+        renderMappingTable(q
+            ? allMappingData.filter(m =>
+                (m.screeningName && m.screeningName.toLowerCase().includes(q)) ||
+                (m.planName      && m.planName.toLowerCase().includes(q)))
+            : allMappingData);
+    }
+
+    function renderMappingTable(data) {
+        const container = document.getElementById('mappingContainer');
+        if (data.length === 0) {
+            container.innerHTML = '<span class="text-muted">Соответствия не загружены. Загрузите файл Excel.</span>';
+            return;
+        }
+        const tbody = data.map((row, idx) =>
+            '<tr>' +
+                '<td class="text-muted px-2" style="font-size:12px;width:40px">' + (idx + 1) + '</td>' +
+                '<td class="px-2" style="font-size:12px;max-width:380px;white-space:normal">' + safeEsc(row.screeningName || '') + '</td>' +
+                '<td class="px-2" style="font-size:12px;max-width:380px;white-space:normal">' + safeEsc(row.planName || '') + '</td>' +
+            '</tr>'
+        ).join('');
+        container.innerHTML =
+            '<div style="overflow-x:auto; max-height:560px; overflow-y:auto;">' +
+                '<table class="table table-sm table-bordered table-hover mb-0" style="font-size:12px;">' +
+                    '<thead class="table-light sticky-top">' +
+                        '<tr>' +
+                            '<th class="px-2" style="width:40px">№</th>' +
+                            '<th class="px-2">Название в скрининговых данных</th>' +
+                            '<th class="px-2">Название в файле планов</th>' +
+                        '</tr>' +
+                    '</thead>' +
+                    '<tbody>' + tbody + '</tbody>' +
+                '</table>' +
+            '</div>';
+    }
+
+    function uploadMappingFile() {
+        const fileInput = document.getElementById('mappingFileInput');
+        if (!fileInput.files.length) { showMappingStatus('warning', 'Выберите файл'); return; }
+        showMappingStatus('secondary', 'Загружаю...');
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        fetch(BASE_PATH + '/api/upload-mapping', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showMappingStatus('success', '✓ ' + data.message);
+                    fileInput.value = '';
+                    loadMapping();
+                } else {
+                    showMappingStatus('danger', '✗ Ошибки:<br>' +
+                        (data.errors || ['Неизвестная ошибка']).map(e => safeEsc(e)).join('<br>'));
+                }
+            })
+            .catch(err => showMappingStatus('danger', '✗ ' + safeEsc(err.message)));
+    }
+
+    function showMappingStatus(type, html) {
+        const el = document.getElementById('mappingUploadStatus');
+        el.style.display = 'block';
+        el.className = 'alert alert-' + type;
+        el.innerHTML = html;
+    }
+
+>>>>>>> dev
 </script>
 
 </body>

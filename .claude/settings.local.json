@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /s /b \"C:\\\\Users\\\\Stepler\\\\IdeaProjects\\\\emias-dashboard\\\\src\\\\main\\\\java\\\\com\\\\emias\\\\dashboard\\\\service\\\\*.java\")",
+      "Bash(mvn compile *)",
+      "Read(//c/Users/Stepler/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/08c25091-a7cf-40e8-be84-13c6d7ca661a/b15e7938-a38b-4523-a2de-91ba3965ef93/skills/xlsx/**)",
+      "Bash(python -)"
+    ]
+  }
+}

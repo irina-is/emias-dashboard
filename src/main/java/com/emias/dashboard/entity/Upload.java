@@ -22,19 +22,36 @@ public class Upload {
     @Column(name = "record_count")
     private int recordCount;
 
+<<<<<<< HEAD
+=======
+    @Column(name = "file_name")
+    private String fileName;
+
+>>>>>>> dev
     @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt;
 
     public Upload() {}
 
+<<<<<<< HEAD
     public Upload(LocalDate reportDate, int recordCount) {
         this.reportDate  = reportDate;
         this.recordCount = recordCount;
+=======
+    public Upload(LocalDate reportDate, int recordCount, String fileName) {
+        this.reportDate  = reportDate;
+        this.recordCount = recordCount;
+        this.fileName    = fileName;
+>>>>>>> dev
         this.uploadedAt  = LocalDateTime.now();
     }
 
     public Long          getId()          { return id; }
     public LocalDate     getReportDate()  { return reportDate; }
     public int           getRecordCount() { return recordCount; }
+<<<<<<< HEAD
+=======
+    public String        getFileName()    { return fileName; }
+>>>>>>> dev
     public LocalDateTime getUploadedAt()  { return uploadedAt; }
 }
