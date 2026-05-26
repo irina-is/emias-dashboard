@@ -65,8 +65,8 @@
                             <h6 class="mb-3">Загрузить отчёт</h6>
 
                             <div class="mb-3">
-                                <label class="form-label">Дата отчёта</label>
-                                <input type="date" id="dateInput" class="form-control">
+                                <label class="form-label">Месяц отчёта</label>
+                                <input type="month" id="dateInput" class="form-control">
                             </div>
 
                             <div class="mb-3">
@@ -442,8 +442,7 @@
     const today = new Date();
     const yyyy  = today.getFullYear();
     const mm    = String(today.getMonth() + 1).padStart(2, '0');
-    const dd    = String(today.getDate()).padStart(2, '0');
-    document.getElementById('dateInput').value = yyyy + '-' + mm + '-' + dd;
+    document.getElementById('dateInput').value = yyyy + '-' + mm;
 
     loadDates();
 
@@ -452,27 +451,38 @@
     }
 
     function formatDate(dateStr) {
-        const months = ['января','февраля','марта','апреля','мая','июня',
-                        'июля','августа','сентября','октября','ноября','декабря'];
+        const months = ['Январь','Февраль','Март','Апрель','Май','Июнь',
+                        'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
         const parts = dateStr.split('-');
-        return parts[2] + ' ' + months[parseInt(parts[1]) - 1] + ' ' + parts[0];
+        return months[parseInt(parts[1]) - 1] + ' ' + parts[0];
     }
 
     // ── Загрузка данных ──────────────────────────────────────────────────────
 
     function loadDates() {
-        fetch(BASE_PATH + '/api/dates')
+        fetch(BASE_PATH + '/api/uploads')
             .then(r => r.json())
-            .then(dates => {
+            .then(uploads => {
                 const container = document.getElementById('datesList');
-                if (dates.length === 0) {
+                if (uploads.length === 0) {
                     container.innerHTML = '<span class="text-muted">Файлов ещё нет</span>';
                     return;
                 }
                 let html = '<ul class="list-group">';
-                for (let i = 0; i < dates.length; i++) {
-                    const label = i === 0 ? ' <span class="badge bg-primary ms-2">последний</span>' : '';
-                    html += '<li class="list-group-item">' + formatDate(dates[i]) + label + '</li>';
+                for (let i = 0; i < uploads.length; i++) {
+                    const u = uploads[i];
+                    const badge = i === 0 ? ' <span class="badge bg-primary ms-2">последний</span>' : '';
+                    const name  = u.fileName ? '<span class="text-muted small ms-2">' + safeEsc(u.fileName) + '</span>' : '';
+                    const count = '<span class="text-muted small">' + u.recordCount.toLocaleString('ru') + ' записей</span>';
+                    html += '<li class="list-group-item d-flex align-items-center gap-2">'
+                          + '<span>' + formatDate(u.date) + '</span>'
+                          + badge + name
+                          + '<span class="ms-auto d-flex align-items-center gap-2">'
+                          + count
+                          + '<button class="btn btn-outline-danger btn-sm" onclick="deleteUpload(\'' + u.date + '\')" title="Удалить данные за эту дату">'
+                          + '<i class="bi bi-trash"></i></button>'
+                          + '</span>'
+                          + '</li>';
                 }
                 html += '</ul>';
                 container.innerHTML = html;
@@ -483,10 +493,24 @@
             });
     }
 
+    function deleteUpload(date) {
+        if (!confirm('Удалить все данные за ' + formatDate(date) + '?\nЭто действие нельзя отменить.')) return;
+        fetch(BASE_PATH + '/api/uploads/' + date, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    loadDates();
+                } else {
+                    alert('Ошибка: ' + data.message);
+                }
+            })
+            .catch(() => alert('Ошибка соединения'));
+    }
+
     function uploadFile() {
         const fileInput = document.getElementById('fileInput');
         const dateInput = document.getElementById('dateInput');
-        if (!dateInput.value) { showStatus('warning', 'Выберите дату'); return; }
+        if (!dateInput.value) { showStatus('warning', 'Выберите месяц'); return; }
         if (!fileInput.files.length) { showStatus('warning', 'Выберите файл'); return; }
 
         const btn         = document.getElementById('uploadBtn');
@@ -544,7 +568,7 @@
 
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
-        formData.append('date', dateInput.value);
+        formData.append('date', dateInput.value + '-01');
 
         const xhr = new XMLHttpRequest();
 

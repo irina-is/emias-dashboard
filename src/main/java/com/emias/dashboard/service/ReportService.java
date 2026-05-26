@@ -55,10 +55,10 @@ public class ReportService {
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-    private static final int[]    DATE_COL_INDICES = {7, 8, 9, 10, 27, 28, 29};
+    private static final int[]    DATE_COL_INDICES = {7, 9, 27, 28, 29};
     private static final String[] DATE_COL_NAMES   = {
-        "Дата диспансеризации", "Дата исследования", "Дата закрытия карты",
-        "Дата рождения", "Дата забора биоматериала", "Дата доставки",
+        "Дата проведения мероприятия", "Дата закрытия карты",
+        "Дата забора биоматериала", "Дата доставки",
         "Дата проведения исследования"
     };
 
@@ -158,8 +158,30 @@ public class ReportService {
         log.info("Итого сохранено {} записей в базу за {}", savedTotal, reportDate);
 
         // Шаг 5: сохраняем запись о загрузке
-        uploadRepository.save(new Upload(reportDate, records.size()));
+        uploadRepository.save(new Upload(reportDate, records.size(), originalName));
         log.info("=== Загрузка завершена успешно: {} записей за {} ===", records.size(), reportDate);
+    }
+
+    /**
+     * Возвращает все записи о загрузках, от новой к старой.
+     */
+    public List<Upload> getUploads() {
+        return uploadRepository.findAllByOrderByReportDateDesc();
+    }
+
+    /**
+     * Удаляет все данные скрининга за указанную дату и файл с диска.
+     */
+    @Transactional
+    public void deleteByDate(String date) throws IOException {
+        LocalDate reportDate = LocalDate.parse(date);
+        screeningRepository.deleteByReportDate(reportDate);
+        uploadRepository.deleteByReportDate(reportDate);
+
+        Path file = Paths.get(uploadDir).resolve("report_" + date + ".xlsx");
+        Files.deleteIfExists(file);
+
+        log.info("Данные и файл за {} удалены", reportDate);
     }
 
     /**
@@ -175,25 +197,38 @@ public class ReportService {
     }
 
     /**
+     * Читает из базы все записи за все месяцы.
+     */
+    public List<PatientRecord> readAllRecords() {
+        List<Screening> screenings = screeningRepository.findAll();
+        List<PatientRecord> records = new ArrayList<>();
+        for (Screening s : screenings) {
+            records.add(toPatientRecord(s));
+        }
+        return records;
+    }
+
+    /**
      * Читает из базы все записи за указанную дату.
      */
     public List<PatientRecord> readRecords(String date) {
         LocalDate reportDate = LocalDate.parse(date);
-        List<Screening> screenings = screeningRepository.findByReportDate(reportDate);
-
         List<PatientRecord> records = new ArrayList<>();
-        for (Screening s : screenings) {
-            records.add(new PatientRecord(
-                    s.getMkabNumber(), s.getLastName(), s.getFirstName(), s.getMiddleName(),
-                    s.getVisitType(), s.getSnils(), s.getOmsPolicy(),
-                    s.getDispensarizationDate(), s.getResearchDate(), s.getCardClosingDate(),
-                    s.getBirthDate(), s.getTfomsServiceCode(), s.getValueText(),
-                    s.getReferralNumber(), s.getRefusal(), s.getResearchResult(),
-                    s.getServiceCode(), s.getResearchStatus(), s.getDoctorName(),
-                    s.getOgrnFrom(), s.getFacilityFrom(), s.getOgrnTo(), s.getFacilityTo(),
-                    s.getPcrResult(), s.getPcrDone(), s.getAgeAtExport(), s.getAgeAtResearch(),
-                    s.getBiomaterialDate(), s.getDeliveryDate(), s.getResearchConductedDate()
-            ));
+        for (Screening s : screeningRepository.findByReportDate(reportDate)) {
+            records.add(toPatientRecord(s));
+        }
+        return records;
+    }
+
+    /**
+     * Читает все записи за текущий календарный месяц (с 1-го числа по selectedDate включительно).
+     */
+    public List<PatientRecord> readRecordsForMonth(String date) {
+        LocalDate selectedDate = LocalDate.parse(date);
+        LocalDate monthStart = selectedDate.withDayOfMonth(1);
+        List<PatientRecord> records = new ArrayList<>();
+        for (Screening s : screeningRepository.findByReportDateBetween(monthStart, selectedDate)) {
+            records.add(toPatientRecord(s));
         }
         return records;
     }
@@ -276,7 +311,7 @@ public class ReportService {
                         try {
                             records.add(new PatientRecord(
                                     row[0], row[1], row[2], row[3], row[4], row[5], row[6],
-                                    row[7], row[8], row[9], row[10], row[11], row[12], row[13],
+                                    "", row[7], row[9], row[10], row[11], row[12], row[13],
                                     row[14], row[15], row[16], row[17], row[18], row[19], row[20],
                                     row[21], row[22], row[23], row[24], row[25], row[26], row[27],
                                     row[28], row[29]
@@ -316,6 +351,21 @@ public class ReportService {
         return records;
     }
 
+    /** Конвертирует Screening entity → PatientRecord */
+    private PatientRecord toPatientRecord(Screening s) {
+        return new PatientRecord(
+                s.getMkabNumber(), s.getLastName(), s.getFirstName(), s.getMiddleName(),
+                s.getVisitType(), s.getSnils(), s.getOmsPolicy(),
+                s.getDispensarizationDate(), s.getResearchDate(), s.getCardClosingDate(),
+                s.getBirthDate(), s.getTfomsServiceCode(), s.getValueText(),
+                s.getReferralNumber(), s.getRefusal(), s.getResearchResult(),
+                s.getServiceCode(), s.getResearchStatus(), s.getDoctorName(),
+                s.getOgrnFrom(), s.getFacilityFrom(), s.getOgrnTo(), s.getFacilityTo(),
+                s.getPcrResult(), s.getPcrDone(), s.getAgeAtExport(), s.getAgeAtResearch(),
+                s.getBiomaterialDate(), s.getDeliveryDate(), s.getResearchConductedDate()
+        );
+    }
+
     /** Конвертирует PatientRecord → Screening entity */
     private Screening toScreening(PatientRecord record, LocalDate reportDate) {
         Screening s = new Screening();
@@ -327,7 +377,6 @@ public class ReportService {
         s.setVisitType(record.getVisitType());
         s.setSnils(record.getSnils());
         s.setOmsPolicy(record.getOmsPolicy());
-        s.setDispensarizationDate(record.getDispensarizationDate());
         s.setResearchDate(record.getResearchDate());
         s.setCardClosingDate(record.getCardClosingDate());
         s.setBirthDate(record.getBirthDate());

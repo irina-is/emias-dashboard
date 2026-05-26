@@ -112,6 +112,35 @@ public class DataController {
     }
 
     /**
+     * Возвращает список загрузок с именами файлов, датами и количеством записей.
+     */
+    @GetMapping("/uploads")
+    public List<Map<String, Object>> getUploads() {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (com.emias.dashboard.entity.Upload u : reportService.getUploads()) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("date",        u.getReportDate().toString());
+            m.put("fileName",    u.getFileName() != null ? u.getFileName() : "");
+            m.put("recordCount", u.getRecordCount());
+            result.add(m);
+        }
+        return result;
+    }
+
+    /**
+     * Удаляет все данные скрининга за указанную дату.
+     */
+    @DeleteMapping("/uploads/{date}")
+    public Map<String, Object> deleteUpload(@PathVariable String date) {
+        try {
+            reportService.deleteByDate(date);
+            return Map.of("success", true, "message", "Данные за " + date + " удалены");
+        } catch (Exception e) {
+            return Map.of("success", false, "message", "Ошибка: " + e.getMessage());
+        }
+    }
+
+    /**
      * Текущий прогресс обработки файла на сервере.
      * Клиент опрашивает этот эндпоинт каждые 500 мс во время загрузки.
      */

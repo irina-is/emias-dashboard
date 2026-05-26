@@ -31,7 +31,7 @@ public class DiagramService {
 
     // Названия возрастных групп — порядок важен, он совпадает с порядком значений
     private static final List<String> AGE_LABELS = List.of(
-            "до 18", "18–25", "26–35", "36–45", "46–55", "56–65", "66–75", "76–85", "86+"
+            "18–25", "26–35", "36–45", "46–55", "56–65", "66–75", "76–85", "86+", "Нет данных"
     );
 
     /**
@@ -85,8 +85,10 @@ public class DiagramService {
         for (PatientRecord record : records) {
             int age = calculateAgeFromBirthDate(record.getBirthDate());
 
-            if (age < 0) {
-                continue; // дата рождения не заполнена или неверный формат
+            if (age < 0 || age < 18) {
+                // Неверный формат даты рождения или возраст до 18 — в «Нет данных»
+                counters.put("Нет данных", counters.get("Нет данных") + 1);
+                continue;
             }
 
             String group = getAgeGroup(age);
@@ -98,7 +100,7 @@ public class DiagramService {
 
     // Вычисляет возраст из строки "dd.MM.yyyy". Возвращает -1 если не удалось
     private int calculateAgeFromBirthDate(String birthDate) {
-        if (birthDate.isEmpty()) {
+        if (birthDate == null || birthDate.isEmpty()) {
             return -1;
         }
 
@@ -126,14 +128,12 @@ public class DiagramService {
         int currentYear = LocalDate.now().getYear();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-        // Дедупликация внутри файла: один МКАБ со статусом "Выполнено" — одна запись
+        // Дедупликация внутри файла: один (МКАБ + Фамилия) со статусом "Завершено" — одна запись
         Map<String, PatientRecord> uniquePatients = new LinkedHashMap<>();
         for (PatientRecord record : records) {
-            String mkab = record.getMkabNumber();
-            if (mkab != null && !mkab.isEmpty()
-                    && !uniquePatients.containsKey(mkab)
-                    && isCompleted(record)) {
-                uniquePatients.put(mkab, record);
+            String key = uniqueKey(record);
+            if (key != null && !uniquePatients.containsKey(key) && isCompleted(record)) {
+                uniquePatients.put(key, record);
             }
         }
 
@@ -174,16 +174,16 @@ public class DiagramService {
      * Файл нарастающим итогом — в нём уже все данные с начала года.
      */
     public ScreeningStats buildStats(List<PatientRecord> records, long annualPlan) {
-        // Уникальные МКАБ со статусом "Выполнено"
-        Set<String> uniqueMkab = new HashSet<>();
+        // Уникальные (МКАБ + Фамилия) со статусом "Завершено"
+        Set<String> unique = new HashSet<>();
         for (PatientRecord record : records) {
-            if (record.getMkabNumber() != null && !record.getMkabNumber().isEmpty()
-                    && isCompleted(record)) {
-                uniqueMkab.add(record.getMkabNumber());
+            String key = uniqueKey(record);
+            if (key != null && isCompleted(record)) {
+                unique.add(key);
             }
         }
 
-        long completed = uniqueMkab.size();
+        long completed = unique.size();
         long remaining = Math.max(0, annualPlan - completed);
 
         // Дней осталось до конца текущего года (включая сегодня)
@@ -215,12 +215,12 @@ public class DiagramService {
             Map<String, String> mappingMap,
             Map<String, FacilityPlan> plansByName) {
 
-        // Дедупликация: один МКАБ — одна запись (первое вхождение)
+        // Дедупликация: один (МКАБ + Фамилия) — одна запись (первое вхождение)
         Map<String, PatientRecord> uniquePatients = new LinkedHashMap<>();
         for (PatientRecord record : records) {
-            String mkab = record.getMkabNumber();
-            if (mkab != null && !mkab.isEmpty() && !uniquePatients.containsKey(mkab)) {
-                uniquePatients.put(mkab, record);
+            String key = uniqueKey(record);
+            if (key != null && !uniquePatients.containsKey(key)) {
+                uniquePatients.put(key, record);
             }
         }
 
@@ -280,9 +280,39 @@ public class DiagramService {
             rating.add(row);
         }
 
-        rating.sort((a, b) -> Long.compare(b.getCompleted(), a.getCompleted()));
+        rating.sort((a, b) -> {
+            Integer pa = a.getCompletionPercent();
+            Integer pb = b.getCompletionPercent();
+            if (pa == null && pb == null) return 0;
+            if (pa == null) return 1;   // без плана — в конец
+            if (pb == null) return -1;
+            return Integer.compare(pb, pa); // по убыванию %
+        });
 
         return rating;
+    }
+
+    /**
+     * Проставляет monthlyCompleted — количество уникальных завершённых скринингов
+     * за весь текущий календарный месяц (по всем датам загрузки в месяце).
+     */
+    public void enrichWithMonthlyFact(List<FacilityRating> rating, List<PatientRecord> monthlyRecords) {
+        Map<String, Long> monthlyCounts = new LinkedHashMap<>();
+        Set<String> seen = new HashSet<>();
+
+        for (PatientRecord record : monthlyRecords) {
+            String key = uniqueKey(record);
+            if (key == null || !seen.add(key)) continue;
+            if (!isCompleted(record)) continue;
+
+            String facility = record.getFacilityFrom();
+            if (facility == null || facility.isEmpty()) facility = "Не указано";
+            monthlyCounts.merge(facility, 1L, Long::sum);
+        }
+
+        for (FacilityRating row : rating) {
+            row.setMonthlyCompleted(monthlyCounts.getOrDefault(row.getName(), 0L));
+        }
     }
 
     /**
@@ -294,7 +324,8 @@ public class DiagramService {
     public Conclusions buildConclusions(List<PatientRecord> records,
                                         ScreeningStats stats,
                                         List<FacilityRating> rating,
-                                        long annualPlan) {
+                                        long annualPlan,
+                                        String lastUploadDate) {
         // ── Риск невыполнения плана ───────────────────────────────────────────────
         LocalDate today      = LocalDate.now();
         int dayOfYear        = today.getDayOfYear();
@@ -308,21 +339,21 @@ public class DiagramService {
         }
 
         // ── Много отказов ─────────────────────────────────────────────────────────
-        Set<String> uniqueMkab   = new HashSet<>();
-        Set<String> refusalMkab  = new HashSet<>();
+        Set<String> uniqueKeys   = new HashSet<>();
+        Set<String> refusalKeys  = new HashSet<>();
 
         for (PatientRecord record : records) {
-            String mkab = record.getMkabNumber();
-            if (mkab == null || mkab.isEmpty()) continue;
-            uniqueMkab.add(mkab);
+            String key = uniqueKey(record);
+            if (key == null) continue;
+            uniqueKeys.add(key);
             String result = record.getResearchResult();
             if (result != null && result.trim().equalsIgnoreCase("Отказ")) {
-                refusalMkab.add(mkab);
+                refusalKeys.add(key);
             }
         }
 
-        long total          = uniqueMkab.size();
-        long refusals       = refusalMkab.size();
+        long total          = uniqueKeys.size();
+        long refusals       = refusalKeys.size();
         long refusalPercent = total > 0 ? refusals * 100 / total : 0;
         boolean highRefusals = refusalPercent > 10;
 
@@ -341,14 +372,14 @@ public class DiagramService {
         }
 
         // ── Много записей без результата (только среди "Завершено") ─────────────
-        Set<String> completedMkab = new HashSet<>();
+        Set<String> completedKeys = new HashSet<>();
         for (PatientRecord record : records) {
-            String mkab = record.getMkabNumber();
-            if (mkab != null && !mkab.isEmpty() && isCompleted(record)) {
-                completedMkab.add(mkab);
+            String key = uniqueKey(record);
+            if (key != null && isCompleted(record)) {
+                completedKeys.add(key);
             }
         }
-        long completedTotal = completedMkab.size();
+        long completedTotal = completedKeys.size();
         long noDataCount    = completedTotal
                 - countByResultAndStatus(records, "Без отклонений")
                 - countByResultAndStatus(records, "Выявлено отклонение")
@@ -357,9 +388,14 @@ public class DiagramService {
         long noDataPercent  = completedTotal > 0 ? noDataCount * 100 / completedTotal : 0;
         boolean highNoData  = noDataPercent >= 10;
 
-        // ── Сравнение текущего и прошлого месяца ─────────────────────────────────
-        int currentMonthIdx  = today.getMonthValue() - 1; // 0-based
-        int previousMonthIdx = currentMonthIdx - 1;
+        // ── Сравнение месяца последней загрузки с предыдущим месяцем ────────────
+        // Используем дату последнего загруженного файла, а не сегодняшний день,
+        // чтобы сравнивались реальные отчётные месяцы (например, март vs февраль),
+        // а не текущий календарный месяц, в котором данных ещё нет.
+        LocalDate lastUpload    = LocalDate.parse(lastUploadDate);
+        int currentMonthIdx     = lastUpload.getMonthValue() - 1; // 0-based
+        int previousMonthIdx    = currentMonthIdx - 1;
+        int uploadYear          = lastUpload.getYear();
 
         long currentMonthCount  = 0;
         long previousMonthCount = 0;
@@ -368,18 +404,18 @@ public class DiagramService {
         if (previousMonthIdx >= 0) {
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-            // Дедупликация по МКАБ для скринингов со статусом "Завершено"
-            Set<String> seenMkab = new HashSet<>();
+            // Дедупликация по (МКАБ + Фамилия) для скринингов со статусом "Завершено"
+            Set<String> seenKeys = new HashSet<>();
             for (PatientRecord record : records) {
-                String mkab = record.getMkabNumber();
-                if (mkab == null || mkab.isEmpty() || !isCompleted(record)) continue;
-                if (!seenMkab.add(mkab)) continue;
+                String key = uniqueKey(record);
+                if (key == null || !isCompleted(record)) continue;
+                if (!seenKeys.add(key)) continue;
 
                 String dateStr = record.getResearchDate();
                 if (dateStr == null || dateStr.isEmpty()) continue;
                 try {
                     LocalDate date = LocalDate.parse(dateStr, fmt);
-                    if (date.getYear() == today.getYear()) {
+                    if (date.getYear() == uploadYear) {
                         if (date.getMonthValue() - 1 == currentMonthIdx)  currentMonthCount++;
                         if (date.getMonthValue() - 1 == previousMonthIdx) previousMonthCount++;
                     }
@@ -397,32 +433,40 @@ public class DiagramService {
                 slowingDown, currentMonthCount, previousMonthCount);
     }
 
-    // Считает уникальные МКАБ с конкретным researchResult только среди "Завершено"
+    // Считает уникальные (МКАБ + Фамилия) с конкретным researchResult только среди "Завершено"
     private long countByResultAndStatus(List<PatientRecord> records, String targetResult) {
-        Set<String> mkabs = new HashSet<>();
+        Set<String> keys = new HashSet<>();
         for (PatientRecord record : records) {
-            String mkab = record.getMkabNumber();
-            if (mkab == null || mkab.isEmpty() || !isCompleted(record)) continue;
+            String key = uniqueKey(record);
+            if (key == null || !isCompleted(record)) continue;
             String result = record.getResearchResult();
             if (result != null && result.trim().equalsIgnoreCase(targetResult)) {
-                mkabs.add(mkab);
+                keys.add(key);
             }
         }
-        return mkabs.size();
+        return keys.size();
     }
 
-    // Считает уникальные МКАБ с конкретным значением researchResult
+    // Считает уникальные (МКАБ + Фамилия) с конкретным значением researchResult
     private long countByResult(List<PatientRecord> records, String targetResult) {
-        Set<String> mkabs = new HashSet<>();
+        Set<String> keys = new HashSet<>();
         for (PatientRecord record : records) {
-            String mkab = record.getMkabNumber();
-            if (mkab == null || mkab.isEmpty()) continue;
+            String key = uniqueKey(record);
+            if (key == null) continue;
             String result = record.getResearchResult();
             if (result != null && result.trim().equalsIgnoreCase(targetResult)) {
-                mkabs.add(mkab);
+                keys.add(key);
             }
         }
-        return mkabs.size();
+        return keys.size();
+    }
+
+    // Составной ключ уникальности: МКАБ + Фамилия. Null если МКАБ отсутствует.
+    private String uniqueKey(PatientRecord record) {
+        String mkab = record.getMkabNumber();
+        if (mkab == null || mkab.isEmpty()) return null;
+        String lastName = record.getLastName();
+        return mkab + "|" + (lastName != null ? lastName.trim().toLowerCase() : "");
     }
 
     // Возвращает true если исследование считается выполненным скринингом
@@ -435,7 +479,6 @@ public class DiagramService {
 
     // Определяет возрастную группу. Например: 45 → "36–45"
     private String getAgeGroup(int age) {
-        if (age < 18) return "до 18";
         if (age < 26) return "18–25";
         if (age < 36) return "26–35";
         if (age < 46) return "36–45";

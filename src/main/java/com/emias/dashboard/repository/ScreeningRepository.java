@@ -25,6 +25,8 @@ public interface ScreeningRepository extends JpaRepository<Screening, Long> {
 
     long countByReportDate(LocalDate reportDate);
 
+    List<Screening> findByReportDateBetween(LocalDate from, LocalDate to);
+
     // @Modifying — выполняет DELETE напрямую, без буферизации JPA
     @Modifying
     @Query("DELETE FROM Screening s WHERE s.reportDate = :date")
