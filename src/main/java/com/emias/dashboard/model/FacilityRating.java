@@ -13,6 +13,8 @@ public class FacilityRating {
     private long refusal;            // Отказ (результат)
     private long noData;             // Нет данных (результат)
 
+    private long monthlyCompleted;    // Факт месяц — выполнено в текущем календарном месяце
+
     // Плановые значения (null = план не загружен для этой организации)
     private Long annualPlanTotal;    // Годовой план (общий)
     private Long monthlyPlanTotal;   // Месячный план (общий)
@@ -32,6 +34,7 @@ public class FacilityRating {
 
     public String getName()              { return name; }
     public long   getCompleted()         { return completed; }
+    public long   getMonthlyCompleted()  { return monthlyCompleted; }
     public long   getWithoutDeviations() { return withoutDeviations; }
     public long   getWithDeviations()    { return withDeviations; }
     public long   getRefusal()           { return refusal; }
@@ -60,6 +63,7 @@ public class FacilityRating {
 
     // ── Сеттеры плана ────────────────────────────────────────────────────────
 
+    public void setMonthlyCompleted(long v) { monthlyCompleted = v; }
     public void setAnnualPlanTotal(Long v)  { annualPlanTotal  = v; }
     public void setMonthlyPlanTotal(Long v) { monthlyPlanTotal = v; }
     public void setWeeklyPlanTotal(Long v)  { weeklyPlanTotal  = v; }

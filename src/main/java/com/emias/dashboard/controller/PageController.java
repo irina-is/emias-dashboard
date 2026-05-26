@@ -16,9 +16,7 @@ import com.emias.dashboard.service.SettingsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +60,7 @@ public class PageController {
     }
 
     @GetMapping("/dashboard")
-    public String index(@RequestParam(required = false) String date, Model model) {
+    public String index(Model model) {
         DashboardConfig config = settingsService.getConfig();
         model.addAttribute("config", config);
 
@@ -73,10 +71,8 @@ public class PageController {
                 throw new Exception("Нет загруженных файлов");
             }
 
-            String selectedDate = (date != null && dates.contains(date)) ? date : dates.get(0);
-            boolean isLatest = selectedDate.equals(dates.get(0));
-
-            List<PatientRecord> records = reportService.readRecords(selectedDate);
+            // Агрегируем данные по всем загруженным месяцам
+            List<PatientRecord> records = reportService.readAllRecords();
             long annualPlan = config.getAnnualPlan();
 
             ScreeningStats stats = diagramService.buildStats(records, annualPlan);
@@ -86,11 +82,10 @@ public class PageController {
             model.addAttribute("monthly", monthly);
 
             Map<String, List<PatientRecord>> singleFile = new LinkedHashMap<>();
-            singleFile.put(formatDate(selectedDate), records);
+            singleFile.put("Все данные", records);
             AgeDiagram diagram = diagramService.buildAgeDiagram(singleFile);
             model.addAttribute("diagram", diagram);
 
-            // Загружаем маппинг и планы для обогащения рейтинга
             Map<String, String> mappingMap = facilityMappingService.getMappingMap();
             Map<String, FacilityPlan> plansByName = new LinkedHashMap<>();
             for (FacilityPlan plan : facilityPlanService.getAllPlans()) {
@@ -98,18 +93,15 @@ public class PageController {
             }
 
             List<FacilityRating> rating = diagramService.buildFacilityRating(records, mappingMap, plansByName);
+            // Факт месяц — данные последнего загруженного месяца
+            List<PatientRecord> monthlyRecords = reportService.readRecordsForMonth(dates.get(0));
+            diagramService.enrichWithMonthlyFact(rating, monthlyRecords);
             model.addAttribute("rating", rating);
 
-            Conclusions conclusions = diagramService.buildConclusions(records, stats, rating, annualPlan);
+            Conclusions conclusions = diagramService.buildConclusions(records, stats, rating, annualPlan, dates.get(0));
             model.addAttribute("conclusions", conclusions);
 
-            model.addAttribute("lastUploadDate", formatDate(selectedDate));
-            model.addAttribute("isLatest", isLatest);
-            model.addAttribute("selectedDateRaw", selectedDate);
-            model.addAttribute("uploadedDates", dates);
-            List<String> formattedDates = new ArrayList<>();
-            for (String d : dates) formattedDates.add(formatDate(d));
-            model.addAttribute("uploadedDatesFormatted", formattedDates);
+            model.addAttribute("lastUploadDate", formatMonth(dates.get(0)));
 
         } catch (Exception e) {
             model.addAttribute("error", "Файл отчёта не загружен. Перейдите в панель администратора и загрузите файл.");
@@ -141,5 +133,13 @@ public class PageController {
         String[] parts = date.split("-");
         int month = Integer.parseInt(parts[1]) - 1;
         return parts[2] + " " + months[month] + " " + parts[0];
+    }
+
+    private String formatMonth(String date) {
+        String[] months = {"Январь","Февраль","Март","Апрель","Май","Июнь",
+                           "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"};
+        String[] parts = date.split("-");
+        int month = Integer.parseInt(parts[1]) - 1;
+        return months[month] + " " + parts[0];
     }
 }

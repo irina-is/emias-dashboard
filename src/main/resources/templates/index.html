@@ -422,9 +422,65 @@
             letter-spacing: 0.04em;
             border-bottom: 1px solid var(--emias-border);
             background: transparent;
+            vertical-align: bottom;
         }
         .table tbody td { border-color: var(--emias-border); vertical-align: middle; }
         .table-hover tbody tr:hover { background-color: var(--emias-blue-lt); }
+
+        /* Прокручиваемая таблица рейтинга с фиксированной шапкой */
+        .rating-scroll-wrap {
+            max-height: 480px;
+            overflow-y: auto;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #CED4DA transparent;
+        }
+        .rating-scroll-wrap::-webkit-scrollbar       { width: 5px; height: 5px; }
+        .rating-scroll-wrap::-webkit-scrollbar-track  { background: transparent; }
+        .rating-scroll-wrap::-webkit-scrollbar-thumb  { background: #CED4DA; border-radius: 10px; }
+        .rating-scroll-wrap::-webkit-scrollbar-thumb:hover { background: #ADB5BD; }
+        html[data-theme="dark"] .rating-scroll-wrap {
+            scrollbar-color: #444C5A transparent;
+        }
+        html[data-theme="dark"] .rating-scroll-wrap::-webkit-scrollbar-thumb { background: #444C5A; }
+        html[data-theme="dark"] .rating-scroll-wrap::-webkit-scrollbar-thumb:hover { background: #6A7280; }
+        /* Все ячейки шапки — sticky внутри контейнера */
+        #rating-table thead th,
+        #rating-table thead td {
+            position: sticky;
+            z-index: 3;
+            background: #fff;
+        }
+        /* Первая строка (названия столбцов) — прилипает к верху */
+        #rating-table thead tr:first-child th {
+            top: 0;
+        }
+        /* Вторая строка (Всего/Среднее) — top выставляется через JS */
+        #rating-table thead tr:nth-child(2) td {
+            box-shadow: 0 3px 6px rgba(59,91,216,0.07);
+        }
+        html[data-theme="dark"] #rating-table thead th,
+        html[data-theme="dark"] #rating-table thead td {
+            background: #161B22;
+        }
+        html[data-theme="dark"] #rating-table thead tr:nth-child(2) td {
+            box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+        }
+
+        /* Сортируемые заголовки таблицы */
+        .th-sort {
+            cursor: pointer;
+            user-select: none;
+        }
+        .th-sort:hover { color: var(--emias-blue) !important; }
+        .sort-ind {
+            display: inline-block;
+            width: 10px;
+            font-size: 0.7em;
+            color: var(--emias-blue);
+            margin-left: 2px;
+        }
+        html[data-theme="dark"] .th-sort:hover { color: var(--emias-blue) !important; }
     </style>
 </head>
 <body>
@@ -445,20 +501,6 @@
         <div class="d-flex align-items-center justify-content-between no-print" style="margin-top: 12px;">
             <a th:href="${basePath + '/'}" class="btn-emias-outline">← Назад</a>
             <div class="d-flex gap-2 align-items-center">
-                <div class="dropdown" th:if="${uploadedDates != null and #lists.size(uploadedDates) > 1}">
-                    <button class="btn-icon" th:classappend="${isLatest == false} ? ' btn-icon-warning'" data-bs-toggle="dropdown" aria-expanded="false" title="История загрузок">
-                        <i class="bi bi-clock-history"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li th:each="d, i : ${uploadedDates}">
-                            <a class="dropdown-item"
-                               th:href="@{/dashboard(date=${d})}"
-                               th:text="${uploadedDatesFormatted[i.index]}"
-                               th:classappend="${d == selectedDateRaw} ? ' active' : ''">
-                            </a>
-                        </li>
-                    </ul>
-                </div>
                 <button class="btn-icon" onclick="window.print()" title="Сохранить как PDF">
                     <i class="bi bi-file-earmark-pdf"></i>
                 </button>
@@ -643,20 +685,32 @@
                                oninput="filterRating(this.value)">
                     </div>
                 </div>
+                <div class="rating-scroll-wrap">
                 <table id="rating-table" class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th style="width: 40px;">#</th>
-                            <th>Медицинская организация</th>
-                            <th class="text-end">Завершено</th>
-                            <th class="text-end">План (год)</th>
-                            <th class="text-end">% плана</th>
-                            <th class="text-end">План (мес)</th>
-                            <th class="text-end">План (нед)</th>
-                            <th class="text-end">Без отклонений</th>
-                            <th class="text-end">Выявлено отклонение</th>
-                            <th class="text-end">Отказ</th>
-                            <th class="text-end">Нет данных</th>
+                            <th class="th-sort" style="width: 40px;" onclick="sortRating(0)"># <span class="sort-ind" data-col="0"></span></th>
+                            <th class="th-sort" onclick="sortRating(1)">Медицинская организация <span class="sort-ind" data-col="1"></span></th>
+                            <th class="th-sort text-end" onclick="sortRating(2)">Завершено всего <span class="sort-ind" data-col="2"></span></th>
+                            <th class="th-sort text-end" onclick="sortRating(3)">План (год) <span class="sort-ind" data-col="3"></span></th>
+                            <th class="th-sort text-end" onclick="sortRating(4)">% плана <span class="sort-ind" data-col="4"></span></th>
+                            <th class="th-sort text-end" onclick="sortRating(5)">План (мес) <span class="sort-ind" data-col="5"></span></th>
+                            <th class="th-sort text-end" onclick="sortRating(6)">Факт (мес) <span class="sort-ind" data-col="6"></span></th>
+                            <th class="th-sort text-end" onclick="sortRating(7)">Всего без отклонений <span class="sort-ind" data-col="7"></span></th>
+                            <th class="th-sort text-end" onclick="sortRating(8)">Всего выявлено отклонений <span class="sort-ind" data-col="8"></span></th>
+                            <th class="th-sort text-end" onclick="sortRating(9)">Отказ <span class="sort-ind" data-col="9"></span></th>
+                        </tr>
+                        <tr id="rating-totals-row" style="border-top: 2px solid var(--emias-border);">
+                            <td class="text-muted" style="font-size:0.78rem; padding-bottom:6px;"></td>
+                            <td style="font-size:0.78rem; font-weight:600; padding-bottom:6px;">Всего / Среднее</td>
+                            <td class="text-end" style="font-size:0.78rem; font-weight:600; padding-bottom:6px;" id="tot-col-2"></td>
+                            <td class="text-end" style="font-size:0.78rem; font-weight:600; padding-bottom:6px;" id="tot-col-3"></td>
+                            <td class="text-end" style="font-size:0.78rem; font-weight:600; padding-bottom:6px;" id="tot-col-4"></td>
+                            <td class="text-end" style="font-size:0.78rem; font-weight:600; padding-bottom:6px;" id="tot-col-5"></td>
+                            <td class="text-end" style="font-size:0.78rem; font-weight:600; padding-bottom:6px;" id="tot-col-6"></td>
+                            <td class="text-end" style="font-size:0.78rem; font-weight:600; padding-bottom:6px;" id="tot-col-7"></td>
+                            <td class="text-end" style="font-size:0.78rem; font-weight:600; padding-bottom:6px;" id="tot-col-8"></td>
+                            <td class="text-end" style="font-size:0.78rem; font-weight:600; padding-bottom:6px;" id="tot-col-9"></td>
                         </tr>
                     </thead>
                     <tbody>
@@ -685,18 +739,18 @@
                                 th:text="${row.hasPlan()} ? ${#numbers.formatInteger(row.monthlyPlanTotal, 0, 'DEFAULT')} : '—'">
                             </td>
 
-                            <!-- План (нед) -->
-                            <td class="text-end text-muted"
-                                th:text="${row.hasPlan()} ? ${#numbers.formatInteger(row.weeklyPlanTotal, 0, 'DEFAULT')} : '—'">
+                            <!-- Факт (мес) -->
+                            <td class="text-end fw-bold"
+                                th:text="${#numbers.formatInteger(row.monthlyCompleted, 0, 'DEFAULT')}">
                             </td>
 
                             <td class="text-end" th:text="${row.withoutDeviations}"></td>
                             <td class="text-end text-danger" th:text="${row.withDeviations}"></td>
                             <td class="text-end text-warning" th:text="${row.refusal}"></td>
-                            <td class="text-end text-muted" th:text="${row.noData}"></td>
                         </tr>
                     </tbody>
                 </table>
+                </div><!-- /.rating-scroll-wrap -->
             </div>
         </div>
 
@@ -771,7 +825,25 @@
 
     // Сортировка рейтинга (col 2 = Завершено, col 4 = % плана)
     let _sortAsc   = false;
-    let _sortCol   = 2; // по умолчанию — по "Завершено"
+    let _sortCol   = 4; // по умолчанию — по "% плана"
+
+    function _updateSortIndicators() {
+        document.querySelectorAll('#rating-table .sort-ind').forEach(s => {
+            const c = parseInt(s.dataset.col);
+            s.textContent = c === _sortCol ? (_sortAsc ? '▲' : '▼') : '';
+        });
+        const btn = document.getElementById('sort-btn');
+        if (btn) {
+            if (_sortAsc) {
+                btn.title = 'Сортировка по возрастанию — нажмите для смены';
+                btn.querySelector('i').className = 'bi bi-sort-up';
+            } else {
+                btn.title = 'Сортировка по убыванию — нажмите для смены';
+                btn.querySelector('i').className = 'bi bi-sort-down';
+            }
+        }
+    }
+
     function sortRating(col) {
         if (col === undefined) col = _sortCol;
         if (_sortCol === col) {
@@ -791,15 +863,64 @@
             row.cells[0].textContent = i + 1;
             tbody.appendChild(row);
         });
-        const btn = document.getElementById('sort-btn');
-        if (_sortAsc) {
-            btn.title = 'Сортировка по возрастанию — нажмите для смены';
-            btn.querySelector('i').className = 'bi bi-sort-up';
-        } else {
-            btn.title = 'Сортировка по убыванию — нажмите для смены';
-            btn.querySelector('i').className = 'bi bi-sort-down';
-        }
+        _updateSortIndicators();
     }
+
+    // Показываем начальный индикатор сортировки и итоги
+    function computeRatingTotals() {
+        const rows = Array.from(document.querySelectorAll('#rating-table tbody tr'));
+
+        const parseNum = txt => {
+            const s = txt.trim();
+            if (s === '—' || s === '') return null;
+            const n = parseFloat(s.replace('%', '').replace(/[\s ]/g, '').replace(',', '.'));
+            return isNaN(n) ? null : n;
+        };
+
+        let s2=0, s3=0, s6=0, s7=0, s8=0, s9=0;
+        let s4=0, c4=0, s5=0, c5=0;
+
+        rows.forEach(r => {
+            const v = i => parseNum(r.cells[i].textContent);
+            const n2=v(2), n3=v(3), n4=v(4), n5=v(5), n6=v(6), n7=v(7), n8=v(8), n9=v(9);
+            if (n2!==null) s2+=n2;
+            if (n3!==null) s3+=n3;
+            if (n4!==null) { s4+=n4; c4++; }
+            if (n5!==null) { s5+=n5; c5++; }
+            if (n6!==null) s6+=n6;
+            if (n7!==null) s7+=n7;
+            if (n8!==null) s8+=n8;
+            if (n9!==null) s9+=n9;
+        });
+
+        const fmt    = n => Math.round(n).toLocaleString('ru-RU');
+        const avgPct = (s,c) => c>0 ? Math.round(s/c)+'%' : '—';
+        const avgNum = (s,c) => c>0 ? fmt(Math.round(s/c))   : '—';
+
+        document.getElementById('tot-col-2').textContent = fmt(s2);         // Завершено всего — сумма
+        document.getElementById('tot-col-3').textContent = fmt(s3);         // План (год) — сумма
+        document.getElementById('tot-col-4').textContent = avgPct(s4,c4);   // % плана — среднее
+        document.getElementById('tot-col-5').textContent = avgNum(s5,c5);   // План (мес) — среднее
+        document.getElementById('tot-col-6').textContent = fmt(s6);         // Факт (мес) — сумма
+        document.getElementById('tot-col-7').textContent = fmt(s7);         // Без отклонений — сумма
+        document.getElementById('tot-col-8').textContent = fmt(s8);         // Выявлено отклонений — сумма
+        document.getElementById('tot-col-9').textContent = fmt(s9);         // Отказ — сумма
+    }
+
+    // Выставляет top второй строки шапки (Всего/Среднее) равным высоте первой строки
+    function fixStickyTotalsRow() {
+        const firstRow = document.querySelector('#rating-table thead tr:first-child');
+        const totalsRow = document.querySelector('#rating-table thead tr:nth-child(2)');
+        if (!firstRow || !totalsRow) return;
+        const h = firstRow.getBoundingClientRect().height;
+        totalsRow.querySelectorAll('td').forEach(td => { td.style.top = h + 'px'; });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        _updateSortIndicators();
+        computeRatingTotals();
+        fixStickyTotalsRow();
+    });
 
     // Экспорт таблицы в CSV
     function exportRatingCSV() {
