@@ -3,6 +3,7 @@ package com.emias.dashboard.service;
 import com.emias.dashboard.entity.FacilityPlan;
 import com.emias.dashboard.model.AgeDiagram;
 import com.emias.dashboard.model.AgeGroupChange;
+import com.emias.dashboard.model.AgeGroupStat;
 import com.emias.dashboard.model.Conclusions;
 import com.emias.dashboard.model.DiagramSeries;
 import com.emias.dashboard.model.FacilityRating;
@@ -197,6 +198,45 @@ public class DiagramService {
     }
 
     /**
+     * Считает уникальных завершённых пациентов по целевым возрастам скрининга (25, 35, 45, 65, 75 лет).
+     * Возраст берётся из поля ageAtResearch.
+     */
+    public List<AgeGroupStat> buildScreeningAgeCounts(List<PatientRecord> records) {
+        int[] targetAges = {25, 35, 45, 55, 65, 75};
+        long[] counts    = new long[targetAges.length];
+
+        Set<String> seen = new HashSet<>();
+        long total = 0;
+
+        for (PatientRecord record : records) {
+            if (!isCompleted(record)) continue;
+            String key = uniqueKey(record);
+            if (key == null || !seen.add(key)) continue;
+            total++;
+
+            int age = calculateAgeFromBirthDate(record.getBirthDate());
+            if (age < 0) continue;
+            for (int i = 0; i < targetAges.length; i++) {
+                if (targetAges[i] == age) { counts[i]++; break; }
+            }
+        }
+
+        long ageTotal = 0;
+        for (long c : counts) ageTotal += c;
+
+        List<AgeGroupStat> result = new ArrayList<>();
+        result.add(new AgeGroupStat("Всего", ageTotal, null));
+        for (int i = 0; i < targetAges.length; i++) {
+            long c = counts[i];
+            String pct = ageTotal > 0
+                ? String.format("%.1f", c * 100.0 / ageTotal).replace('.', ',') + "% от всех"
+                : "0% от всех";
+            result.add(new AgeGroupStat(targetAges[i] + " лет", c, pct));
+        }
+        return result;
+    }
+
+    /**
      * Строит рейтинг медицинских организаций без данных о планах.
      */
     public List<FacilityRating> buildFacilityRating(List<PatientRecord> records) {
@@ -215,11 +255,12 @@ public class DiagramService {
             Map<String, String> mappingMap,
             Map<String, FacilityPlan> plansByName) {
 
-        // Дедупликация: один (МКАБ + Фамилия) — одна запись (первое вхождение)
+        // Дедупликация: один (МКАБ + Фамилия) среди завершённых — первое завершённое вхождение.
+        // Это обеспечивает совпадение итога с buildStats.
         Map<String, PatientRecord> uniquePatients = new LinkedHashMap<>();
         for (PatientRecord record : records) {
             String key = uniqueKey(record);
-            if (key != null && !uniquePatients.containsKey(key)) {
+            if (key != null && isCompleted(record) && !uniquePatients.containsKey(key)) {
                 uniquePatients.put(key, record);
             }
         }
@@ -238,9 +279,6 @@ public class DiagramService {
             }
             long[] c = counts.get(facility);
 
-            if (!isCompleted(record)) {
-                continue;
-            }
             c[0]++;
 
             String result = record.getResearchResult();
@@ -270,9 +308,9 @@ public class DiagramService {
                 if (planName != null) {
                     FacilityPlan plan = plansByName.get(planName);
                     if (plan != null) {
-                        row.setAnnualPlanTotal(plan.getAnnualPlanTotal());
-                        row.setMonthlyPlanTotal(plan.getMonthlyPlanTotal());
-                        row.setWeeklyPlanTotal(plan.getWeeklyPlanTotal());
+                        row.setAnnualPlanTotal(plan.getAnnualPlanAllAges());
+                        row.setMonthlyPlanTotal(plan.getMonthlyPlanAllAges());
+                        row.setWeeklyPlanTotal(plan.getWeeklyPlanAllAges());
                     }
                 }
             }

@@ -3,12 +3,24 @@ package com.emias.dashboard.controller;
 import com.emias.dashboard.entity.FacilityMapping;
 import com.emias.dashboard.entity.FacilityPlan;
 import com.emias.dashboard.entity.Screening;
+import com.emias.dashboard.model.FacilityRating;
+import com.emias.dashboard.model.PatientRecord;
 import com.emias.dashboard.repository.ScreeningRepository;
+import com.emias.dashboard.service.DiagramService;
 import com.emias.dashboard.service.FacilityMappingService;
 import com.emias.dashboard.service.FacilityPlanService;
 import com.emias.dashboard.service.FileValidationException;
 import com.emias.dashboard.service.ReportService;
 import com.emias.dashboard.service.SettingsService;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import java.io.ByteArrayOutputStream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -53,17 +65,20 @@ public class DataController {
     private final SettingsService        settingsService;
     private final FacilityPlanService    facilityPlanService;
     private final FacilityMappingService facilityMappingService;
+    private final DiagramService         diagramService;
 
     public DataController(ReportService reportService,
                           ScreeningRepository screeningRepository,
                           SettingsService settingsService,
                           FacilityPlanService facilityPlanService,
-                          FacilityMappingService facilityMappingService) {
+                          FacilityMappingService facilityMappingService,
+                          DiagramService diagramService) {
         this.reportService          = reportService;
         this.screeningRepository    = screeningRepository;
         this.settingsService        = settingsService;
         this.facilityPlanService    = facilityPlanService;
         this.facilityMappingService = facilityMappingService;
+        this.diagramService         = diagramService;
     }
 
     /**
@@ -445,6 +460,88 @@ public class DataController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body(Map.of("error", "Ошибка: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Выгружает рейтинг медицинских организаций в Excel.
+     * Каждый показатель — в отдельной ячейке, заголовки выделены жирным.
+     */
+    @GetMapping("/rating/export")
+    public ResponseEntity<byte[]> exportRatingXlsx() throws IOException {
+        List<PatientRecord> records = reportService.readAllRecords();
+
+        Map<String, String> mappingMap = facilityMappingService.getMappingMap();
+        Map<String, FacilityPlan> plansByName = new LinkedHashMap<>();
+        for (FacilityPlan plan : facilityPlanService.getAllPlans()) {
+            plansByName.put(plan.getFacilityName(), plan);
+        }
+
+        List<FacilityRating> rating = diagramService.buildFacilityRating(records, mappingMap, plansByName);
+
+        List<String> dates = reportService.getUploadedDates();
+        if (!dates.isEmpty()) {
+            List<PatientRecord> monthly = reportService.readRecordsForMonth(dates.get(0));
+            diagramService.enrichWithMonthlyFact(rating, monthly);
+        }
+
+        try (XSSFWorkbook wb = new XSSFWorkbook()) {
+            XSSFSheet sheet = wb.createSheet("Рейтинг");
+
+            // Стиль заголовка: жирный белый текст, синий фон
+            XSSFCellStyle hStyle = wb.createCellStyle();
+            XSSFFont hFont = wb.createFont();
+            hFont.setBold(true);
+            hFont.setColor(IndexedColors.WHITE.getIndex());
+            hStyle.setFont(hFont);
+            hStyle.setFillForegroundColor(IndexedColors.CORNFLOWER_BLUE.getIndex());
+            hStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+            // Заголовки столбцов
+            String[] headers = {
+                "№", "Медицинская организация", "Завершено всего",
+                "План (год)", "% плана", "План (мес)", "Факт (мес)",
+                "Без отклонений", "Выявлено отклонений", "Отказ"
+            };
+            Row hRow = sheet.createRow(0);
+            for (int i = 0; i < headers.length; i++) {
+                Cell c = hRow.createCell(i);
+                c.setCellValue(headers[i]);
+                c.setCellStyle(hStyle);
+            }
+
+            // Строки данных
+            for (int i = 0; i < rating.size(); i++) {
+                FacilityRating r = rating.get(i);
+                Row row = sheet.createRow(i + 1);
+                row.createCell(0).setCellValue(i + 1);
+                row.createCell(1).setCellValue(r.getName() != null ? r.getName() : "");
+                row.createCell(2).setCellValue(r.getCompleted());
+                if (r.getAnnualPlanTotal()  != null) row.createCell(3).setCellValue(r.getAnnualPlanTotal());
+                if (r.getCompletionPercent() != null) row.createCell(4).setCellValue(r.getCompletionPercent());
+                if (r.getMonthlyPlanTotal() != null) row.createCell(5).setCellValue(r.getMonthlyPlanTotal());
+                row.createCell(6).setCellValue(r.getMonthlyCompleted());
+                row.createCell(7).setCellValue(r.getWithoutDeviations());
+                row.createCell(8).setCellValue(r.getWithDeviations());
+                row.createCell(9).setCellValue(r.getRefusal());
+            }
+
+            // Авторазмер и закрепление заголовка
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+            sheet.createFreezePane(0, 1);
+
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            wb.write(bos);
+
+            String filename = "rating.xlsx";
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + filename + "\"")
+                    .contentType(MediaType.parseMediaType(
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                    .body(bos.toByteArray());
         }
     }
 

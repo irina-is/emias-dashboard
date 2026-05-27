@@ -78,6 +78,8 @@ public class PageController {
             ScreeningStats stats = diagramService.buildStats(records, annualPlan);
             model.addAttribute("stats", stats);
 
+            model.addAttribute("ageCounts", diagramService.buildScreeningAgeCounts(records));
+
             MonthlyChartData monthly = diagramService.buildMonthlyChartData(records, annualPlan);
             model.addAttribute("monthly", monthly);
 

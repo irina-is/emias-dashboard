@@ -381,6 +381,84 @@
         html[data-theme="dark"] .dropdown-item:hover { background: #141D35; color: var(--emias-blue); }
         html[data-theme="dark"] .dropdown-item.active { background: var(--emias-blue); color: #fff; }
 
+        /* KPI-лента возрастных групп */
+        .kpi-strip-title {
+            font-size: 0.76rem;
+            color: var(--emias-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+        .kpi-strip {
+            display: flex;
+            align-items: stretch;
+        }
+        .kpi-cell {
+            flex: 1;
+            text-align: center;
+            padding: 10px 14px 8px;
+            border-right: 1px solid var(--emias-border);
+            border-radius: 8px;
+            transition: background 0.15s, box-shadow 0.15s;
+            cursor: default;
+            position: relative;
+        }
+        .kpi-cell:last-child { border-right: none; }
+        .kpi-cell:not(.kpi-cell-total):hover {
+            background: var(--emias-blue-lt);
+            box-shadow: 0 2px 8px rgba(59,91,216,0.08);
+        }
+        /* Цветовой акцент — полоска сверху */
+        .kpi-cell:not(.kpi-cell-total)::before {
+            content: '';
+            display: block;
+            width: 28px;
+            height: 3px;
+            border-radius: 2px;
+            margin: 0 auto 7px;
+        }
+        .kpi-strip .kpi-cell:nth-child(2)::before { background: #4DABF7; }
+        .kpi-strip .kpi-cell:nth-child(3)::before { background: #69DB7C; }
+        .kpi-strip .kpi-cell:nth-child(4)::before { background: #FFA94D; }
+        .kpi-strip .kpi-cell:nth-child(5)::before { background: #E599F7; }
+        .kpi-strip .kpi-cell:nth-child(6)::before { background: #FF8787; }
+        .kpi-strip .kpi-cell:nth-child(7)::before { background: #63E6BE; }
+        .kpi-cell-total {
+            flex: 0 0 auto;
+            text-align: left;
+            padding-left: 0;
+            padding-right: 24px;
+            border-right: 2px solid var(--emias-border) !important;
+            border-radius: 0;
+            margin-right: 4px;
+        }
+        .kpi-cell-total:hover { background: none !important; box-shadow: none !important; }
+        .kpi-cell-label {
+            font-size: 0.74rem;
+            color: var(--emias-muted);
+            font-weight: 500;
+            margin-bottom: 3px;
+            white-space: nowrap;
+        }
+        .kpi-cell-value {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--emias-text);
+            line-height: 1.2;
+        }
+        .kpi-cell-total .kpi-cell-label { color: var(--emias-blue); font-weight: 700; }
+        .kpi-cell-total .kpi-cell-value { font-size: 1.75rem; color: var(--emias-blue); }
+        .kpi-cell-pct {
+            font-size: 0.68rem;
+            color: var(--emias-muted);
+            margin-top: 3px;
+        }
+        /* Тёмная тема */
+        html[data-theme="dark"] .kpi-cell:not(.kpi-cell-total):hover {
+            background: var(--emias-blue-lt);
+        }
+
         /* Поиск по таблице */
         .filter-wrap {
             position: relative;
@@ -579,6 +657,23 @@
             </div>
         </div>
 
+        <!-- Блок 1б: Скрининги по возрастным группам (KPI-лента) -->
+        <div class="drag-block" th:if="${ageCounts}">
+            <div class="chart-box" style="padding: 16px 24px;">
+                <div class="drag-handle no-print"><i class="bi bi-grip-horizontal"></i></div>
+                <div class="kpi-strip-title">Скрининги по возрастным группам</div>
+                <div class="kpi-strip">
+                    <div th:each="ag, stat : ${ageCounts}"
+                         th:classappend="${stat.first} ? ' kpi-cell-total' : ''"
+                         class="kpi-cell">
+                        <div class="kpi-cell-label" th:text="${ag.label}"></div>
+                        <div class="kpi-cell-value" th:text="${#numbers.formatInteger(ag.count, 0, 'DEFAULT')}"></div>
+                        <div class="kpi-cell-pct" th:if="${ag.hasPercent()}" th:text="${ag.percentText}"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Блок 2: График план / факт по месяцам -->
         <div class="drag-block" th:if="${config.chartMonthlyEnabled}">
             <div class="chart-box">
@@ -675,9 +770,10 @@
                     <button class="btn-icon" id="sort-btn" onclick="sortRating()" title="Сортировка: лучшие вверху — нажмите, чтобы показать худших первыми" style="flex-shrink: 0;">
                         <i class="bi bi-sort-down"></i>
                     </button>
-                    <button class="btn-icon" onclick="exportRatingCSV()" title="Скачать CSV" style="flex-shrink: 0;">
-                        <i class="bi bi-download"></i>
-                    </button>
+                    <a class="btn-icon" th:href="${basePath + '/api/rating/export'}"
+                       title="Скачать Excel" style="flex-shrink: 0; line-height: 1.2; text-decoration: none;">
+                        <i class="bi bi-file-earmark-excel"></i>
+                    </a>
                     <div class="filter-wrap">
                         <i class="bi bi-search"></i>
                         <input type="text" class="filter-input" id="facility-filter"

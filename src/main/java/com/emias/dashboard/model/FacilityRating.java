@@ -43,7 +43,7 @@ public class FacilityRating {
     // ── Геттеры плана ────────────────────────────────────────────────────────
 
     public Long getAnnualPlanTotal()  { return annualPlanTotal; }
-    public Long getMonthlyPlanTotal() { return monthlyPlanTotal; }
+    public Long getMonthlyPlanTotal() { return annualPlanTotal != null ? annualPlanTotal / 12 : null; }
     public Long getWeeklyPlanTotal()  { return weeklyPlanTotal; }
 
     /**
@@ -51,7 +51,7 @@ public class FacilityRating {
      */
     public Integer getCompletionPercent() {
         if (annualPlanTotal == null || annualPlanTotal == 0) return null;
-        return (int) Math.min(100L, completed * 100L / annualPlanTotal);
+        return (int)(completed * 100L / annualPlanTotal);
     }
 
     /**
