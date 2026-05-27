@@ -28,16 +28,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                // Главная, дашборд и логин — публичные
                 .requestMatchers("/", "/dashboard", "/login").permitAll()
-                // Статические ресурсы — публичные
                 .requestMatchers("/css/**", "/js/**", "/fonts/**").permitAll()
-                // Всё остальное — только после входа
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/admin", true)
+                .defaultSuccessUrl(basePath + "/admin", true)
+                .failureUrl(basePath + "/login?error")
                 .permitAll()
             )
             .logout(logout -> logout

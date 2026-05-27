@@ -3,8 +3,16 @@
     "allow": [
       "Bash(dir /s /b \"C:\\\\Users\\\\Stepler\\\\IdeaProjects\\\\emias-dashboard\\\\src\\\\main\\\\java\\\\com\\\\emias\\\\dashboard\\\\service\\\\*.java\")",
       "Bash(mvn compile *)",
-      "Read(//c/Users/Stepler/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/08c25091-a7cf-40e8-be84-13c6d7ca661a/b15e7938-a38b-4523-a2de-91ba3965ef93/skills/xlsx/**)",
-      "Bash(python -)"
+      "Bash(export SSHPASS='kjs+@Q3Ji_3HfZ')",
+      "Bash(sshpass -e ssh -o StrictHostKeyChecking=no root@186.246.30.21 'ls -lh /opt/emias-dashboard/ && echo \"---\" && cat /etc/systemd/system/emias-dashboard.service')",
+      "Bash(sshpass -e ssh -o StrictHostKeyChecking=no root@186.246.30.21 'sed -i \"s|app.jar|dashboard-1.0.0.jar|g\" /etc/systemd/system/emias-dashboard.service && \\\\ *)",
+      "Bash(sshpass -e *)",
+      "Bash(mvn package *)",
+      "Bash(pip install *)",
+      "Bash(python3 -)",
+      "Bash(pip3 install *)",
+      "Bash(ls /Library/Fonts/ | grep -i times; ls /System/Library/Fonts/ | grep -i times)",
+      "Bash(xargs -I{} bash -c 'fc-query --format=\"%{family}\\\\n\" \"{}\" 2>/dev/null | grep -i \"times\\\\|new roman\" && echo \"{}\"')"
     ]
   }
 }
