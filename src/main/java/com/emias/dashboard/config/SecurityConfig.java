@@ -34,12 +34,12 @@ public class SecurityConfig {
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl(basePath + "/admin", true)
-                .failureUrl(basePath + "/login?error")
+                .defaultSuccessUrl("/admin", true)
+                .failureUrl("/login?error")
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutSuccessUrl(basePath + "/")
+                .logoutSuccessUrl("/")
                 .permitAll()
             )
             .exceptionHandling(ex -> ex
