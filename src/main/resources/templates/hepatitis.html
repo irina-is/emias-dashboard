@@ -199,7 +199,18 @@
         .rating-table thead th:not(.sort-asc):not(.sort-desc) .sort-icon::before { content:'↕'; }
 
         .rating-table tbody td { border-bottom:1px solid var(--emias-border); padding:8px 10px; vertical-align:middle; background:var(--emias-bg); }
-        .rating-table tbody tr:hover td { background:var(--emias-blue-lt) !important; }
+        .rating-table tbody tr {
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .rating-table tbody tr:hover td {
+            background: var(--emias-blue-lt) !important;
+        }
+        .rating-table tbody tr:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 91, 216, 0.10);
+            position: relative;
+            z-index: 1;
+        }
         .rating-table tfoot td { font-weight:700; background:var(--emias-blue-lt) !important; border-top:2px solid var(--emias-border); padding:8px 10px; }
 
         /* Закреплённые столбцы */
