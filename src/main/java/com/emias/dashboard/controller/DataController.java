@@ -2,12 +2,16 @@ package com.emias.dashboard.controller;
 
 import com.emias.dashboard.entity.FacilityMapping;
 import com.emias.dashboard.entity.FacilityPlan;
+import com.emias.dashboard.entity.MoTask;
 import com.emias.dashboard.entity.Screening;
+import com.emias.dashboard.repository.MoTaskRepository;
 import com.emias.dashboard.model.FacilityRating;
 import com.emias.dashboard.model.PatientRecord;
 import com.emias.dashboard.repository.ScreeningRepository;
 import com.emias.dashboard.service.DiagramService;
 import com.emias.dashboard.service.FacilityMappingService;
+import com.emias.dashboard.service.HcvService;
+import com.emias.dashboard.service.HcvRegistryService;
 import com.emias.dashboard.service.FacilityPlanService;
 import com.emias.dashboard.service.FileValidationException;
 import com.emias.dashboard.service.ReportService;
@@ -66,19 +70,68 @@ public class DataController {
     private final FacilityPlanService    facilityPlanService;
     private final FacilityMappingService facilityMappingService;
     private final DiagramService         diagramService;
+    private final HcvService             hcvService;
+    private final HcvRegistryService     hcvRegistryService;
+    private final MoTaskRepository       moTaskRepository;
 
     public DataController(ReportService reportService,
                           ScreeningRepository screeningRepository,
                           SettingsService settingsService,
                           FacilityPlanService facilityPlanService,
                           FacilityMappingService facilityMappingService,
-                          DiagramService diagramService) {
+                          DiagramService diagramService,
+                          HcvService hcvService,
+                          HcvRegistryService hcvRegistryService,
+                          MoTaskRepository moTaskRepository) {
         this.reportService          = reportService;
         this.screeningRepository    = screeningRepository;
         this.settingsService        = settingsService;
         this.facilityPlanService    = facilityPlanService;
         this.facilityMappingService = facilityMappingService;
         this.diagramService         = diagramService;
+        this.hcvService             = hcvService;
+        this.hcvRegistryService     = hcvRegistryService;
+        this.moTaskRepository       = moTaskRepository;
+    }
+
+    /* ── Поручения МО ── */
+    @PostMapping("/tasks")
+    public ResponseEntity<MoTask> createTask(@RequestParam String title,
+                                             @RequestParam String priority,
+                                             @RequestParam String status,
+                                             @RequestParam(required = false) String responsible,
+                                             @RequestParam(required = false) String deadline,
+                                             @RequestParam(required = false) String tag) {
+        MoTask t = new MoTask();
+        t.setTitle(title);
+        t.setPriority(priority);
+        t.setStatus(status);
+        t.setResponsible(responsible);
+        t.setTag(tag);
+        if (deadline != null && !deadline.isBlank())
+            t.setDeadline(java.time.LocalDate.parse(deadline));
+        return ResponseEntity.ok(moTaskRepository.save(t));
+    }
+
+    @DeleteMapping("/tasks/{id}")
+    public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
+        moTaskRepository.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/tasks/{id}/status")
+    public ResponseEntity<Void> updateTaskStatus(@PathVariable Long id,
+                                                  @RequestParam String status) {
+        moTaskRepository.findById(id).ifPresent(t -> {
+            t.setStatus(status);
+            moTaskRepository.save(t);
+        });
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/tasks/list")
+    public ResponseEntity<java.util.List<MoTask>> listTasks() {
+        return ResponseEntity.ok(moTaskRepository.findAllByOrderByIdDesc());
     }
 
     /**
@@ -543,6 +596,59 @@ public class DataController {
                             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                     .body(bos.toByteArray());
         }
+    }
+
+    // ── 4ДИ Гепатит С ────────────────────────────────────────────────────────
+
+    @PostMapping("/hcv/upload-progress")
+    public ResponseEntity<?> uploadHcvProgress(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("project") int projectId) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "errors", List.of("Файл не выбран")));
+        }
+        if (projectId < 1 || projectId > 3) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "errors", List.of("Неверный номер проекта")));
+        }
+        try {
+            int updated = hcvService.uploadProgress(file, projectId);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Обновлено организаций: " + updated));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("success", false, "errors", List.of("Ошибка: " + e.getMessage())));
+        }
+    }
+
+    // ── Свод ВГС (реестр пациентов гепатита С) ──────────────────────────────
+
+    /**
+     * Загружает свод ВГС. Полностью заменяет данные в таблице hcv_registry.
+     */
+    @PostMapping("/hcv/upload-registry")
+    public ResponseEntity<?> uploadHcvRegistry(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Файл не выбран"));
+        }
+        String filename = file.getOriginalFilename();
+        if (filename == null || !filename.toLowerCase().endsWith(".xlsx")) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Нужен файл формата .xlsx"));
+        }
+        try {
+            int count = hcvRegistryService.upload(file);
+            return ResponseEntity.ok(Map.of("success", true,
+                    "message", "Свод ВГС загружен: " + count + " пациентов"));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("success", false, "message", "Ошибка: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Количество записей в реестре ВГС.
+     */
+    @GetMapping("/hcv/registry/count")
+    public Map<String, Object> getHcvRegistryCount() {
+        return Map.of("count", hcvRegistryService.count());
     }
 
     // Диагностика: показывает что лежит в базе

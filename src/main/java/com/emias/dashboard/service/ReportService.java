@@ -81,12 +81,16 @@ public class ReportService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    private final ScreeningRepository screeningRepository;
-    private final UploadRepository    uploadRepository;
+    private final ScreeningRepository  screeningRepository;
+    private final UploadRepository     uploadRepository;
+    private final DashboardCacheService dashboardCache;
 
-    public ReportService(ScreeningRepository screeningRepository, UploadRepository uploadRepository) {
+    public ReportService(ScreeningRepository screeningRepository,
+                         UploadRepository uploadRepository,
+                         DashboardCacheService dashboardCache) {
         this.screeningRepository = screeningRepository;
         this.uploadRepository    = uploadRepository;
+        this.dashboardCache      = dashboardCache;
     }
 
     /**
@@ -160,6 +164,7 @@ public class ReportService {
         // Шаг 5: сохраняем запись о загрузке
         uploadRepository.save(new Upload(reportDate, records.size(), originalName));
         log.info("=== Загрузка завершена успешно: {} записей за {} ===", records.size(), reportDate);
+        dashboardCache.invalidate();
     }
 
     /**
@@ -182,6 +187,7 @@ public class ReportService {
         Files.deleteIfExists(file);
 
         log.info("Данные и файл за {} удалены", reportDate);
+        dashboardCache.invalidate();
     }
 
     /**

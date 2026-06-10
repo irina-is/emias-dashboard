@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title th:text="${config.dashboardTitle}">Дашборд</title>
-    <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('emias-theme')||'light')}catch(e){}</script>
+    <script>document.documentElement.setAttribute('data-theme','dark');</script>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%233B5BD8'/><rect x='4' y='18' width='6' height='10' rx='1' fill='white'/><rect x='13' y='10' width='6' height='18' rx='1' fill='white'/><rect x='22' y='6' width='6' height='22' rx='1' fill='white'/></svg>">
     <link th:href="${basePath + '/css/fonts.css'}" rel="stylesheet">
     <link th:href="${basePath + '/css/bootstrap.min.css'}" rel="stylesheet">
@@ -307,35 +307,40 @@
         .conclusion-ok            { color: var(--emias-success); }
         .conclusion-ok::before    { color: var(--emias-success); }
 
-        /* ═══ Ночная тема ═══ */
+        /* ═══ Тёмная тема (всегда) ═══ */
         html[data-theme="dark"] {
-            --emias-bg:      #0D1117;
-            --emias-text:    #C9D1D9;
-            --emias-border:  #21262D;
-            --emias-muted:   #6A7280;
-            --emias-blue-lt: #141D35;
+            --emias-bg:      #0b0f1a;
+            --emias-text:    #e2e8f0;
+            --emias-border:  #1e2535;
+            --emias-muted:   #64748b;
+            --emias-blue:    #818cf8;
+            --emias-blue-lt: rgba(99,102,241,.1);
+            --emias-success: #4ade80;
+            --emias-danger:  #f87171;
+            --emias-warning: #fcd34d;
         }
         html[data-theme="dark"] body       { background: var(--emias-bg); color: var(--emias-text); }
+        html[data-theme="dark"] body::before { background: #6366f1; }
         html[data-theme="dark"] h2,
         html[data-theme="dark"] h5         { color: var(--emias-text); }
-        html[data-theme="dark"] .card-stat { background: #161B22; border-color: var(--emias-border); }
-        html[data-theme="dark"] .chart-box { background: #161B22; border-color: var(--emias-border); }
-        html[data-theme="dark"] .progress  { background: var(--emias-blue-lt); }
+        html[data-theme="dark"] .card-stat { background: #111827; border-color: var(--emias-border); }
+        html[data-theme="dark"] .chart-box { background: #111827; border-color: var(--emias-border); }
+        html[data-theme="dark"] .progress  { background: rgba(99,102,241,.15); }
+        html[data-theme="dark"] .progress-bar { background-color: #818cf8 !important; }
         html[data-theme="dark"] .stat-label,
         html[data-theme="dark"] .stat-plan { color: var(--emias-muted); }
         html[data-theme="dark"] .stat-value { color: var(--emias-text); }
-        html[data-theme="dark"] .btn-icon  { background: #161B22; border-color: var(--emias-border); color: var(--emias-muted); }
-        html[data-theme="dark"] .btn-icon:hover { border-color: var(--emias-blue); color: var(--emias-blue); }
-        html[data-theme="dark"] .alert-danger  { background: #2A1515; color: #FC8989; }
-        html[data-theme="dark"] .alert-success { background: #0F2018; color: #6EE7B7; }
-        html[data-theme="dark"] .alert-warning { background: #241C00; color: #FFD43B; }
-        html[data-theme="dark"] .alert-nodate  { background: #241C00; color: #FFD43B; }
-        html[data-theme="dark"] .badge-archive { background: #241C00; color: #FFD43B; }
-        html[data-theme="dark"] .btn-icon-warning { }
+        html[data-theme="dark"] .btn-icon  { background: #111827; border-color: var(--emias-border); color: var(--emias-muted); }
+        html[data-theme="dark"] .btn-icon:hover { border-color: #818cf8; color: #818cf8; }
+        html[data-theme="dark"] .alert-danger  { background: rgba(248,113,113,.1); color: #fca5a5; border:1px solid rgba(248,113,113,.2); }
+        html[data-theme="dark"] .alert-success { background: rgba(74,222,128,.08); color: #86efac; border:1px solid rgba(74,222,128,.15); }
+        html[data-theme="dark"] .alert-warning { background: rgba(252,211,77,.08); color: #fde68a; border:1px solid rgba(252,211,77,.15); }
+        html[data-theme="dark"] .alert-nodate  { background: rgba(252,211,77,.08); color: #fde68a; }
+        html[data-theme="dark"] .badge-archive { background: rgba(252,211,77,.08); color: #fde68a; }
         html[data-theme="dark"] .conclusion-risk,
-        html[data-theme="dark"] .conclusion-risk::before { color: #FC8989; }
+        html[data-theme="dark"] .conclusion-risk::before { color: #f87171; }
         html[data-theme="dark"] .conclusion-ok,
-        html[data-theme="dark"] .conclusion-ok::before   { color: #6EE7B7; }
+        html[data-theme="dark"] .conclusion-ok::before   { color: #4ade80; }
         html[data-theme="dark"] .table {
             --bs-table-bg: transparent;
             --bs-table-color: var(--emias-text);
@@ -376,7 +381,7 @@
         }
         .dropdown-item:hover, .dropdown-item:focus { background: var(--emias-blue-lt); color: var(--emias-blue); }
         .dropdown-item.active, .dropdown-item:active { background: var(--emias-blue); color: #fff; }
-        html[data-theme="dark"] .dropdown-menu { background: #1C2030; border-color: #21262D; }
+        html[data-theme="dark"] .dropdown-menu { background: #1e2535; border-color: #2a3347; }
         html[data-theme="dark"] .dropdown-item { color: #C9D1D9; }
         html[data-theme="dark"] .dropdown-item:hover { background: #141D35; color: var(--emias-blue); }
         html[data-theme="dark"] .dropdown-item.active { background: var(--emias-blue); color: #fff; }
@@ -539,7 +544,7 @@
         }
         html[data-theme="dark"] #rating-table thead th,
         html[data-theme="dark"] #rating-table thead td {
-            background: #161B22;
+            background: #111827;
         }
         html[data-theme="dark"] #rating-table thead tr:nth-child(2) td {
             box-shadow: 0 3px 6px rgba(0,0,0,0.25);
@@ -577,16 +582,13 @@
             </span>
         </div>
         <div class="d-flex align-items-center justify-content-between no-print" style="margin-top: 12px;">
-            <a th:href="${basePath + '/'}" class="btn-emias-outline">← Назад</a>
+            <a th:href="${basePath + '/hepatitis'}" class="btn-emias-outline">← Гепатит С</a>
             <div class="d-flex gap-2 align-items-center">
                 <button class="btn-icon" onclick="window.print()" title="Сохранить как PDF">
                     <i class="bi bi-file-earmark-pdf"></i>
                 </button>
                 <button class="btn-icon" onclick="location.reload()" title="Обновить данные">
                     <i class="bi bi-arrow-clockwise"></i>
-                </button>
-                <button class="btn-icon" onclick="toggleTheme()" title="Сменить тему" id="theme-btn">
-                    <i id="theme-icon" class="bi bi-moon-stars-fill"></i>
                 </button>
             </div>
         </div>

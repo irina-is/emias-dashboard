@@ -21,12 +21,16 @@ public class HcvService {
     // Мета-данные по проектам
     private static final int[]    PROJECT_IDS     = {1, 2, 3};
     private static final String[] PROJECT_TITLES  = {
-            "Лечение гепатита С",
+            "Дневной стационар",
             "Амбулаторная помощь",
             "ПЦР-тестирование"
     };
-    private static final int[]    PROJECT_TARGETS  = {4135, 1442, 5522};
-    private static final int[]    PROJECT_LEADS    = {414, 144, 106};
+    // Целевые значения на 2026 год согласно доп. соглашению № 056-2024-Д50055-1/2:
+    // Проект 1 (дневной стационар): 4 105 чел. (п. 1.5)
+    // Проект 2 (амбулаторное лечение): 1 416 чел. (п. 1.4)
+    // Проект 3 (УВО / излечены): 5 163 чел. (п. 1.6)
+    private static final int[]    PROJECT_TARGETS  = {4105, 1416, 5163};
+    private static final int[]    PROJECT_LEADS    = {411, 142, 99};
     private static final String[] PROJECT_DEADLINES = {
             "01.08.2026", "01.08.2026", "31.12.2026"
     };
