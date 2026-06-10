@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ПЦР — дашборд</title>
+    <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('emias-theme')||'light')}catch(e){}</script>
+    <link th:href="${basePath + '/css/fonts.css'}" rel="stylesheet">
+    <link th:href="${basePath + '/css/bootstrap.min.css'}" rel="stylesheet">
+    <link th:href="${basePath + '/css/bootstrap-icons.css'}" rel="stylesheet">
+    <style>
+        :root {
+            --emias-blue:    #3B5BD8;
+            --emias-border:  #E8ECF5;
+            --emias-bg:      #F4F6FB;
+            --emias-text:    #1A1A2E;
+            --emias-muted:   #868E96;
+            --emias-success: #2F9E44;
+            --emias-danger:  #E03131;
+            --emias-warning: #F59F00;
+        }
+        body { background: var(--emias-bg); font-family: 'Inter', sans-serif; color: var(--emias-text); margin:0; }
+        body::before { content:''; display:block; position:fixed; top:0;left:0;right:0; height:3px; background:var(--emias-blue); z-index:9999; }
+
+        /* Шапка */
+        .top-bar { background:#fff; border-bottom:1px solid var(--emias-border); padding:14px 28px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+        .top-bar .title { font-size:1rem; font-weight:700; display:flex; align-items:center; gap:10px; }
+        .badge-year { background:var(--emias-blue); color:#fff; font-size:.7rem; padding:2px 8px; border-radius:20px; font-weight:600; }
+        .back-btn { font-size:.82rem; color:var(--emias-muted); text-decoration:none; display:flex; align-items:center; gap:4px; }
+        .back-btn:hover { color:var(--emias-blue); }
+
+        .page-body { padding:24px 28px; max-width:1500px; margin:0 auto; }
+
+        /* KPI */
+        .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:16px; margin-bottom:24px; }
+        .kpi-card { background:#fff; border-radius:14px; padding:20px 22px; border:1px solid var(--emias-border); }
+        .kpi-label { font-size:.75rem; color:var(--emias-muted); font-weight:500; margin-bottom:6px; }
+        .kpi-value { font-size:2rem; font-weight:800; letter-spacing:-.03em; line-height:1; color:var(--emias-blue); }
+        .kpi-value.green  { color:var(--emias-success); }
+        .kpi-value.red    { color:var(--emias-danger); }
+        .kpi-value.gray   { color:var(--emias-muted); }
+        .kpi-sub { font-size:.72rem; color:var(--emias-muted); margin-top:6px; }
+        .kpi-bar  { height:4px; background:#E8ECF5; border-radius:2px; margin-top:10px; overflow:hidden; }
+        .kpi-fill-pos { height:100%; border-radius:2px; background:linear-gradient(90deg,#E03131,#FF6B6B); }
+
+        /* Секция */
+        .section-box { background:#fff; border-radius:14px; border:1px solid var(--emias-border); padding:22px 24px; margin-bottom:20px; }
+        .section-title { font-size:.9rem; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+
+        /* Таблица */
+        .pcr-table { width:100%; border-collapse:collapse; font-size:.82rem; }
+        .pcr-table th {
+            background:#F8F9FC; color:var(--emias-muted); font-weight:600; font-size:.7rem;
+            text-transform:uppercase; letter-spacing:.04em; padding:10px 12px;
+            border-bottom:2px solid var(--emias-border); text-align:right; white-space:nowrap;
+        }
+        .pcr-table th.left { text-align:left; }
+        .pcr-table th.year-col { background:#EEF2FF; color:var(--emias-blue); }
+        .pcr-table td { padding:8px 12px; border-bottom:1px solid var(--emias-border); text-align:right; vertical-align:middle; }
+        .pcr-table td.left { text-align:left; font-weight:500; }
+        .pcr-table tr:hover td { background:#F8F9FC; }
+        .pcr-table tr:last-child td { border-bottom:none; }
+        .pcr-table tfoot td { font-weight:700; background:#F8F9FC; border-top:2px solid var(--emias-border); }
+
+        .num-pos  { color:var(--emias-danger); font-weight:700; }
+        .num-neg  { color:var(--emias-success); font-weight:600; }
+        .num-gray { color:var(--emias-muted); }
+        .num-year { color:var(--emias-blue); font-weight:600; }
+        .num-total { font-weight:700; }
+
+        .pct-badge { display:inline-block; background:#FFF5F5; color:var(--emias-danger); font-size:.68rem; border-radius:4px; padding:1px 5px; margin-left:4px; font-weight:600; }
+
+        .mo-num { color:var(--emias-muted); font-size:.72rem; width:28px; text-align:center; }
+
+        .error-box { background:#FFF5F5; border:1px solid #FFC9C9; border-radius:12px; padding:20px 24px; color:var(--emias-danger); }
+
+        /* Поиск */
+        .search-input { border:1px solid var(--emias-border); border-radius:8px; padding:6px 14px; font-size:.82rem; width:280px; outline:none; }
+        .search-input:focus { border-color:var(--emias-blue); }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="title">
+        🧬 ПЦР-тестирование
+    </div>
+    <a th:href="${basePath + '/hepatitis'}" class="back-btn">
+        <i class="bi bi-arrow-left"></i> Гепатит С
+    </a>
+</div>
+
+<div class="page-body">
+
+    <div th:if="${error}" class="error-box" th:text="${error}"></div>
+
+    <th:block th:if="${stats != null}">
+
+    <!-- KPI -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-label">ПЦР положительных</div>
+            <div class="kpi-value red" th:text="${#numbers.formatInteger(stats.totalPositive,0,'DEFAULT')}">0</div>
+            <div class="kpi-sub" th:text="${stats.positivePct()} + '% от всех'"></div>
+            <div class="kpi-bar"><div class="kpi-fill-pos" th:style="'width:'+${stats.positivePct()}+'%'"></div></div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">ПЦР отрицательных</div>
+            <div class="kpi-value green" th:text="${#numbers.formatInteger(stats.totalNegative,0,'DEFAULT')}">0</div>
+            <div class="kpi-sub" th:text="${stats.totalAll > 0 ? stats.totalNegative * 100 / stats.totalAll : 0} + '% от всех'"></div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Нет информации о ПЦР</div>
+            <div class="kpi-value gray" th:text="${#numbers.formatInteger(stats.totalNoInfo,0,'DEFAULT')}">0</div>
+            <div class="kpi-sub" th:text="${stats.totalAll > 0 ? stats.totalNoInfo * 100 / stats.totalAll : 0} + '% от всех'"></div>
+        </div>
+        <!-- Только 2026 -->
+        <div th:if="${stats.totalByYear != null and stats.totalByYear['2026'] != null}" class="kpi-card">
+            <div class="kpi-label">2026</div>
+            <div class="kpi-value" th:text="${#numbers.formatInteger(stats.totalByYear['2026'],0,'DEFAULT')}">0</div>
+            <div class="kpi-sub">записей за год</div>
+        </div>
+    </div>
+
+    <!-- Таблица по территориям -->
+    <div class="section-box">
+        <div class="section-title" style="justify-content:space-between;">
+            <span>🏥 Разбивка по территориям</span>
+            <input class="search-input" type="text" placeholder="Поиск по МО..." id="moSearch" oninput="filterTable()">
+        </div>
+        <div style="overflow-x:auto;">
+            <table class="pcr-table" id="moTable">
+                <thead>
+                    <tr>
+                        <th class="mo-num left">№</th>
+                        <th class="left">Медицинская организация</th>
+                        <th class="left">ПЦР+</th>
+                        <th class="left">ПЦР−</th>
+                        <th class="left">Нет данных</th>
+                        <!-- Только 2026 -->
+                        <th class="year-col">2026</th>
+                        <th>Всего</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="row, i : ${stats.rows}">
+                        <td class="mo-num" th:text="${i.count}"></td>
+                        <td class="left" th:text="${row.territory}"></td>
+                        <td>
+                            <span class="num-pos" th:if="${row.positive > 0}" th:text="${row.positive}"></span>
+                            <span class="num-gray" th:unless="${row.positive > 0}">—</span>
+                            <span th:if="${row.positive > 0}" class="pct-badge" th:text="${row.positivePct()}+'%'"></span>
+                        </td>
+                        <td>
+                            <span class="num-neg" th:if="${row.negative > 0}" th:text="${row.negative}"></span>
+                            <span class="num-gray" th:unless="${row.negative > 0}">—</span>
+                        </td>
+                        <td class="num-gray" th:text="${row.noInfo > 0 ? row.noInfo : '—'}"></td>
+                        <!-- Только 2026 -->
+                        <td>
+                            <span class="num-year" th:if="${row.byYear['2026'] != null and row.byYear['2026'] > 0}" th:text="${row.byYear['2026']}"></span>
+                            <span class="num-gray" th:unless="${row.byYear['2026'] != null and row.byYear['2026'] > 0}">—</span>
+                        </td>
+                        <td class="num-total" th:text="${row.total}"></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td></td>
+                        <td class="left">Итого</td>
+                        <td class="num-pos" th:text="${stats.totalPositive}"></td>
+                        <td class="num-neg" th:text="${stats.totalNegative}"></td>
+                        <td class="num-gray" th:text="${stats.totalNoInfo}"></td>
+                        <td class="num-year" th:text="${stats.totalByYear['2026'] != null ? stats.totalByYear['2026'] : '—'}"></td>
+                        <td class="num-total" th:text="${stats.totalAll}"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    </th:block>
+
+    <th:block th:unless="${stats != null}">
+        <div class="error-box">
+            Данные не загружены. Перейдите в <a th:href="${basePath + '/admin'}">панель администратора</a> и загрузите свод ВГС.
+        </div>
+    </th:block>
+
+</div>
+
+<script>
+function filterTable() {
+    const q = document.getElementById('moSearch').value.toLowerCase();
+    const rows = document.querySelectorAll('#moTable tbody tr');
+    rows.forEach(row => {
+        const name = row.cells[1].textContent.toLowerCase();
+        row.style.display = name.includes(q) ? '' : 'none';
+    });
+}
+</script>
+
+<script th:src="${basePath + '/js/bootstrap.bundle.min.js'}"></script>
+</body>
+</html>

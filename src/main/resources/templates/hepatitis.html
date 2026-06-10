@@ -2,717 +2,982 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Гепатит С — 4ДИ</title>
-    <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('emias-theme')||'light')}catch(e){}</script>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%233B5BD8'/><rect x='4' y='18' width='6' height='10' rx='1' fill='white'/><rect x='13' y='10' width='6' height='18' rx='1' fill='white'/><rect x='22' y='6' width='6' height='22' rx='1' fill='white'/></svg>">
+    <title>Гепатит С — Московская область</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230f172a'/><text y='22' x='6' font-size='20'>🧬</text></svg>">
     <link th:href="${basePath + '/css/fonts.css'}" rel="stylesheet">
-    <link th:href="${basePath + '/css/bootstrap.min.css'}" rel="stylesheet">
     <link th:href="${basePath + '/css/bootstrap-icons.css'}" rel="stylesheet">
     <style>
-        :root {
-            --emias-blue:    #3B5BD8;
-            --emias-blue-lt: #EDF2FF;
-            --emias-border:  #E8ECF5;
-            --emias-bg:      #F4F6FB;
-            --emias-text:    #1A1A2E;
-            --emias-muted:   #868E96;
-            --emias-success: #2F9E44;
-            --emias-danger:  #E03131;
-            --emias-warning: #F59F00;
-        }
-        body { background-color: #fff; font-family: 'Inter', sans-serif; color: var(--emias-text); }
-        body::before { content:''; display:block; position:fixed; top:0; left:0; right:0; height:3px; background:var(--emias-blue); z-index:9999; }
-        h2 { font-family:'Plus Jakarta Sans','Inter',sans-serif; font-weight:500; font-size:2rem; color:var(--emias-text); }
-        .text-success { color: var(--emias-success) !important; }
-        .text-danger  { color: var(--emias-danger)  !important; }
-        .text-warning { color: var(--emias-warning) !important; }
-        .text-muted   { color: var(--emias-muted)   !important; }
-        .text-primary { color: var(--emias-blue)    !important; }
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Inter',sans-serif;background:#0b0f1a;color:#e2e8f0;min-height:100vh;}
+        a{text-decoration:none;color:inherit;}
 
-        /* Карточка проекта */
-        .project-card { background:#fff; border-radius:16px; border:1px solid var(--emias-border); overflow:hidden; margin-bottom:32px; }
-        .project-header { background:var(--emias-blue-lt); padding:16px 24px; border-bottom:2px solid var(--emias-border); display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-        .project-header h3 { font-family:'Plus Jakarta Sans','Inter',sans-serif; font-size:1.2rem; font-weight:600; color:var(--emias-text); margin:0; }
-        .project-badge { font-size:0.75rem; font-weight:500; padding:3px 10px; border-radius:20px; background:#fff; color:var(--emias-blue); border:1px solid var(--emias-border); }
+        /* ── TOP NAV ── */
+        .topnav{
+            position:sticky;top:0;z-index:200;
+            background:rgba(11,15,26,.92);
+            backdrop-filter:blur(12px);
+            border-bottom:1px solid rgba(255,255,255,.07);
+            display:flex;align-items:center;gap:0;
+            padding:0 32px;height:56px;
+            overflow:visible;
+        }
+        .tn-logo{display:flex;align-items:center;gap:10px;margin-right:36px;flex-shrink:0;}
+        .tn-logo-icon{
+            width:32px;height:32px;border-radius:8px;
+            background:linear-gradient(135deg,#6366f1,#8b5cf6);
+            display:flex;align-items:center;justify-content:center;font-size:1rem;
+        }
+        .tn-logo-text{font-size:.95rem;font-weight:800;color:#fff;letter-spacing:-.01em;}
+        .tn-logo-year{font-size:.75rem;font-weight:600;color:#6366f1;margin-left:4px;}
+        .tn-links{display:flex;align-items:center;gap:2px;flex:1;overflow:visible;}
+        .tn-link{
+            padding:6px 13px;border-radius:6px;
+            font-size:.78rem;font-weight:500;color:rgba(255,255,255,.5);
+            white-space:nowrap;transition:all .15s;cursor:pointer;
+        }
+        .tn-link:hover{color:#fff;background:rgba(255,255,255,.07);}
+        .tn-link.active{color:#fff;background:rgba(99,102,241,.25);font-weight:600;}
+        .tn-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;}
 
-        /* KPI полоска */
-        .kpi-strip { display:flex; flex-wrap:wrap; gap:16px; padding:20px 24px; border-bottom:1px solid var(--emias-border); background:#fff; }
-        .kpi-cell {
-            flex:1; min-width:200px;
-            padding:20px 24px;
-            background:#fff;
-            border:1px solid var(--emias-border);
-            border-radius:14px;
-            box-shadow:0 2px 8px rgba(0,0,0,0.06);
-            display:flex; flex-direction:column; gap:4px;
+        /* ── DROPDOWN ── */
+        .tn-dropdown{position:relative;display:flex;align-items:center;}
+        .tn-dropdown-toggle{display:flex;align-items:center;gap:4px;}
+        .tn-caret{font-size:.6rem;opacity:.5;transition:transform .2s;}
+        .tn-dropdown.open .tn-caret{transform:rotate(180deg);}
+        .tn-dropdown-menu{
+            display:none;position:absolute;top:calc(100% + 4px);left:0;
+            background:#1e2535;border:1px solid rgba(255,255,255,.12);
+            border-radius:10px;padding:6px;min-width:215px;
+            box-shadow:0 12px 32px rgba(0,0,0,.6);z-index:9999;
         }
-        .kpi-label {
-            font-size:0.68rem; text-transform:uppercase; letter-spacing:0.07em;
-            font-weight:700; color:var(--emias-muted); margin-bottom:6px;
+        .tn-dropdown.open .tn-dropdown-menu{display:block;}
+        .tn-dropdown-menu-inner{}
+        .tn-dd-item{
+            display:flex;align-items:center;gap:10px;
+            padding:9px 12px;border-radius:7px;
+            font-size:.8rem;font-weight:500;color:rgba(255,255,255,.6);
+            transition:all .12s;cursor:pointer;
         }
-        .kpi-value {
-            font-size:3rem; font-weight:800; color:var(--emias-text);
-            line-height:1; letter-spacing:-0.02em;
+        .tn-dd-item:hover{background:rgba(99,102,241,.2);color:#fff;}
+        .tn-dd-num{
+            width:20px;height:20px;border-radius:6px;flex-shrink:0;
+            background:rgba(99,102,241,.2);color:#a5b4fc;
+            font-size:.7rem;font-weight:700;
+            display:flex;align-items:center;justify-content:center;
         }
-        .kpi-desc { font-size:0.82rem; color:var(--emias-muted); margin-top:4px; }
-        .kpi-remain {
-            margin-top:10px; padding-top:10px;
-            border-top:1px solid var(--emias-border);
-            font-size:0.78rem; color:var(--emias-text);
-            display:flex; align-items:center; justify-content:space-between;
+        .tn-dd-disabled{cursor:default;opacity:.4;}
+        .tn-dd-disabled:hover{background:transparent!important;color:rgba(255,255,255,.6)!important;}
+        .tn-badge{
+            padding:5px 14px;border-radius:20px;font-size:.75rem;font-weight:700;
+            background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);
+            border:1px solid rgba(255,255,255,.1);white-space:nowrap;
         }
-        .kpi-remain strong { font-weight:700; }
-        .kpi-remain .kpi-deadline {
-            font-size:0.72rem; color:var(--emias-muted); font-weight:500;
-        }
-        .kpi-sub { font-size:0.75rem; color:var(--emias-muted); margin-top:3px; }
+        .tn-badge.deadline{background:rgba(239,68,68,.15);color:#fca5a5;border-color:rgba(239,68,68,.3);}
 
-        /* Прогресс */
-        /* ─── Прогресс-бар ─── */
-        .progress {
-            border-radius: 99px;
-            background: var(--emias-border);
-            height: 8px;
-            margin-top: 10px;
-            overflow: visible;
-            position: relative;
-        }
-        .progress-bar {
-            height: 100%;
-            border-radius: 99px;
-            width: 0%;
-            transition: width 1.2s cubic-bezier(.4,0,.2,1);
-            background: linear-gradient(90deg, #5B7FFF 0%, var(--emias-blue) 100%);
-            position: relative;
-        }
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            right: -1px; top: 50%;
-            transform: translateY(-50%);
-            width: 12px; height: 12px;
-            border-radius: 50%;
-            background: #fff;
-            border: 2px solid var(--emias-blue);
-            box-shadow: 0 0 0 3px rgba(59,91,216,.15);
-            transition: border-color 1.2s;
-        }
-        .progress-bar-success {
-            background: linear-gradient(90deg, #51CF66 0%, var(--emias-success) 100%) !important;
-        }
-        .progress-bar-success::after { border-color: var(--emias-success) !important; box-shadow: 0 0 0 3px rgba(47,158,68,.15); }
-        .progress-bar-danger {
-            background: linear-gradient(90deg, #FF8787 0%, var(--emias-danger) 100%) !important;
-        }
-        .progress-bar-danger::after  { border-color: var(--emias-danger) !important; box-shadow: 0 0 0 3px rgba(224,49,49,.15); }
+        /* ── MAIN ── */
+        .main{max-width:1240px;margin:0 auto;padding:48px 32px 64px;}
 
-        /* Бейджи */
-        .status-badge { display:inline-flex; align-items:center; gap:5px; font-size:0.75rem; font-weight:600; padding:3px 9px; border-radius:6px; }
-        .badge-ok      { background:#EBFBEE; color:#2B8A3E; }
-        .badge-risk    { background:#FFF5F5; color:#C92A2A; }
-        .badge-warn    { background:#FFF8DB; color:#8D6700; }
-        .badge-neutral { background:var(--emias-blue-lt); color:var(--emias-blue); }
-
-        /* КВЦ-баннер */
-        .kvc-banner { display:flex; align-items:center; gap:16px; padding:14px 24px; background:linear-gradient(90deg,#EDF2FF 0%,#fff 100%); border-bottom:1px solid var(--emias-border); flex-wrap:wrap; }
-        .kvc-icon { width:44px; height:44px; border-radius:10px; background:var(--emias-blue); display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.3rem; flex-shrink:0; }
-        .kvc-label { font-size:0.68rem; text-transform:uppercase; letter-spacing:0.07em; font-weight:700; color:var(--emias-blue); margin-bottom:2px; }
-        .kvc-text { font-size:1.05rem; font-weight:700; color:var(--emias-text); }
-        .kvc-text span { color:var(--emias-blue); }
-        .kvc-deadline { margin-left:auto; text-align:right; }
-        .kvc-deadline .kvc-label { color:var(--emias-muted); }
-        .kvc-deadline .kvc-date { font-size:1.1rem; font-weight:700; color:var(--emias-text); }
-
-        /* Блок обратного отсчёта */
-        .kvc-countdown {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 12px 20px;
-            background: #fff;
-            border: 1px solid var(--emias-border);
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            min-width: 150px; text-align: center;
+        /* ── PAGE HEADER ── */
+        .page-header{margin-bottom:52px;}
+        .page-title{
+            font-size:2.2rem;font-weight:800;color:#fff;
+            letter-spacing:-.03em;line-height:1.2;
+            max-width:760px;margin-bottom:16px;
         }
-        .kvc-countdown-label {
-            font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.07em;
-            font-weight: 700; color: var(--emias-muted); margin-bottom: 4px; white-space: nowrap;
+        .page-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+        .pmeta{
+            padding:5px 14px;border-radius:20px;font-size:.76rem;font-weight:600;
+            border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.55);
+            background:rgba(255,255,255,.05);
         }
-        .kvc-countdown-days {
-            font-size: 2.4rem; font-weight: 800; line-height: 1;
-            letter-spacing: -0.02em; color: var(--emias-blue);
+        .pmeta.deadline{background:rgba(239,68,68,.12);color:#fca5a5;border-color:rgba(239,68,68,.25);}
+
+        /* ── SECTION WRAPPER ── */
+        .section-block{margin-bottom:64px;}
+        .section-num{
+            font-size:5rem;font-weight:900;color:rgba(255,255,255,.04);
+            line-height:1;letter-spacing:-.04em;margin-bottom:-18px;
+            font-family:'Inter',sans-serif;
         }
-        .kvc-countdown-unit {
-            font-size: 0.72rem; color: var(--emias-muted); margin-top: 2px;
+        .section-heading{
+            display:flex;align-items:flex-start;gap:16px;margin-bottom:8px;
         }
-        .kvc-countdown-date {
-            margin-top: 8px; padding-top: 8px;
-            border-top: 1px solid var(--emias-border);
-            font-size: 0.72rem; color: var(--emias-muted); white-space: nowrap;
+        .section-title{
+            font-size:1.7rem;font-weight:800;color:#fff;
+            letter-spacing:-.02em;line-height:1.2;
         }
-        .kvc-countdown-date strong { color: var(--emias-text); font-size: 0.8rem; }
-        html[data-theme="dark"] .kvc-countdown { background:#161B22; border-color:var(--emias-border); }
-        html[data-theme="dark"] .kvc-countdown-date { border-color:var(--emias-border); }
+        .section-subtitle{font-size:.86rem;color:rgba(255,255,255,.4);line-height:1.6;max-width:680px;margin-bottom:24px;}
 
-        /* ─── KPI-блоки рейтинга ─── */
-        .rating-kpi { display:flex; flex-wrap:wrap; gap:12px; padding:20px 24px; border-bottom:1px solid var(--emias-border); background:var(--emias-bg); }
-        .rkpi-card { background:#fff; border:1px solid var(--emias-border); border-radius:12px; padding:14px 18px; min-width:150px; flex:1; }
-        .rkpi-label { font-size:0.68rem; text-transform:uppercase; letter-spacing:0.05em; font-weight:600; color:var(--emias-muted); margin-bottom:4px; white-space:nowrap; }
-        .rkpi-value { font-size:1.25rem; font-weight:700; color:var(--emias-text); }
-        .rkpi-value.red   { color:var(--emias-danger); }
-        .rkpi-value.green { color:var(--emias-success); }
-        .rkpi-value.warn  { color:var(--emias-warning); }
-
-        /* ─── Рейтинговая таблица ─── */
-        .table-wrap { padding:0 0 4px; overflow-x:auto; }
-        .rating-controls { display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:12px 24px; border-bottom:1px solid var(--emias-border); }
-
-        .filter-wrap { position:relative; }
-        .filter-wrap .bi-search { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--emias-muted); font-size:0.82rem; pointer-events:none; }
-        .filter-input { padding:7px 12px 7px 30px; font-size:0.84rem; font-family:'Inter',sans-serif; border:1px solid var(--emias-border); border-radius:8px; background:var(--emias-bg); color:var(--emias-text); outline:none; transition:border-color 0.15s; width:240px; }
-        .filter-input:focus { border-color:var(--emias-blue); }
-        .filter-input::placeholder { color:var(--emias-muted); }
-
-        .status-filter-btn { font-size:0.78rem; font-weight:600; padding:5px 12px; border-radius:8px; border:1px solid var(--emias-border); background:#fff; cursor:pointer; transition:all 0.15s; color:var(--emias-text); }
-        .status-filter-btn:hover { border-color:var(--emias-blue); }
-        .status-filter-btn.active { background:var(--emias-blue); color:#fff; border-color:var(--emias-blue); }
-        .status-filter-btn.btn-green.active { background:var(--emias-success); border-color:var(--emias-success); }
-        .status-filter-btn.btn-yellow.active { background:var(--emias-warning); border-color:var(--emias-warning); }
-        .status-filter-btn.btn-red.active { background:var(--emias-danger); border-color:var(--emias-danger); }
-
-        .rating-scroll { max-height:520px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:#CED4DA transparent; background:var(--emias-bg); }
-        .rating-table { font-size:0.82rem; margin:0; border-collapse:separate; border-spacing:0; background:var(--emias-bg); }
-        .rating-table tbody td { background:var(--emias-bg); }
-        .rating-table thead th {
-            position:sticky; top:0; z-index:4;
-            background:var(--emias-bg);
-            color:var(--emias-muted); font-weight:600; font-size:0.7rem;
-            text-transform:uppercase; letter-spacing:0.04em;
-            border-bottom:2px solid var(--emias-border);
-            padding:10px 10px; white-space:nowrap; cursor:pointer;
-            user-select:none;
+        /* ── KVC CARDS ── */
+        .kvc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+        .kvc-card{
+            border-radius:16px;padding:24px 26px;
+            border:1px solid rgba(255,255,255,.08);
+            background:#111827;
         }
-        .rating-table thead th.sticky-col { z-index:5; }
-        .rating-table thead th:hover { color:var(--emias-blue); }
-        .rating-table thead th .sort-icon { margin-left:3px; opacity:0.4; font-size:0.65rem; }
-        .rating-table thead th.sort-asc .sort-icon::before { content:'↑'; opacity:1; }
-        .rating-table thead th.sort-desc .sort-icon::before { content:'↓'; opacity:1; }
-        .rating-table thead th:not(.sort-asc):not(.sort-desc) .sort-icon::before { content:'↕'; }
-
-        .rating-table tbody td { border-bottom:1px solid var(--emias-border); padding:8px 10px; vertical-align:middle; background:var(--emias-bg); }
-        .rating-table tbody tr {
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        .kvc-card.green{border-left:4px solid #4ade80;}
+        .kvc-card.red  {border-left:4px solid #f87171;}
+        .kvc-card.blue {border-left:4px solid #818cf8;}
+        .kvc-label{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+        .kvc-label.green{color:#4ade80;}
+        .kvc-label.red  {color:#f87171;}
+        .kvc-label.blue {color:#818cf8;}
+        .kvc-title{font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:4px;line-height:1.3;}
+        .kvc-goal{font-size:.9rem;font-weight:700;margin-bottom:20px;}
+        .kvc-goal.green{color:#4ade80;}
+        .kvc-goal.red  {color:#f87171;}
+        .kvc-goal.blue {color:#818cf8;}
+        .kvc-dot.blue  {background:#818cf8;}
+        .kvc-divider{border:none;border-top:1px solid rgba(255,255,255,.07);margin:14px 0;}
+        .kvc-block-label{
+            font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+            color:rgba(255,255,255,.3);margin-bottom:10px;
         }
-        .rating-table tbody tr:hover td {
-            background: var(--emias-blue-lt) !important;
+        .kvc-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+        .kvc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+        .kvc-dot.green{background:#4ade80;}
+        .kvc-dot.red  {background:#f87171;}
+        .kvc-item-title{font-size:.88rem;font-weight:600;color:#e2e8f0;line-height:1.3;}
+        .kvc-item-sub{font-size:.75rem;color:rgba(255,255,255,.35);margin-top:2px;line-height:1.4;}
+
+        /* ── METRIC BOX ── */
+        .metric-box{
+            border-radius:14px;padding:22px 26px;
+            border:1px solid rgba(99,102,241,.25);
+            background:rgba(99,102,241,.08);
+            margin-bottom:28px;
         }
-        .rating-table tbody tr:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(59, 91, 216, 0.10);
-            position: relative;
-            z-index: 1;
+        .metric-box-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);margin-bottom:8px;}
+        .metric-box-value{font-size:2.6rem;font-weight:900;color:#a5b4fc;letter-spacing:-.03em;line-height:1;}
+        .metric-box-arrow{color:rgba(255,255,255,.25);margin:0 12px;font-size:1.4rem;}
+        .metric-box-target{font-size:2.6rem;font-weight:900;color:#6366f1;letter-spacing:-.03em;line-height:1;}
+        .metric-box-row{display:flex;align-items:center;}
+
+        /* ── KPI GRID ── */
+        .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+        @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+        .kpi-card{
+            background:#111827;border-radius:14px;padding:22px 20px;
+            border:1px solid rgba(255,255,255,.07);
+            position:relative;overflow:hidden;
         }
-        .rating-table tfoot td { font-weight:700; background:var(--emias-blue-lt) !important; border-top:2px solid var(--emias-border); padding:8px 10px; }
-
-        /* Закреплённые столбцы */
-        .sticky-col { position:sticky; background:var(--emias-bg); }
-        .col-rank  { left:0; min-width:50px; width:50px; border-right:1px solid var(--emias-border); }
-        .col-org   { left:50px; min-width:220px; max-width:280px; border-right:1px solid var(--emias-border); }
-        .rating-table tfoot .sticky-col { background:var(--emias-blue-lt) !important; }
-
-        /* Цветовая подсветка процентов */
-        .pct-green { color:var(--emias-success); font-weight:700; }
-        .pct-red   { color:var(--emias-danger);  font-weight:700; }
-        .pct-warn  { color:var(--emias-warning); font-weight:700; }
-
-        /* Статус-кружок */
-        .dot {
-            display: inline-block;
-            width: 14px; height: 14px;
-            border-radius: 50%;
-            cursor: default;
-            position: relative;
-            flex-shrink: 0;
+        .kpi-card::before{
+            content:'';position:absolute;top:0;left:0;right:0;height:3px;
         }
-        .dot-green  { background: var(--emias-success); box-shadow: 0 0 0 3px rgba(47,158,68,.18); }
-        .dot-yellow { background: var(--emias-warning); box-shadow: 0 0 0 3px rgba(245,159,0,.18); }
-        .dot-red    { background: var(--emias-danger);  box-shadow: 0 0 0 3px rgba(224,49,49,.18); }
+        .kpi-card.c-blue::before{background:linear-gradient(90deg,#6366f1,#818cf8);}
+        .kpi-card.c-green::before{background:linear-gradient(90deg,#22c55e,#4ade80);}
+        .kpi-card.c-yellow::before{background:linear-gradient(90deg,#f59e0b,#fcd34d);}
+        .kpi-card.c-red::before{background:linear-gradient(90deg,#ef4444,#f87171);}
+        .kpi-tag{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);margin-bottom:10px;}
+        .kpi-val{font-size:2.4rem;font-weight:900;line-height:1;letter-spacing:-.03em;color:#fff;margin-bottom:5px;}
+        .kpi-desc{font-size:.74rem;color:rgba(255,255,255,.35);line-height:1.4;min-height:30px;}
+        .kpi-prog{margin-top:14px;}
+        .kpi-prog-wrap{height:5px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;}
+        .kpi-prog-bar{height:100%;border-radius:99px;width:0;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+        .kpi-prog-bar.blue  {background:linear-gradient(90deg,#6366f1,#818cf8);}
+        .kpi-prog-bar.green {background:linear-gradient(90deg,#22c55e,#4ade80);}
+        .kpi-prog-bar.yellow{background:linear-gradient(90deg,#f59e0b,#fcd34d);}
+        .kpi-prog-bar.red   {background:linear-gradient(90deg,#ef4444,#f87171);}
+        .kpi-sub{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);}
+        .kpi-sub-val{font-size:1.4rem;font-weight:800;color:#a5b4fc;letter-spacing:-.02em;}
+        .kpi-sub-desc{font-size:.72rem;color:rgba(255,255,255,.3);margin-top:2px;}
 
-        /* Ритм */
-        .rhythm-block { padding:14px 24px; font-size:0.88rem; color:var(--emias-muted); border-top:1px solid var(--emias-border); }
-
-        /* Кнопки */
-        .btn-emias-outline { color:#fff; background:var(--emias-blue); border:none; border-radius:8px; font-size:0.84rem; padding:6px 16px; font-weight:500; text-decoration:none; display:inline-block; transition:background 0.15s; }
-        .btn-emias-outline:hover { background:#2F4EC0; color:#fff; }
-        .btn-icon { width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; background:#fff; border:1px solid var(--emias-border); border-radius:8px; color:var(--emias-muted); font-size:1rem; cursor:pointer; transition:border-color 0.15s, color 0.15s; text-decoration:none; }
-        .btn-icon:hover { border-color:var(--emias-blue); color:var(--emias-blue); }
-
-        /* Печать */
-        @media print {
-            @page { size: A4 landscape; margin: 8mm; }
-            * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-            body { background:#fff !important; font-size:9px; }
-            .no-print { display:none !important; }
-            .project-card { break-inside:avoid; margin-bottom:12px !important; }
-            .rating-scroll { max-height:none; overflow:visible; }
-            .sticky-col { position:static; }
+        /* ── TRAFFIC LIGHT ── */
+        .traffic-light{
+            width:14px;height:14px;border-radius:50%;flex-shrink:0;
+            box-shadow:0 0 8px currentColor;
         }
+        .tl-green { background:#4ade80; box-shadow:0 0 8px rgba(74,222,128,.6); }
+        .tl-yellow{ background:#fcd34d; box-shadow:0 0 8px rgba(252,211,77,.6); }
+        .tl-red   { background:#f87171; box-shadow:0 0 8px rgba(248,113,113,.6); }
 
-        /* Ночная тема */
-        html[data-theme="dark"] {
-            --emias-bg:#0D1117; --emias-text:#C9D1D9; --emias-border:#21262D; --emias-muted:#6A7280; --emias-blue-lt:#141D35;
+        /* ── TAB HEADER ── */
+        .tab-hd{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+        .tab-pill{
+            display:flex;align-items:center;gap:7px;
+            padding:7px 14px;border-radius:8px;
+            font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
         }
-        html[data-theme="dark"] body { background:var(--emias-bg); color:var(--emias-text); }
-        html[data-theme="dark"] h2, html[data-theme="dark"] h3 { color:var(--emias-text); }
-        html[data-theme="dark"] .project-card { background:#161B22; border-color:var(--emias-border); }
-        html[data-theme="dark"] .project-header { background:var(--emias-blue-lt); border-color:var(--emias-border); }
-        html[data-theme="dark"] .project-badge { background:#0D1117; border-color:var(--emias-border); }
-        html[data-theme="dark"] .kpi-cell { border-color:var(--emias-border); }
-        html[data-theme="dark"] .kpi-value { color:var(--emias-text); }
-        html[data-theme="dark"] .kvc-banner { background:linear-gradient(90deg,var(--emias-blue-lt) 0%,#161B22 100%); border-color:var(--emias-border); }
-        html[data-theme="dark"] .kvc-text, html[data-theme="dark"] .kvc-date { color:var(--emias-text); }
-        html[data-theme="dark"] .rating-kpi { background:var(--emias-bg); }
-        html[data-theme="dark"] .rkpi-card { background:#161B22; border-color:var(--emias-border); }
-        html[data-theme="dark"] .rkpi-value { color:var(--emias-text); }
-        html[data-theme="dark"] .rating-controls { border-color:var(--emias-border); }
-        html[data-theme="dark"] .filter-input { background:#0D1117; border-color:#21262D; color:#C9D1D9; }
-        html[data-theme="dark"] .filter-input::placeholder { color:#6A7280; }
-        html[data-theme="dark"] .status-filter-btn { background:#161B22; border-color:var(--emias-border); color:var(--emias-text); }
-        html[data-theme="dark"] .rating-table thead th { background:#161B22; color:var(--emias-muted); border-color:var(--emias-border); }
-        html[data-theme="dark"] .rating-table thead th.sticky-col { background:#161B22; }
-        html[data-theme="dark"] .rating-table tbody td { border-color:var(--emias-border); }
-        html[data-theme="dark"] .rating-table tbody tr:hover td { background:var(--emias-blue-lt) !important; }
-        html[data-theme="dark"] .rating-table tfoot td { background:var(--emias-blue-lt) !important; border-color:var(--emias-border) !important; }
-        html[data-theme="dark"] .sticky-col { background:#161B22; }
-        html[data-theme="dark"] .rating-table tfoot .sticky-col { background:var(--emias-blue-lt) !important; }
-        html[data-theme="dark"] .btn-icon { background:#161B22; border-color:var(--emias-border); color:var(--emias-muted); }
-        html[data-theme="dark"] .badge-ok   { background:#0F2018; color:#6EE7B7; }
-        html[data-theme="dark"] .badge-risk { background:#2A1515; color:#FC8989; }
-        html[data-theme="dark"] .badge-warn { background:#2A2010; color:#FBD38D; }
+        .tab-pill.green {background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.2);}
+        .tab-pill.purple{background:rgba(167,139,250,.12);color:#c4b5fd;border:1px solid rgba(167,139,250,.2);}
+        .tab-pill.blue  {background:rgba(99,102,241,.12);color:#a5b4fc;border:1px solid rgba(99,102,241,.2);}
+        .tab-pill.red   {background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.2);}
+        .tab-pill.lead  {background:rgba(74,222,128,.07);color:#86efac;border:1px solid rgba(74,222,128,.15);}
+        .tab-pill.lag   {background:rgba(239,68,68,.07);color:#fca5a5;border:1px solid rgba(239,68,68,.15);}
+        .tab-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+        /* ── PATHWAY ── */
+        .pathway-wrap{overflow-x:auto;}
+        .pathway-inner{display:flex;align-items:center;gap:0;min-width:960px;padding:4px 0;}
+        .pw-step{
+            flex:1;background:#111827;border-radius:12px;
+            border:1px solid rgba(255,255,255,.07);
+            padding:16px 14px;display:flex;flex-direction:column;gap:4px;min-width:110px;
+            transition:border-color .15s,transform .15s;
+        }
+        .pw-step:hover{border-color:rgba(99,102,241,.4);transform:translateY(-2px);}
+        .pw-icon{font-size:1.3rem;margin-bottom:2px;}
+        .pw-name{font-size:.8rem;font-weight:700;color:#e2e8f0;line-height:1.3;}
+        .pw-sub{font-size:.68rem;color:rgba(255,255,255,.3);line-height:1.3;}
+        .pw-val{font-size:1.5rem;font-weight:800;color:#6366f1;margin-top:6px;letter-spacing:-.02em;line-height:1;}
+        .pw-fact{font-size:1.3rem;font-weight:800;color:#6366f1;margin-top:6px;letter-spacing:-.02em;line-height:1;}
+        .pw-plan{font-size:.66rem;color:rgba(255,255,255,.3);margin-top:2px;}
+        .pw-bar{width:100%;height:4px;background:rgba(255,255,255,.07);border-radius:3px;margin-top:6px;overflow:hidden;}
+        .pw-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#6366f1,#818cf8);transition:width .4s;}
+        .pw-warn{font-size:.72rem;color:#f87171;font-weight:500;margin-top:auto;line-height:1.3;}
+        .pw-arrow{
+            padding:0 8px;color:rgba(255,255,255,.15);font-size:.9rem;flex-shrink:0;align-self:center;
+        }
+        .pw-step.stac{border-color:rgba(74,222,128,.2);}
+        .pw-step.amb {border-color:rgba(99,102,241,.2);}
+
+        /* ── DRUG CARD ── */
+        .drug-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+        .drug-card{background:#111827;border-radius:16px;border:1px solid rgba(255,255,255,.07);overflow:hidden;}
+        .drug-card-head{
+            padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.07);
+            display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+        }
+        .drug-card-head.blue{background:rgba(99,102,241,.08);}
+        .drug-card-head.green{background:rgba(74,222,128,.06);}
+        .drug-card-emo{font-size:1.1rem;}
+        .drug-card-title{font-size:.92rem;font-weight:700;color:#fff;}
+        .drug-card-sub{font-size:.68rem;color:rgba(255,255,255,.3);}
+        .drug-card-tag{
+            margin-left:auto;font-size:.65rem;font-weight:700;
+            padding:3px 10px;border-radius:20px;
+        }
+        .drug-card-tag.blue{background:rgba(99,102,241,.2);color:#a5b4fc;}
+        .drug-card-tag.green{background:rgba(74,222,128,.15);color:#4ade80;}
+        .drug-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid rgba(255,255,255,.06);}
+        .drug-kpi-cell{padding:14px 14px;border-right:1px solid rgba(255,255,255,.06);}
+        .drug-kpi-cell:last-child{border-right:none;}
+        .drug-kpi-label{font-size:.58rem;text-transform:uppercase;letter-spacing:.07em;font-weight:700;color:rgba(255,255,255,.25);margin-bottom:6px;}
+        .drug-kpi-val{font-size:1.5rem;font-weight:800;color:#fff;letter-spacing:-.02em;}
+        .drug-kpi-val.green{color:#4ade80;}
+        .drug-kpi-val.blue{color:#818cf8;}
+        .drug-kpi-val.yellow{color:#fcd34d;}
+        .drug-kpi-unit{font-size:.68rem;color:rgba(255,255,255,.3);margin-top:2px;}
+        .drug-prog{padding:14px 20px;}
+        .drug-prog-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+        .drug-prog-label{font-size:.74rem;color:rgba(255,255,255,.35);}
+        .drug-prog-pct{font-size:.82rem;font-weight:800;}
+        .drug-prog-track{height:7px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;}
+        .drug-prog-fill{height:100%;border-radius:99px;width:0;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+        .drug-prog-fill.blue{background:linear-gradient(90deg,#6366f1,#818cf8);}
+        .drug-prog-fill.green{background:linear-gradient(90deg,#22c55e,#4ade80);}
+
+        /* ── RATING TABLE ── */
+        .rating-card{background:#111827;border-radius:16px;border:1px solid rgba(255,255,255,.07);overflow:hidden;margin-bottom:20px;}
+        .rating-head{
+            padding:14px 22px;border-bottom:1px solid rgba(255,255,255,.07);
+            display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+        }
+        .rating-head-title{font-size:.92rem;font-weight:700;color:#fff;}
+        .rating-head-badge{font-size:.68rem;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.4);}
+        .rating-head-total{margin-left:auto;font-size:.8rem;color:rgba(255,255,255,.3);}
+        .rating-head-total strong{color:#818cf8;font-size:.95rem;}
+        .rating-table{width:100%;font-size:.8rem;border-collapse:collapse;}
+        .rating-table thead tr{background:rgba(255,255,255,.03);}
+        .rating-table th{
+            padding:9px 14px;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;
+            font-weight:700;color:rgba(255,255,255,.25);border-bottom:1px solid rgba(255,255,255,.06);
+        }
+        .rating-table tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .12s;}
+        .rating-table tbody tr:hover{background:rgba(255,255,255,.03);}
+        .rating-table td{padding:8px 14px;color:rgba(255,255,255,.7);}
+        .rating-table td.num{text-align:center;color:rgba(255,255,255,.2);font-weight:600;}
+        .rating-table td.val{text-align:right;font-weight:700;color:#818cf8;}
+        .rating-table td.val.green{color:#4ade80;}
+        .rating-scroll{max-height:340px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;}
+
+        /* ── EMPTY ── */
+        .empty-card{
+            background:#111827;border-radius:16px;border:1px solid rgba(255,255,255,.07);
+            padding:40px;text-align:center;
+        }
+        .empty-icon{font-size:2rem;margin-bottom:12px;}
+        .empty-title{font-size:1rem;font-weight:700;color:#fff;margin-bottom:6px;}
+        .empty-sub{font-size:.8rem;color:rgba(255,255,255,.3);}
+
+        /* ── SECTION LABEL ── */
+        .sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+        .sec-title{font-size:1.35rem;font-weight:800;color:#fff;letter-spacing:-.01em;}
+        .sec-link{font-size:.8rem;color:#818cf8;font-weight:600;}
+        .sec-link:hover{text-decoration:underline;}
+
+        /* ── FOOTER ── */
+        .foot{font-size:.72rem;color:rgba(255,255,255,.2);text-align:center;padding:16px 0 32px;}
+        .foot a{color:#818cf8;}
+
+        /* ── PRINT ── */
+        @media print{
+            .topnav{display:none!important;}
+            body{background:#fff;color:#000;}
+            .main{padding:10mm;}
+            .kvc-card,.kpi-card,.drug-card,.rating-card{background:#fff!important;border:1px solid #ddd!important;}
+        }
     </style>
 </head>
 <body>
 
-<div class="container-fluid" style="max-width:1500px; padding:24px 20px;">
-
-    <!-- Заголовок -->
-    <div class="mb-4">
-        <h2 class="mb-0">Гепатит С — управление исполнением (4ДИ)</h2>
-        <div style="font-size:0.85rem; color:var(--emias-muted); margin-top:4px;">
-            Три федеральных проекта — единая система опережающих и запаздывающих показателей
+<!-- ══ TOP NAV ══════════════════════════════════════════════ -->
+<nav class="topnav no-print">
+    <div class="tn-logo">
+        <div class="tn-logo-icon">🧬</div>
+        <span class="tn-logo-text">ГЕПАТИТ С</span>
+        <span class="tn-logo-year">2026</span>
+    </div>
+    <div class="tn-links">
+        <a href="#kvc" class="tn-link active" onclick="navClick(this,'kvc')">КВЦ</a>
+        <a href="#kpi" class="tn-link" onclick="navClick(this,'kpi')">Показатели</a>
+        <div class="tn-dropdown">
+            <a href="#pathway" class="tn-link tn-dropdown-toggle" onclick="navClick(this,'pathway')">Путь пациента <span class="tn-caret">▾</span></a>
+            <div class="tn-dropdown-menu">
+                <div class="tn-dropdown-menu-inner">
+                    <a th:href="${basePath + '/dashboard'}" class="tn-dd-item"><span class="tn-dd-num">1</span>Охват скринингом</a>
+                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">2</span><s>Амбулаторное лечение</s></span>
+                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">3</span><s>Дневной стационар</s></span>
+                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">4</span><s>УВО</s></span>
+                </div>
+            </div>
         </div>
-        <div class="d-flex align-items-center justify-content-between no-print" style="margin-top:12px;">
-            <a th:href="${basePath + '/'}" class="btn-emias-outline">← Назад</a>
-            <div class="d-flex gap-2 align-items-center">
-                <button class="btn-icon" onclick="window.print()" title="Сохранить как PDF"><i class="bi bi-file-earmark-pdf"></i></button>
-                <button class="btn-icon" onclick="location.reload()" title="Обновить"><i class="bi bi-arrow-clockwise"></i></button>
-                <button class="btn-icon" onclick="toggleTheme()" title="Сменить тему" id="theme-btn"><i id="theme-icon" class="bi bi-moon-stars-fill"></i></button>
+        <div class="tn-dropdown">
+            <a href="#drugs" class="tn-link tn-dropdown-toggle" onclick="navClick(this,'drugs')">Лекарства <span class="tn-caret">▾</span></a>
+            <div class="tn-dropdown-menu">
+                <div class="tn-dropdown-menu-inner">
+                    <a href="#drugs" class="tn-dd-item" onclick="navScrollTo('drugs')"><span class="tn-dd-num">1</span>Амбулаторно</a>
+                    <a href="#drugs" class="tn-dd-item" onclick="navScrollTo('drugs')"><span class="tn-dd-num">2</span>Дневной стационар</a>
+                </div>
+            </div>
+        </div>
+        <div class="tn-dropdown">
+            <a href="#rating" class="tn-link tn-dropdown-toggle" onclick="navClick(this,'rating')">Рейтинг МО <span class="tn-caret">▾</span></a>
+            <div class="tn-dropdown-menu">
+                <div class="tn-dropdown-menu-inner">
+                    <a href="#rating" class="tn-dd-item" onclick="navScrollTo('rating')"><span class="tn-dd-num">1</span>Скрининг</a>
+                    <a href="#rating" class="tn-dd-item" onclick="navScrollTo('rating')"><span class="tn-dd-num">2</span>Амбулаторно</a>
+                    <a href="#rating" class="tn-dd-item" onclick="navScrollTo('rating')"><span class="tn-dd-num">3</span>Дневной стационар</a>
+                </div>
+            </div>
+        </div>
+        <a href="#porucheniya" class="tn-link" onclick="navClick(this,'porucheniya')">Поручения</a>
+    </div>
+    <div class="tn-right">
+        <span class="tn-badge">Период: 2026</span>
+    </div>
+</nav>
+
+<!-- ══ MAIN ══════════════════════════════════════════════════ -->
+<main class="main">
+
+    <!-- ── HEADER ── -->
+    <div class="page-header" id="top">
+        <div class="page-title">Борьба с гепатитом С и минимизация рисков распространения данного заболевания (Московская область)</div>
+        <div class="page-meta">
+            <span class="pmeta">Период: 2026</span>
+            <span class="pmeta">Регион: Московская область</span>
+        </div>
+    </div>
+
+    <!-- ══ КВЦ ══════════════════════════════════════════════ -->
+    <div class="section-block" id="kvc">
+        <div class="section-num">01</div>
+        <div class="section-heading">
+            <div class="section-title">Критически важные цели</div>
+        </div>
+        <div class="section-subtitle">Долгосрочные целевые показатели проекта к 31.12.2030 — снижение заболеваемости и смертности в Московской области</div>
+
+        <div class="kvc-grid">
+
+            <!-- КВЦ 1 -->
+            <div class="kvc-card blue">
+                <div class="kvc-label blue">КВЦ 1</div>
+                <div class="kvc-title">Снижение заболеваемости хроническим гепатитом С</div>
+                <div class="kvc-goal blue">Цель: ≥ 15% к 31.12.2030</div>
+
+                <hr class="kvc-divider">
+                <div class="tab-hd">
+                    <div class="tab-pill lead"><div class="tab-dot"></div>↑ Опережающий показатель</div>
+                </div>
+                <div class="kvc-item">
+                    <div class="kvc-dot blue"></div>
+                    <div>
+                        <div class="kvc-item-title">Охват скринингом на антитела к гепатиту С</div>
+                        <div class="kvc-item-sub">430 271 чел. / год · граждане 25+ лет · 1 раз в 10 лет</div>
+                    </div>
+                </div>
+
+                <hr class="kvc-divider">
+                <div class="tab-hd">
+                    <div class="tab-pill lag"><div class="tab-dot"></div>↓ Запаздывающий показатель</div>
+                </div>
+                <div class="kvc-item">
+                    <div class="kvc-dot blue"></div>
+                    <div>
+                        <div class="kvc-item-title">Проведение ПЦР-теста и определение генотипа</div>
+                        <div class="kvc-item-sub">Для постановки диагноза хронического гепатита С</div>
+                        <div style="display:inline-flex;align-items:center;gap:6px;margin-top:6px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);border-radius:20px;padding:3px 10px;">
+                            <span style="font-size:.72rem;font-weight:700;color:#a5b4fc;">≥ 80%</span>
+                            <span style="font-size:.7rem;color:rgba(255,255,255,.4);">от выявленных отклонений при скрининге</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- КВЦ 2 -->
+            <div class="kvc-card blue">
+                <div class="kvc-label blue">КВЦ 2</div>
+                <div class="kvc-title">Снижение смертности от хронического гепатита С</div>
+                <div class="kvc-goal blue">Цель: ≥ 20% к 31.12.2030</div>
+
+                <hr class="kvc-divider">
+                <div class="tab-hd">
+                    <div class="tab-pill lead"><div class="tab-dot"></div>↑ Опережающие показатели</div>
+                </div>
+                <div class="kvc-item">
+                    <div class="kvc-dot blue"></div>
+                    <div>
+                        <div class="kvc-item-title">Выданы лекарственные препараты амбулаторно</div>
+                        <div class="kvc-item-sub">1 416 пациентов / год (план 2026)</div>
+                    </div>
+                </div>
+                <div class="kvc-item">
+                    <div class="kvc-dot blue"></div>
+                    <div>
+                        <div class="kvc-item-title">Пролечены в условиях дневного стационара (ОМС)</div>
+                        <div class="kvc-item-sub">4 105 пациентов / год (план 2026–2030)</div>
+                    </div>
+                </div>
+
+                <hr class="kvc-divider">
+                <div class="tab-hd">
+                    <div class="tab-pill lag"><div class="tab-dot"></div>↓ Запаздывающий показатель</div>
+                </div>
+                <div class="kvc-item">
+                    <div class="kvc-dot blue"></div>
+                    <div>
+                        <div class="kvc-item-title">Устойчивый вирусологический ответ (УВО)</div>
+                        <div class="kvc-item-sub">93% → 95% излечившихся от числа завершивших курс ПВТ</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══ KPI ══════════════════════════════════════════════ -->
+    <div class="section-block" id="kpi">
+        <div class="section-num">02</div>
+        <div class="section-heading">
+            <div class="section-title">Ключевые показатели 2026</div>
+        </div>
+        <div class="section-subtitle">Плановые значения по доп. соглашению № 056-2024-Д50055-1/2 и фактическое исполнение</div>
+
+        <div class="kpi-grid">
+
+            <!-- Скрининг -->
+            <div class="kpi-card c-blue">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+                    <div class="kpi-tag" style="margin-bottom:0;">Скрининг 25+</div>
+                    <th:block th:if="${screeningStats != null}">
+                        <div class="traffic-light"
+                             th:attr="data-actual=${screeningStats.completionPercent}"
+                             th:title="${screeningStats.completionPercent} + '% от плана'"></div>
+                    </th:block>
+                </div>
+                <th:block th:if="${screeningStats != null}">
+                    <div class="kpi-val" th:text="${#numbers.formatInteger(screeningStats.plan,0,'DEFAULT')}">0</div>
+                    <div class="kpi-desc">план пациентов на 2026 год</div>
+                    <div class="kpi-prog">
+                        <div class="kpi-prog-wrap">
+                            <div class="kpi-prog-bar blue" th:attr="data-width=${screeningStats.completionPercent}"></div>
+                        </div>
+                    </div>
+                    <div class="kpi-sub">
+                        <div class="kpi-sub-val" th:text="${#numbers.formatInteger(screeningStats.completedCount,0,'DEFAULT')}">0</div>
+                        <div class="kpi-sub-desc">проведено скринингов в 2026 г.</div>
+                    </div>
+                </th:block>
+                <th:block th:unless="${screeningStats != null}">
+                    <div class="kpi-val">—</div>
+                    <div class="kpi-desc">нет данных</div>
+                </th:block>
+            </div>
+
+            <!-- Амбулаторное -->
+            <div class="kpi-card c-yellow" th:with="p=${projects[1]}">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+                    <div class="kpi-tag" style="margin-bottom:0;">Амбулаторное лечение</div>
+                    <div class="traffic-light"
+                         th:attr="data-actual=${p.completionPercent}"
+                         th:title="${p.completionPercent} + '% от плана'"></div>
+                </div>
+                <div class="kpi-val" th:attr="data-val=${p.target}" th:text="${#numbers.formatInteger(p.target,0,'DEFAULT')}">0</div>
+                <div class="kpi-desc">план пациентов на 2026 год</div>
+                <div class="kpi-prog">
+                    <div class="kpi-prog-wrap">
+                        <div class="kpi-prog-bar yellow" th:attr="data-width=${p.completionPercent}"></div>
+                    </div>
+                </div>
+                <div th:if="${ambulatory2026Count != null}" class="kpi-sub">
+                    <div class="kpi-sub-val" th:text="${#numbers.formatInteger(ambulatory2026Count,0,'DEFAULT')}">0</div>
+                    <div class="kpi-sub-desc">пролечено амбулаторно в 2026 г.</div>
+                </div>
+            </div>
+
+            <!-- Дневной стационар -->
+            <div class="kpi-card c-green" th:with="p=${projects[0]}">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+                    <div class="kpi-tag" style="margin-bottom:0;">Дневной стационар</div>
+                    <div class="traffic-light"
+                         th:attr="data-actual=${p.completionPercent}"
+                         th:title="${p.completionPercent} + '% от плана'"></div>
+                </div>
+                <div class="kpi-val" th:attr="data-val=${p.target}" th:text="${#numbers.formatInteger(p.target,0,'DEFAULT')}">0</div>
+                <div class="kpi-desc">полный курс терапии в ОМС</div>
+                <div class="kpi-prog">
+                    <div class="kpi-prog-wrap">
+                        <div class="kpi-prog-bar green" th:attr="data-width=${p.completionPercent}"></div>
+                    </div>
+                </div>
+                <div th:if="${dayHospital2026Count != null}" class="kpi-sub">
+                    <div class="kpi-sub-val" th:text="${#numbers.formatInteger(dayHospital2026Count,0,'DEFAULT')}">0</div>
+                    <div class="kpi-sub-desc">пролечено в ДС в 2026 г.</div>
+                </div>
+            </div>
+
+            <!-- УВО -->
+            <div class="kpi-card c-red" th:with="p=${projects[2]}">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+                    <div class="kpi-tag" style="margin-bottom:0;">УВО / Излечены</div>
+                    <div class="traffic-light"
+                         th:attr="data-actual=${p.completionPercent}"
+                         th:title="${p.completionPercent} + '% от плана'"></div>
+                </div>
+                <div class="kpi-val" th:attr="data-val=${p.target}" th:text="${#numbers.formatInteger(p.target,0,'DEFAULT')}">0</div>
+                <div class="kpi-desc">федеральный показатель</div>
+                <div class="kpi-prog">
+                    <div class="kpi-prog-wrap">
+                        <div class="kpi-prog-bar red" th:attr="data-width=${p.completionPercent}"></div>
+                    </div>
+                </div>
+                <div th:if="${pathwayStats != null}" class="kpi-sub">
+                    <div class="kpi-sub-val" th:text="${#numbers.formatInteger(pathwayStats.uvo12Negative,0,'DEFAULT')}">0</div>
+                    <div class="kpi-sub-desc">излечены в 2026 г.</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══ ПУТЬ ПАЦИЕНТА ══════════════════════════════════════ -->
+    <div class="section-block" id="pathway">
+        <div class="section-num">03</div>
+        <div class="sec-hd">
+            <div class="section-title">Путь пациента</div>
+            <span class="sec-link">сквозной контроль →</span>
+        </div>
+        <div class="pathway-wrap">
+            <div class="pathway-inner">
+
+                <a th:href="${basePath + '/dashboard'}" class="pw-step" id="pw-screening" style="text-decoration:none;">
+                    <div class="pw-icon">🔬</div>
+                    <div class="pw-name">Скрининг 25+</div>
+                    <div class="pw-sub">антитела к ВГС</div>
+                    <th:block th:if="${screeningStats != null}">
+                        <div class="pw-fact" th:text="${#numbers.formatInteger(screeningStats.completedCount,0,'DEFAULT')}">0</div>
+                        <div class="pw-plan" th:text="'из ' + ${#numbers.formatInteger(screeningStats.plan,0,'DEFAULT')} + ' · ' + ${screeningStats.completionPercent} + '%'"></div>
+                        <div class="pw-bar"><div class="pw-bar-fill" th:style="'width:' + ${screeningStats.completionPercent} + '%'"></div></div>
+                    </th:block>
+                    <th:block th:unless="${screeningStats != null}"><div class="pw-val">—</div></th:block>
+                </a>
+
+                <div class="pw-arrow">›</div>
+
+                <a th:href="${basePath + '/pcr-dashboard'}" class="pw-step" style="text-decoration:none;">
+                    <div class="pw-icon">🧬</div>
+                    <div class="pw-name">ПЦР + генотип</div>
+                    <div class="pw-sub">положительных тестов</div>
+                    <th:block th:if="${pcrStats != null}">
+                        <div class="pw-fact" th:text="'+ ' + ${#numbers.formatInteger(pcrStats.totalPositive,0,'DEFAULT')}"></div>
+                        <div class="pw-bar"><div class="pw-bar-fill" th:style="'width:' + ${pcrStats.totalAll > 0 ? pcrStats.totalPositive * 100 / pcrStats.totalAll : 0} + '%'"></div></div>
+                    </th:block>
+                    <th:block th:unless="${pcrStats != null}"><div class="pw-val">—</div></th:block>
+                </a>
+
+                <div class="pw-arrow">›</div>
+
+                <div class="pw-step">
+                    <div class="pw-icon">📋</div>
+                    <div class="pw-name">Региональный регистр</div>
+                    <div class="pw-sub">учёт пациентов</div>
+                    <div class="pw-warn">Регистр в доработке у МИАЦ</div>
+                </div>
+
+                <div class="pw-arrow">›</div>
+
+                <a th:href="${basePath + '/naznachenie'}" class="pw-step" style="text-decoration:none;">
+                    <div class="pw-icon">📝</div>
+                    <div class="pw-name">Назначение</div>
+                    <div class="pw-sub">заключение МОНИКИ / Центр СПИД</div>
+                    <th:block th:if="${monikConclusion2026Count != null}">
+                        <div class="pw-fact" th:text="${#numbers.formatInteger(monikConclusion2026Count,0,'DEFAULT')}">0</div>
+                        <div class="pw-plan">заключений за 2026 г.</div>
+                        <div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06);font-size:.68rem;line-height:1.7;color:rgba(255,255,255,.3);">
+                            <div>Амб.: <span style="color:#a5b4fc;font-weight:700;" th:text="${monikAmbulatory2026Count != null ? #numbers.formatInteger(monikAmbulatory2026Count,0,'DEFAULT') : '—'}">—</span></div>
+                            <div>ДС: <span style="color:#a5b4fc;font-weight:700;" th:text="${monikDayHospital2026Count != null ? #numbers.formatInteger(monikDayHospital2026Count,0,'DEFAULT') : '—'}">—</span></div>
+                        </div>
+                    </th:block>
+                    <th:block th:unless="${monikConclusion2026Count != null}"><div class="pw-val">—</div></th:block>
+                </a>
+
+                <div class="pw-arrow">›</div>
+
+                <!-- Начали лечение -->
+                <div class="pw-step amb" id="pw-ambulatory">
+                    <div class="pw-icon">🟢</div>
+                    <div class="pw-name">Начали лечение</div>
+                    <div class="pw-sub">старт терапии в 2026 г.</div>
+                    <th:block th:with="amb=${ambulatory2026Count != null ? ambulatory2026Count : 0}, ds=${dayHospital2026Count != null ? dayHospital2026Count : 0}">
+                        <div class="pw-fact" th:text="${#numbers.formatInteger(amb + ds, 0, 'DEFAULT')}">0</div>
+                        <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);font-size:.68rem;line-height:1.8;color:rgba(255,255,255,.3);">
+                            <div>Рецепты:&nbsp;<span style="color:#a5b4fc;font-weight:700;" th:text="${#numbers.formatInteger(amb,0,'DEFAULT')}">—</span></div>
+                            <div>Дн. стационар:&nbsp;<span style="color:#4ade80;font-weight:700;" th:text="${#numbers.formatInteger(ds,0,'DEFAULT')}">—</span></div>
+                        </div>
+                    </th:block>
+                </div>
+
+                <div class="pw-arrow">›</div>
+
+                <div class="pw-step amb">
+                    <div class="pw-icon">💊</div>
+                    <div class="pw-name">Лечение</div>
+                    <div class="pw-sub">Окончили лечение</div>
+                    <th:block th:if="${treatmentEndCount != null}">
+                        <div class="pw-fact" th:text="${#numbers.formatInteger(treatmentEndCount,0,'DEFAULT')}">0</div>
+                        <div class="pw-plan">закончили в 2026 г.</div>
+                    </th:block>
+                    <th:block th:unless="${treatmentEndCount != null}"><div class="pw-val">—</div></th:block>
+                </div>
+
+                <div class="pw-arrow">›</div>
+
+                <div class="pw-step stac" id="pw-uvo">
+                    <div class="pw-icon">🧪</div>
+                    <div class="pw-name">Контроль ПЦР</div>
+                    <div class="pw-sub">УВО12 после лечения</div>
+                    <th:block th:if="${uvo12PcrCount != null}">
+                        <div class="pw-fact" th:text="${#numbers.formatInteger(uvo12PcrCount,0,'DEFAULT')}">0</div>
+                        <div class="pw-plan">дата ПЦР УВО12 заполнена</div>
+                        <div class="pw-bar"><div class="pw-bar-fill" th:style="'width:' + ${treatmentEndCount != null and treatmentEndCount > 0 ? uvo12PcrCount * 100 / treatmentEndCount : 0} + '%'"></div></div>
+                    </th:block>
+                    <th:block th:unless="${uvo12PcrCount != null}"><div class="pw-val">—</div></th:block>
+                </div>
+
             </div>
         </div>
     </div>
 
-    <!-- Проекты -->
-    <div th:each="proj : ${projects}">
-        <div class="project-card">
-
-            <!-- Шапка -->
-            <div class="project-header">
-                <i th:if="${proj.projectId == 1}" class="bi bi-virus2 text-primary" style="font-size:1.4rem;"></i>
-                <i th:if="${proj.projectId == 2}" class="bi bi-hospital text-primary" style="font-size:1.4rem;"></i>
-                <i th:if="${proj.projectId == 3}" class="bi bi-eyedropper text-primary" style="font-size:1.4rem;"></i>
-                <h3 th:text="'Проект №' + ${proj.projectId} + ': ' + ${proj.title}">Проект</h3>
-                <span class="project-badge" th:text="'КВЦ до ' + ${proj.deadline}"></span>
+    <!-- ══ ЛЕКАРСТВА ════════════════════════════════════════ -->
+    <div class="section-block" id="drugs">
+        <div class="section-num">04</div>
+        <div class="sec-hd">
+            <div class="section-title">Лекарственное обеспечение
+                <span style="font-size:.68rem;font-weight:700;background:rgba(251,191,36,.12);color:#fcd34d;border-radius:20px;padding:3px 10px;margin-left:10px;vertical-align:middle;">🚧 В разработке</span>
             </div>
+            <span class="sec-link">ПППД · 2026</span>
+        </div>
 
-            <!-- КВЦ-баннер -->
-            <div class="kvc-banner">
-                <div class="kvc-icon"><i class="bi bi-bullseye"></i></div>
-                <div>
-                    <div class="kvc-label">Критически важная цель (КВЦ)</div>
-                    <div class="kvc-text">
-                        <span th:text="${#numbers.formatInteger(proj.target, 0, 'DEFAULT')}">0</span>
-                        <span th:switch="${proj.projectId}">
-                            <span th:case="1"> пациентов направить на лечение</span>
-                            <span th:case="2"> пациентов направить на амбулаторную помощь</span>
-                            <span th:case="3"> ПЦР-тестов провести</span>
-                            <span th:case="*"> пациентов</span>
-                        </span>
+        <div class="drug-grid">
+
+            <!-- Амбулаторное -->
+            <div class="drug-card">
+                <div class="drug-card-head blue">
+                    <span class="drug-card-emo">💊</span>
+                    <span class="drug-card-title">Амбулаторное лечение</span>
+                    <span class="drug-card-sub">рецепты / льготный отпуск</span>
+                    <span class="drug-card-tag blue">п. 1.4 · план 2026</span>
+                </div>
+                <div class="drug-kpi-row">
+                    <div class="drug-kpi-cell">
+                        <div class="drug-kpi-label">Потребность</div>
+                        <div class="drug-kpi-val" th:text="${#numbers.formatInteger(projects[1].target,0,'DEFAULT')}">1 416</div>
+                        <div class="drug-kpi-unit">человек</div>
+                    </div>
+                    <div class="drug-kpi-cell">
+                        <div class="drug-kpi-label">Законтрактовано</div>
+                        <div class="drug-kpi-val green">1 416</div>
+                        <div class="drug-kpi-unit">курсов</div>
+                    </div>
+                    <div class="drug-kpi-cell">
+                        <div class="drug-kpi-label">Отпущено</div>
+                        <div class="drug-kpi-val blue" th:text="${projects[1].totalAccumulated > 0 ? #numbers.formatInteger(projects[1].totalAccumulated,0,'DEFAULT') : '—'}">—</div>
+                        <div class="drug-kpi-unit">пациентов</div>
+                    </div>
+                    <div class="drug-kpi-cell">
+                        <div class="drug-kpi-label">Остатки</div>
+                        <div class="drug-kpi-val yellow">~320</div>
+                        <div class="drug-kpi-unit">упаковок</div>
                     </div>
                 </div>
-                <div class="kvc-deadline" style="margin-left:auto;">
-                    <div class="kvc-label">КВЦ</div>
-                    <div class="kvc-text" style="font-size:0.92rem;">
-                        <span th:text="${#numbers.formatInteger(proj.target, 0, 'DEFAULT')}"></span>
-                        <span th:switch="${proj.projectId}">
-                            <span th:case="1"> пациентов направить</span>
-                            <span th:case="2"> пациентов направить</span>
-                            <span th:case="3"> ПЦР-тестов провести</span>
-                            <span th:case="*"> пациентов</span>
-                        </span>
+                <div class="drug-prog">
+                    <div class="drug-prog-row">
+                        <span class="drug-prog-label">Выполнение плана 2026</span>
+                        <span class="drug-prog-pct"
+                              th:style="${projects[1].completionPercent >= 80} ? 'color:#4ade80' : 'color:#f87171'"
+                              th:text="${#numbers.formatDecimal(projects[1].planCompletionDouble,1,1)} + '%'">0%</span>
                     </div>
-                </div>
-                <div class="kvc-countdown" th:attr="data-deadline=${proj.deadline}">
-                    <div class="kvc-countdown-label">До дедлайна осталось</div>
-                    <div class="kvc-countdown-days">—</div>
-                    <div class="kvc-countdown-unit">дней</div>
-                    <div class="kvc-countdown-date">
-                        Срок исполнения<br>
-                        <strong th:text="${proj.deadline}">—</strong>
+                    <div class="drug-prog-track">
+                        <div class="drug-prog-fill blue" th:attr="data-width=${projects[1].completionPercent}"></div>
                     </div>
-                </div>
-            </div>
-
-            <!-- KPI-полоска (запаздывающий / опережающий / остаток) -->
-            <div class="kpi-strip">
-
-                <!-- Карточка 1: Запаздывающий показатель -->
-                <div class="kpi-cell">
-                    <div class="kpi-label">Запаздывающий показатель</div>
-                    <div class="kpi-value"
-                         th:text="${#numbers.formatInteger(proj.target, 0, 'DEFAULT')}"
-                         th:attr="data-val=${proj.target}">0</div>
-                    <div class="kpi-desc">
-                        <span th:switch="${proj.projectId}">
-                            <span th:case="1">Пациентов необходимо направить на лечение</span>
-                            <span th:case="2">Пациентов необходимо направить на амбулаторную помощь</span>
-                            <span th:case="3">ПЦР-тестов необходимо провести</span>
-                            <span th:case="*">Пациентов необходимо направить</span>
-                        </span>
-                    </div>
-                    <div class="kpi-remain">
-                        <div>
-                            Осталось:&nbsp;<strong
-                                th:text="${#numbers.formatInteger(proj.target - proj.totalAccumulated, 0, 'DEFAULT')}">0</strong>
-                        </div>
-                        <div class="kpi-deadline">
-                            До <span th:text="${proj.deadline}">—</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Карточка 2: Опережающий показатель -->
-                <div class="kpi-cell">
-                    <div class="kpi-label">Опережающий показатель</div>
-                    <div class="kpi-value"
-                         th:classappend="${proj.leadOnTrack} ? ' text-success' : ' text-danger'"
-                         th:text="${#numbers.formatInteger(proj.totalLastWeek, 0, 'DEFAULT')}">0</div>
-                    <div class="kpi-desc">
-                        <span th:switch="${proj.projectId}">
-                            <span th:case="1">Направлений за последнюю неделю</span>
-                            <span th:case="2">Направлений за последнюю неделю</span>
-                            <span th:case="3">ПЦР-тестов за последнюю неделю</span>
-                            <span th:case="*">За последнюю неделю</span>
-                        </span>
-                    </div>
-                    <div class="kpi-remain">
-                        <div>
-                            Норма:&nbsp;<strong th:text="${proj.leadTarget}">0</strong>&nbsp;/ нед.
-                        </div>
-                        <div class="kpi-deadline"
-                             th:classappend="${proj.leadOnTrack} ? 'text-success' : 'text-danger'"
-                             th:text="${proj.leadOnTrack} ? '✓ В норме' : '✗ Отставание'"></div>
-                    </div>
-                </div>
-
-                <!-- Карточка 3: Накоплено -->
-                <div class="kpi-cell">
-                    <div class="kpi-label">Накоплено</div>
-                    <div class="kpi-value text-primary"
-                         th:text="${#numbers.formatInteger(proj.totalAccumulated, 0, 'DEFAULT')}"
-                         th:attr="data-val=${proj.totalAccumulated}">0</div>
-                    <div class="kpi-desc">
-                        <span th:switch="${proj.projectId}">
-                            <span th:case="3">Тестов проведено с начала года</span>
-                            <span th:case="*">Пациентов направлено с начала года</span>
-                        </span>
-                    </div>
-                    <div style="margin-top:12px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                            <span style="font-size:0.75rem; color:var(--emias-muted); font-weight:500;">Выполнение плана</span>
-                            <strong th:text="${proj.completionPercent} + '%'"
-                                    th:style="${proj.completionPercent >= 100} ? 'color:var(--emias-success); font-size:0.85rem;'
-                                             : (${proj.completionPercent >= 80}  ? 'color:var(--emias-warning); font-size:0.85rem;'
-                                             : 'color:var(--emias-danger);  font-size:0.85rem;')">0%</strong>
-                        </div>
-                        <div class="progress" style="margin-top:0;">
-                            <div class="progress-bar"
-                                 th:classappend="${proj.completionPercent >= 100} ? ' progress-bar-success'
-                                               : (${proj.completionPercent < 50}  ? ' progress-bar-danger' : '')"
-                                 th:attr="data-width=${proj.completionPercent}"></div>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:0.7rem; color:var(--emias-muted);">
-                            <span>0</span>
-                            <span th:text="${#numbers.formatInteger(proj.target, 0, 'DEFAULT')}"></span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Управляющая панель таблицы -->
-            <div class="rating-controls no-print">
-                <div class="filter-wrap">
-                    <i class="bi bi-search"></i>
-                    <input type="text" class="filter-input"
-                           th:id="'search-' + ${proj.projectId}"
-                           placeholder="Поиск по МО..."
-                           th:attr="data-project=${proj.projectId}"
-                           oninput="filterRating(this.dataset.project, this.value)">
-                </div>
-                <button class="status-filter-btn active"
-                        th:id="'btn-all-' + ${proj.projectId}"
-                        th:attr="data-project=${proj.projectId}"
-                        onclick="setStatusFilter(this.dataset.project, 'all', this)">Все</button>
-                <button class="status-filter-btn btn-green"
-                        th:id="'btn-green-' + ${proj.projectId}"
-                        th:attr="data-project=${proj.projectId}"
-                        onclick="setStatusFilter(this.dataset.project, 'green', this)">
-                    <span class="dot dot-green"></span> Зелёные
-                </button>
-                <button class="status-filter-btn btn-yellow"
-                        th:id="'btn-yellow-' + ${proj.projectId}"
-                        th:attr="data-project=${proj.projectId}"
-                        onclick="setStatusFilter(this.dataset.project, 'yellow', this)">
-                    <span class="dot dot-yellow"></span> Жёлтые
-                </button>
-                <button class="status-filter-btn btn-red"
-                        th:id="'btn-red-' + ${proj.projectId}"
-                        th:attr="data-project=${proj.projectId}"
-                        onclick="setStatusFilter(this.dataset.project, 'red', this)">
-                    <span class="dot dot-red"></span> Красные
-                </button>
-                <span style="margin-left:auto; font-size:0.78rem; color:var(--emias-muted);">
-                    <span th:id="'count-' + ${proj.projectId}" th:text="${proj.rows.size()}"></span> из
-                    <span th:text="${proj.rows.size()}"></span> МО
-                </span>
-            </div>
-
-            <!-- Таблица рейтинга -->
-            <div class="table-wrap px-0">
-                <div class="rating-scroll">
-                    <table th:id="'rtable-' + ${proj.projectId}" class="rating-table w-100">
-                        <thead>
-                            <tr>
-                                <th class="sticky-col col-rank text-center"
-                                    th:attr="data-col=0,data-table=${proj.projectId}"
-                                    onclick="sortTable(this.dataset.table, 0, 'num', this)">
-                                    №<span class="sort-icon"></span>
-                                </th>
-                                <th class="sticky-col col-org">Медицинская организация</th>
-                                <th class="text-end" th:attr="data-col=2,data-table=${proj.projectId}"
-                                    onclick="sortTable(this.dataset.table, 2, 'num', this)">
-                                    План 2026<span class="sort-icon"></span>
-                                </th>
-                                <th class="text-end" th:attr="data-col=3,data-table=${proj.projectId}"
-                                    onclick="sortTable(this.dataset.table, 3, 'num', this)">
-                                    Факт 2026<span class="sort-icon"></span>
-                                </th>
-                                <th class="text-end" th:attr="data-col=4,data-table=${proj.projectId}"
-                                    onclick="sortTable(this.dataset.table, 4, 'num', this)">
-                                    Исполнение плана, %<span class="sort-icon"></span>
-                                </th>
-                                <th class="text-end" th:attr="data-col=5,data-table=${proj.projectId}"
-                                    onclick="sortTable(this.dataset.table, 5, 'num', this)">
-                                    Остаток<span class="sort-icon"></span>
-                                </th>
-                                <th class="text-end" th:attr="data-col=6,data-table=${proj.projectId}"
-                                    onclick="sortTable(this.dataset.table, 6, 'num', this)">
-                                    Нед. план<span class="sort-icon"></span>
-                                </th>
-                                <th class="text-end" th:attr="data-col=7,data-table=${proj.projectId}"
-                                    onclick="sortTable(this.dataset.table, 7, 'num', this)">
-                                    Факт нед.<span class="sort-icon"></span>
-                                </th>
-                                <th class="text-end" th:attr="data-col=8,data-table=${proj.projectId}"
-                                    onclick="sortTable(this.dataset.table, 8, 'num', this)">
-                                    Исп. нед. плана, %<span class="sort-icon"></span>
-                                </th>
-                                <th class="text-end" th:attr="data-col=9,data-table=${proj.projectId}"
-                                    onclick="sortTable(this.dataset.table, 9, 'num', this)">
-                                    Прогноз к кон. 2026, %<span class="sort-icon"></span>
-                                </th>
-                                <th class="text-center">
-                                    Статус
-                                    <i class="bi bi-info-circle ms-1"
-                                       style="font-size:0.75rem; color:var(--emias-muted); cursor:default;"
-                                       title="🟢 Зелёный — выполнение плана 2026 ≥ 100%&#10;🟡 Жёлтый — от 80% до 99%&#10;🔴 Красный — ниже 80%"></i>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="row, stat : ${proj.rows}"
-                                th:attr="data-status=${row.status},data-org=${row.orgName}">
-                                <!-- Место -->
-                                <td class="sticky-col col-rank text-center text-muted fw-bold"
-                                    th:text="${row.annualPlan > 0 ? stat.count : '—'}"></td>
-                                <!-- МО -->
-                                <td class="sticky-col col-org" style="font-size:0.8rem;" th:text="${row.orgName}"></td>
-                                <!-- План 2026 -->
-                                <td class="text-end text-muted"
-                                    th:attr="data-val=${row.annualPlan}"
-                                    th:text="${row.annualPlan > 0 ? #numbers.formatInteger(row.annualPlan, 0, 'DEFAULT') : '—'}"></td>
-                                <!-- Факт 2026 -->
-                                <td class="text-end fw-bold text-primary"
-                                    th:attr="data-val=${row.accumulated}"
-                                    th:text="${#numbers.formatInteger(row.accumulated, 0, 'DEFAULT')}"></td>
-                                <!-- Исполнение плана % -->
-                                <td class="text-end"
-                                    th:attr="data-val=${row.annualPlan > 0 ? row.planCompletionDouble : -1}">
-                                    <span th:if="${row.annualPlan > 0}"
-                                          th:classappend="${row.planCompletionDouble >= 100} ? ' pct-green' : (${row.planCompletionDouble >= 80} ? ' pct-warn' : ' pct-red')"
-                                          th:text="${#numbers.formatDecimal(row.planCompletionDouble, 1, 1)} + '%'"></span>
-                                    <span th:if="${row.annualPlan == 0}" class="text-muted">—</span>
-                                </td>
-                                <!-- Остаток -->
-                                <td class="text-end text-muted"
-                                    th:attr="data-val=${row.remaining}"
-                                    th:text="${row.annualPlan > 0 ? #numbers.formatInteger(row.remaining, 0, 'DEFAULT') : '—'}"></td>
-                                <!-- Недельный план -->
-                                <td class="text-end text-muted"
-                                    th:attr="data-val=${row.weeklyPlan}"
-                                    th:text="${row.weeklyPlan > 0 ? row.weeklyPlan : '—'}"></td>
-                                <!-- Факт за неделю -->
-                                <td class="text-end"
-                                    th:attr="data-val=${row.lastWeekActual}"
-                                    th:text="${row.lastWeekActual}"></td>
-                                <!-- Исполнение недельного плана % -->
-                                <td class="text-end"
-                                    th:attr="data-val=${row.weeklyPlan > 0 ? row.weeklyCompletionDouble : -1}">
-                                    <span th:if="${row.weeklyPlan > 0}"
-                                          th:classappend="${row.weeklyCompletionDouble >= 100} ? ' pct-green' : (${row.weeklyCompletionDouble >= 80} ? ' pct-warn' : ' pct-red')"
-                                          th:text="${#numbers.formatDecimal(row.weeklyCompletionDouble, 1, 1)} + '%'"></span>
-                                    <span th:if="${row.weeklyPlan == 0}" class="text-muted">—</span>
-                                </td>
-                                <!-- Прогноз -->
-                                <td class="text-end"
-                                    th:attr="data-val=${row.annualPlan > 0 ? row.forecastPercent : -1}">
-                                    <span th:if="${row.annualPlan > 0}"
-                                          th:classappend="${row.forecastPercent >= 100} ? ' pct-green' : (${row.forecastPercent >= 80} ? ' pct-warn' : ' pct-red')"
-                                          th:text="${#numbers.formatDecimal(row.forecastPercent, 1, 1)} + '%'"></span>
-                                    <span th:if="${row.annualPlan == 0}" class="text-muted">—</span>
-                                </td>
-                                <!-- Статус -->
-                                <td class="text-center">
-                                    <span th:if="${row.annualPlan > 0 and row.status == 'green'}"
-                                          class="dot dot-green"
-                                          title="Зелёный — выполнение ≥ 100%"></span>
-                                    <span th:if="${row.annualPlan > 0 and row.status == 'yellow'}"
-                                          class="dot dot-yellow"
-                                          title="Жёлтый — выполнение от 80% до 99%"></span>
-                                    <span th:if="${row.annualPlan > 0 and row.status == 'red'}"
-                                          class="dot dot-red"
-                                          title="Красный — выполнение ниже 80%"></span>
-                                    <span th:if="${row.annualPlan == 0}" class="text-muted" style="font-size:0.8rem;">—</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td class="sticky-col col-rank text-center text-muted" style="font-size:0.75rem;">—</td>
-                                <td class="sticky-col col-org" style="font-size:0.78rem; color:var(--emias-muted);">ИТОГО</td>
-                                <td class="text-end" th:text="${#numbers.formatInteger(proj.totalAnnualPlan, 0, 'DEFAULT')}"></td>
-                                <td class="text-end text-primary" th:text="${#numbers.formatInteger(proj.totalAccumulated, 0, 'DEFAULT')}"></td>
-                                <td class="text-end"
-                                    th:classappend="${proj.planCompletionDouble >= 100} ? ' pct-green' : (${proj.planCompletionDouble >= 80} ? ' pct-warn' : ' pct-red')"
-                                    th:text="${#numbers.formatDecimal(proj.planCompletionDouble, 1, 1)} + '%'"></td>
-                                <td class="text-end text-muted"
-                                    th:text="${#numbers.formatInteger(proj.totalAnnualPlan - proj.totalAccumulated, 0, 'DEFAULT')}"></td>
-                                <td class="text-end text-muted" th:text="${proj.leadTarget}"></td>
-                                <td class="text-end"
-                                    th:classappend="${proj.leadOnTrack} ? ' text-success' : ' text-danger'"
-                                    th:text="${proj.totalLastWeek}"></td>
-                                <td class="text-end"
-                                    th:classappend="${proj.weeklyCompletionDouble >= 100} ? ' pct-green' : (${proj.weeklyCompletionDouble >= 80} ? ' pct-warn' : ' pct-red')"
-                                    th:text="${#numbers.formatDecimal(proj.weeklyCompletionDouble, 1, 1)} + '%'"></td>
-                                <td colspan="2"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
                 </div>
             </div>
 
-            <!-- Ритм отчётности -->
-            <div class="rhythm-block">
-                <i class="bi bi-calendar3 text-primary me-1"></i>
-                <strong>Ритм отчётности:</strong>
-                Еженедельно (понедельник) отчёты от МО, встреча 20 мин.
-                Итоговый контроль: <strong th:text="${proj.deadline}"></strong>.
-                Загрузка фактических данных — в
-                <a th:href="${basePath + '/admin'}" style="color:var(--emias-blue);">панели администратора</a>.
+            <!-- Стационар -->
+            <div class="drug-card">
+                <div class="drug-card-head green">
+                    <span class="drug-card-emo">🏥</span>
+                    <span class="drug-card-title">Дневной стационар</span>
+                    <span class="drug-card-sub">полный курс ПВТ в ОМС</span>
+                    <span class="drug-card-tag green">п. 1.5 · план 2026</span>
+                </div>
+                <div class="drug-kpi-row">
+                    <div class="drug-kpi-cell">
+                        <div class="drug-kpi-label">Потребность</div>
+                        <div class="drug-kpi-val" th:text="${#numbers.formatInteger(projects[0].target,0,'DEFAULT')}">4 105</div>
+                        <div class="drug-kpi-unit">человек</div>
+                    </div>
+                    <div class="drug-kpi-cell">
+                        <div class="drug-kpi-label">Законтрактовано</div>
+                        <div class="drug-kpi-val green" th:text="${#numbers.formatInteger(projects[0].target,0,'DEFAULT')}">4 105</div>
+                        <div class="drug-kpi-unit">курсов</div>
+                    </div>
+                    <div class="drug-kpi-cell">
+                        <div class="drug-kpi-label">Отпущено</div>
+                        <div class="drug-kpi-val blue" th:text="${projects[0].totalAccumulated > 0 ? #numbers.formatInteger(projects[0].totalAccumulated,0,'DEFAULT') : '—'}">—</div>
+                        <div class="drug-kpi-unit">пациентов</div>
+                    </div>
+                    <div class="drug-kpi-cell">
+                        <div class="drug-kpi-label">Остатки</div>
+                        <div class="drug-kpi-val yellow">~890</div>
+                        <div class="drug-kpi-unit">упаковок</div>
+                    </div>
+                </div>
+                <div class="drug-prog">
+                    <div class="drug-prog-row">
+                        <span class="drug-prog-label">Выполнение плана 2026</span>
+                        <span class="drug-prog-pct"
+                              th:style="${projects[0].completionPercent >= 80} ? 'color:#4ade80' : 'color:#f87171'"
+                              th:text="${#numbers.formatDecimal(projects[0].planCompletionDouble,1,1)} + '%'">0%</span>
+                    </div>
+                    <div class="drug-prog-track">
+                        <div class="drug-prog-fill green" th:attr="data-width=${projects[0].completionPercent}"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══ РЕЙТИНГ МО ════════════════════════════════════════ -->
+    <div class="section-block" id="rating">
+        <div class="section-num">05</div>
+        <div class="sec-hd">
+            <div class="section-title">Рейтинг медицинских организаций</div>
+            <a th:href="${basePath + '/admin'}" class="sec-link">Загрузить данные →</a>
+        </div>
+
+        <!-- Дневной стационар -->
+        <div th:if="${dayHospitalRating != null}" class="rating-card">
+            <div class="rating-head">
+                <span style="font-size:1.1rem;">💊</span>
+                <span class="rating-head-title">Дневной стационар</span>
+                <span class="rating-head-badge">из реестра, 2026 г.</span>
+                <div class="rating-head-total">Всего пролечено: <strong th:text="${dayHospital2026Count != null ? #numbers.formatInteger(dayHospital2026Count,0,'DEFAULT') : '—'}">0</strong></div>
+            </div>
+            <div class="rating-scroll">
+                <table class="rating-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;min-width:36px;">№</th>
+                            <th style="min-width:200px;">Медицинская организация</th>
+                            <th style="text-align:right;">Пролечено в ДС</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="row, st : ${dayHospitalRating}">
+                            <td class="num" th:text="${st.count}"></td>
+                            <td th:text="${row[0]}"></td>
+                            <td class="val" th:text="${#numbers.formatInteger(row[1],0,'DEFAULT')}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Амбулаторное -->
+        <div th:if="${ambulatoryRating != null}" class="rating-card"
+             th:with="totalAmb=${ambulatory2026Count != null ? ambulatory2026Count : 0}">
+            <div class="rating-head">
+                <span style="font-size:1.1rem;">🏥</span>
+                <span class="rating-head-title">Амбулаторное лечение</span>
+                <span class="rating-head-badge">из реестра, 2026 г.</span>
+                <div class="rating-head-total">Всего пролечено: <strong th:text="${#numbers.formatInteger(totalAmb,0,'DEFAULT')}">0</strong></div>
+            </div>
+            <div class="rating-scroll">
+                <table class="rating-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;min-width:36px;">№</th>
+                            <th style="min-width:200px;">Медицинская организация</th>
+                            <th style="text-align:right;">Пролечено амбулаторно</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="row, st : ${ambulatoryRating}">
+                            <td class="num" th:text="${st.count}"></td>
+                            <td th:text="${row[0]}"></td>
+                            <td class="val" th:text="${#numbers.formatInteger(row[1],0,'DEFAULT')}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- УВО -->
+        <div th:if="${uvoRating != null}" class="rating-card"
+             th:with="totalUvo=${pathwayStats != null ? pathwayStats.uvo12Negative : 0}">
+            <div class="rating-head">
+                <span style="font-size:1.1rem;">✅</span>
+                <span class="rating-head-title">УВО / Излечены</span>
+                <span class="rating-head-badge">из реестра, 2026 г.</span>
+                <div class="rating-head-total">Всего излечено: <strong style="color:#4ade80;" th:text="${#numbers.formatInteger(totalUvo,0,'DEFAULT')}">0</strong></div>
+            </div>
+            <div class="rating-scroll">
+                <table class="rating-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;min-width:36px;">№</th>
+                            <th style="min-width:200px;">Медицинская организация</th>
+                            <th style="text-align:right;">УВО12 (излечено)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="row, st : ${uvoRating}">
+                            <td class="num" th:text="${st.count}"></td>
+                            <td th:text="${row[0]}"></td>
+                            <td class="val green" th:text="${#numbers.formatInteger(row[1],0,'DEFAULT')}"></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <div style="font-size:0.78rem; color:var(--emias-muted); text-align:center; margin-top:8px; padding-bottom:24px;">
-        Все проекты используют логику 4ДИ: запаздывающий показатель — итог к конечной дате;
-        опережающий — еженедельный темп выполнения. Данные обновляются администратором еженедельно.
-    </div>
-</div>
+    <!-- ══ ПОРУЧЕНИЯ ════════════════════════════════════════ -->
+    <div class="section-block" id="porucheniya">
+        <div class="section-num">06</div>
+        <div class="sec-hd">
+            <div class="section-title">Поручения МО</div>
+        </div>
+        <!-- Пусто -->
+        <div th:if="${moTasks == null or moTasks.isEmpty()}" class="empty-card">
+            <div class="empty-icon">📋</div>
+            <div class="empty-title">Поручений пока нет</div>
+            <div class="empty-sub">Добавьте поручение через <a th:href="${basePath + '/admin'}" style="color:#818cf8;">панель администратора</a></div>
+        </div>
 
-<script th:src="${basePath + '/js/bootstrap.bundle.min.js'}"></script>
+        <!-- Список поручений -->
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <div th:each="task : ${moTasks}"
+                 style="background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:20px 24px;display:flex;align-items:flex-start;gap:20px;">
+
+                <!-- Приоритет -->
+                <div style="flex-shrink:0;">
+                    <div th:style="'background:' + ${task.priorityBg} + ';border:1px solid ' + ${task.priorityBorder} + ';border-radius:8px;padding:6px 12px;text-align:center;'">
+                        <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,.3);margin-bottom:3px;">Приоритет</div>
+                        <div style="font-size:.85rem;font-weight:700;white-space:nowrap;"
+                             th:style="'font-size:.85rem;font-weight:700;white-space:nowrap;color:' + ${task.priorityColor}"
+                             th:text="${task.priorityLabel}"></div>
+                    </div>
+                </div>
+
+                <!-- Контент -->
+                <div style="flex:1;">
+                    <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,.25);margin-bottom:6px;">Что сделать</div>
+                    <div style="font-size:.98rem;font-weight:600;color:#e2e8f0;line-height:1.5;" th:text="${task.title}"></div>
+                    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+                        <span th:if="${task.deadline != null}"
+                              style="font-size:.72rem;padding:3px 10px;border-radius:20px;background:rgba(239,68,68,.1);color:#fca5a5;border:1px solid rgba(239,68,68,.2);"
+                              th:text="'Срок: ' + ${#temporals.format(task.deadline, 'dd.MM.yyyy')}"></span>
+                        <span th:if="${task.responsible != null and !task.responsible.isBlank()}"
+                              style="font-size:.72rem;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.08);"
+                              th:text="'Ответственный: ' + ${task.responsible}"></span>
+                        <span th:if="${task.tag != null and !task.tag.isBlank()}"
+                              style="font-size:.72rem;padding:3px 10px;border-radius:20px;background:rgba(99,102,241,.1);color:#a5b4fc;border:1px solid rgba(99,102,241,.2);"
+                              th:text="${task.tag}"></span>
+                    </div>
+                </div>
+
+                <!-- Статус -->
+                <div style="flex-shrink:0;text-align:center;">
+                    <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,.25);margin-bottom:6px;">Статус</div>
+                    <div th:style="'border-radius:8px;padding:6px 14px;font-size:.8rem;font-weight:700;background:' + ${task.statusBg} + ';border:1px solid ' + ${task.statusBorder} + ';color:' + ${task.statusColor}"
+                         th:text="${task.statusLabel}"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="foot">
+        Данные обновляются администратором еженедельно &nbsp;·&nbsp;
+        <a th:href="${basePath + '/admin'}">Панель администратора</a>
+        &nbsp;·&nbsp;
+        <a th:href="${basePath + '/'}">← Главная</a>
+    </div>
+
+</main>
+
 <script>
-    /* ─── Тема ─── */
-    function applyTheme(t) {
-        document.documentElement.setAttribute('data-theme', t);
-        try { localStorage.setItem('emias-theme', t); } catch(e) {}
-        const ic = document.getElementById('theme-icon');
-        if (ic) ic.className = t === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
-    }
-    function toggleTheme() {
-        applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-    }
-    applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+    /* ── Светофор по месяцу ── */
+    (function() {
+        const now = new Date();
+        const month = now.getMonth() + 1;          // 1–12
+        const day   = now.getDate();
+        const daysInMonth = new Date(now.getFullYear(), month, 0).getDate();
+        // Ожидаемый % = доля прошедшего времени года (с учётом дней текущего месяца)
+        const expected = ((month - 1) + day / daysInMonth) / 12 * 100;
 
-    /* ─── Обратный отсчёт до дедлайна ─── */
-    document.querySelectorAll('.kvc-countdown[data-deadline]').forEach(card => {
-        const raw = card.dataset.deadline; // "DD.MM.YYYY"
-        const [d, m, y] = raw.split('.').map(Number);
-        const deadline = new Date(y, m - 1, d);
-        const today = new Date(); today.setHours(0,0,0,0);
-        const days = Math.max(0, Math.round((deadline - today) / 86400000));
-        const daysEl = card.querySelector('.kvc-countdown-days');
-        const unitEl = card.querySelector('.kvc-countdown-unit');
+        document.querySelectorAll('.traffic-light[data-actual]').forEach(el => {
+            const actual = parseFloat(el.dataset.actual) || 0;
+            const ratio  = actual / expected;       // 1.0 = точно по плану
+            let cls, label;
+            if (ratio >= 0.9) {
+                cls = 'tl-green';  label = 'В плане';
+            } else if (ratio >= 0.7) {
+                cls = 'tl-yellow'; label = 'Отставание';
+            } else {
+                cls = 'tl-red';    label = 'Критическое отставание';
+            }
+            el.classList.add(cls);
+            el.title = label + ': ' + Math.round(actual) + '% факт vs ' + Math.round(expected) + '% ожидалось (месяц ' + month + ')';
+        });
+    })();
 
-        // склонение
-        const last2 = days % 100, last1 = days % 10;
-        let unit = 'дней';
-        if (last2 < 11 || last2 > 19) {
-            if (last1 === 1) unit = 'день';
-            else if (last1 >= 2 && last1 <= 4) unit = 'дня';
-        }
-        unitEl.textContent = unit;
+    /* Прогресс-бары */
+    setTimeout(() => {
+        document.querySelectorAll('[data-width]').forEach(bar => {
+            bar.style.width = Math.min(100, parseFloat(bar.dataset.width)) + '%';
+        });
+    }, 150);
 
-        // цвет по срочности
-        if (days === 0) {
-            daysEl.style.color = 'var(--emias-danger)';
-            daysEl.textContent = '0';
-        } else if (days <= 14) {
-            daysEl.style.color = 'var(--emias-danger)';
-            // анимация отсчёта
-            animCount(daysEl, days);
-        } else if (days <= 60) {
-            daysEl.style.color = 'var(--emias-warning)';
-            animCount(daysEl, days);
-        } else {
-            daysEl.style.color = 'var(--emias-blue)';
-            animCount(daysEl, days);
-        }
-    });
-
-    function animCount(el, target) {
-        const from = Math.max(0, target - Math.ceil(target * 0.08));
-        const t0 = performance.now(), dur = 900;
-        (function tick(now) {
-            const p = Math.min((now - t0) / dur, 1), e = 1 - Math.pow(1 - p, 4);
-            el.textContent = Math.round(from + (target - from) * e);
-            if (p < 1) requestAnimationFrame(tick);
-        })(t0);
-    }
-
-    /* ─── Анимация счётчиков ─── */
+    /* Анимация чисел */
     document.querySelectorAll('[data-val]').forEach(el => {
         const v = parseInt(el.dataset.val, 10);
-        if (!v || v < 0) return;
-        const from = Math.round(v * 0.95), t0 = performance.now(), dur = 900;
+        if (!v || v <= 0) return;
+        const from = Math.round(v * 0.85), t0 = performance.now(), dur = 900;
         (function tick(now) {
             const p = Math.min((now - t0) / dur, 1), e = 1 - Math.pow(1 - p, 4);
             el.textContent = Math.round(from + (v - from) * e).toLocaleString('ru-RU');
@@ -720,77 +985,51 @@
         })(t0);
     });
 
-    /* ─── Фильтр по названию МО ─── */
-    function filterRating(pid, val) {
-        const q = val.toLowerCase();
-        const rows = document.querySelectorAll('#rtable-' + pid + ' tbody tr');
-        let visible = 0;
-        rows.forEach(row => {
-            const matchOrg = row.dataset.org.toLowerCase().includes(q);
-            const curStatus = row.getAttribute('data-filter-status') || 'all';
-            const matchStatus = curStatus === 'all' || row.dataset.status === curStatus;
-            row.style.display = (matchOrg && matchStatus) ? '' : 'none';
-            if (matchOrg && matchStatus) visible++;
-        });
-        const cnt = document.getElementById('count-' + pid);
-        if (cnt) cnt.textContent = visible;
+    /* Скролл к секции из дропдауна без смены активного пункта */
+    function navScrollTo(sectionId) {
+        event.preventDefault();
+        closeAllDropdowns();
+        const target = document.getElementById(sectionId);
+        if (target) target.scrollIntoView({behavior:'smooth', block:'start'});
     }
 
-    /* ─── Фильтр по статусу ─── */
-    function setStatusFilter(pid, status, btn) {
-        // Сбросить активные кнопки
-        document.querySelectorAll('[id^="btn-"][id$="-' + pid + '"]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        const search = document.getElementById('search-' + pid);
-        const q = search ? search.value.toLowerCase() : '';
-        const rows = document.querySelectorAll('#rtable-' + pid + ' tbody tr');
-        let visible = 0;
-        rows.forEach(row => {
-            row.setAttribute('data-filter-status', status);
-            const matchOrg = row.dataset.org.toLowerCase().includes(q);
-            const matchStatus = status === 'all' || row.dataset.status === status;
-            row.style.display = (matchOrg && matchStatus) ? '' : 'none';
-            if (matchOrg && matchStatus) visible++;
+    /* Дропдауны — открытие по клику на toggle */
+    function closeAllDropdowns() {
+        document.querySelectorAll('.tn-dropdown').forEach(d => d.classList.remove('open'));
+    }
+    document.querySelectorAll('.tn-dropdown-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dd = this.closest('.tn-dropdown');
+            const isOpen = dd.classList.contains('open');
+            closeAllDropdowns();
+            if (!isOpen) dd.classList.add('open');
         });
-        const cnt = document.getElementById('count-' + pid);
-        if (cnt) cnt.textContent = visible;
+    });
+    document.addEventListener('click', closeAllDropdowns);
+
+    /* Навигация */
+    function navClick(el, sectionId) {
+        event.preventDefault();
+        document.querySelectorAll('.tn-link').forEach(l => l.classList.remove('active'));
+        el.classList.add('active');
+        const target = document.getElementById(sectionId);
+        if (target) target.scrollIntoView({behavior:'smooth', block:'start'});
     }
 
-    /* ─── Сортировка ─── */
-    function sortTable(pid, colIdx, type, thEl) {
-        const table = document.getElementById('rtable-' + pid);
-        const tbody = table.querySelector('tbody');
-        const rows  = Array.from(tbody.querySelectorAll('tr'));
-
-        // Определить направление
-        const isAsc = thEl.classList.contains('sort-asc');
-        // Сбросить все заголовки
-        table.querySelectorAll('thead th').forEach(h => { h.classList.remove('sort-asc','sort-desc'); });
-        thEl.classList.add(isAsc ? 'sort-desc' : 'sort-asc');
-        const dir = isAsc ? -1 : 1;
-
-        rows.sort((a, b) => {
-            const ca = a.cells[colIdx], cb = b.cells[colIdx];
-            if (!ca || !cb) return 0;
-            if (type === 'num') {
-                const va = parseFloat(ca.dataset.val ?? ca.textContent.replace(/[^\d.-]/g, '')) || -Infinity;
-                const vb = parseFloat(cb.dataset.val ?? cb.textContent.replace(/[^\d.-]/g, '')) || -Infinity;
-                return dir * (va - vb);
-            }
-            return dir * ca.textContent.trim().localeCompare(cb.textContent.trim(), 'ru');
+    /* Автоактивация пункта при скролле */
+    const sections = ['kvc','kpi','pathway','drugs','rating','porucheniya'];
+    window.addEventListener('scroll', () => {
+        let cur = sections[0];
+        sections.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && window.scrollY >= el.offsetTop - 90) cur = id;
         });
-
-        rows.forEach((r, i) => {
-            tbody.appendChild(r);
-            // Обновить номер места (col 0)
-            if (colIdx !== 0 && r.cells[0]) {
-                const orig = r.cells[0].dataset.origRank;
-                if (!orig) r.cells[0].dataset.origRank = r.cells[0].textContent;
-                r.cells[0].textContent = (r.cells[0].dataset.origRank === '—') ? '—' : (i + 1);
-            }
+        document.querySelectorAll('.tn-link[href]').forEach(l => {
+            l.classList.toggle('active', l.getAttribute('href') === '#' + cur);
         });
-    }
+    }, {passive:true});
 </script>
 </body>
 </html>

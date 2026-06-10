@@ -158,16 +158,40 @@
             </a>
         </div>
 
-        <!-- Плитка 2 — в разработке -->
+        <!-- Плитка 2 — Гепатит С -->
         <div class="col-md-4 col-sm-6">
-            <div class="tile-card tile-disabled">
-                <span class="tile-badge">В разработке</span>
-                <div class="tile-icon"><i class="bi bi-journal-medical"></i></div>
-                <div class="tile-title" th:text="${tile2Name}">Регистры</div>
-            </div>
+            <a th:href="${basePath + '/hepatitis'}" class="tile-card tile-active d-flex">
+                <div class="tile-icon"><i class="bi bi-virus2"></i></div>
+                <div class="tile-title" th:text="${tile2Name}">Гепатит С</div>
+                <div th:if="${lastUploadDate}" style="font-size: 0.72rem; margin-top: 10px; color: var(--emias-muted); font-weight: 400;">
+                    Последнее обновление: <span th:text="${lastUploadDate}"></span>
+                </div>
+            </a>
         </div>
 
-        <!-- Плитка 3 — в разработке -->
+        <!-- Плитка 3 — ПЦР дашборд -->
+        <div class="col-md-4 col-sm-6">
+            <a th:href="${basePath + '/pcr-dashboard'}" class="tile-card tile-active d-flex">
+                <div class="tile-icon"><i class="bi bi-virus"></i></div>
+                <div class="tile-title">ПЦР-тестирование ВГС</div>
+                <div style="font-size: 0.72rem; margin-top: 10px; color: var(--emias-muted); font-weight: 400;">
+                    Мониторинг лечения · 2026
+                </div>
+            </a>
+        </div>
+
+        <!-- Плитка 4 — Схемы назначения -->
+        <div class="col-md-4 col-sm-6">
+            <a th:href="${basePath + '/scheme-dashboard'}" class="tile-card tile-active d-flex">
+                <div class="tile-icon">💊</div>
+                <div class="tile-title">Схемы назначения</div>
+                <div style="font-size: 0.72rem; margin-top: 10px; color: var(--emias-muted); font-weight: 400;">
+                    Схема · Продолжительность · Маршрут
+                </div>
+            </a>
+        </div>
+
+        <!-- Плитка 5 — в разработке -->
         <div class="col-md-4 col-sm-6">
             <div class="tile-card tile-disabled">
                 <span class="tile-badge">В разработке</span>

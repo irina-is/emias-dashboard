@@ -52,6 +52,11 @@
                 Исходные данные
             </button>
         </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-hcv">
+                Гепатит С (4ДИ)
+            </button>
+        </li>
     </ul>
 
     <div class="tab-content">
@@ -409,6 +414,68 @@
             </div>
         </div>
 
+        <!-- ── Таб: Гепатит С (4ДИ) ── -->
+        <div class="tab-pane fade" id="tab-hcv">
+
+            <!-- Свод ВГС -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="mb-1">Загрузка свода ВГС</h5>
+                    <p class="text-muted mb-3" style="font-size:0.85rem;">
+                        Файл «СВОД от ...xlsx» — реестр пациентов с гепатитом С.
+                        Лист <strong>СВОД</strong>, строка 1 — заголовки, со строки 2 — данные.
+                        При загрузке все старые записи заменяются новыми.
+                    </p>
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <input type="file" id="hcvRegistryFile" accept=".xlsx" class="form-control" style="max-width:360px;">
+                        <button class="btn btn-primary" onclick="uploadHcvRegistry()">
+                            <i class="bi bi-upload me-1"></i>Загрузить свод
+                        </button>
+                        <span id="hcvRegistryStatus" class="text-muted" style="font-size:0.85rem;"></span>
+                    </div>
+                    <div id="hcvRegistryCount" class="mt-2 text-muted" style="font-size:0.82rem;"></div>
+                </div>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="mb-1">Загрузка фактических данных — 4ДИ Гепатит С</h5>
+                    <p class="text-muted mb-4" style="font-size:0.85rem;">
+                        Загрузите Excel-файл с еженедельными фактическими данными по одному из трёх проектов.
+                        <br>Формат файла: <strong>Столбец A</strong> — название МО,
+                        <strong>Столбец B</strong> — накоплено (всего с начала),
+                        <strong>Столбец C</strong> — за последнюю неделю (необязательно).
+                        Первая строка — заголовок (пропускается автоматически).
+                    </p>
+
+                    <div class="row g-4">
+                        <div class="col-md-4" th:each="pid : ${#numbers.sequence(1,3)}">
+                            <div class="border rounded p-3" style="background: var(--bs-body-bg, #fff);">
+                                <div class="fw-bold mb-1" style="font-size:0.9rem;">
+                                    <span th:text="${pid == 1 ? 'Проект 1: Лечение гепатита С' : (pid == 2 ? 'Проект 2: Амбулаторная помощь' : 'Проект 3: ПЦР-тестирование')}"></span>
+                                </div>
+                                <div class="text-muted mb-3" style="font-size:0.78rem;">
+                                    <span th:text="${pid == 1 ? 'КВЦ: 4 135 пациентов до 01.08.2026' : (pid == 2 ? 'КВЦ: 1 442 пациента до 01.08.2026' : 'КВЦ: 5 522 ПЦР до 31.12.2026')}"></span>
+                                </div>
+                                <input type="file" th:id="'hcvFile' + ${pid}" accept=".xlsx" class="form-control form-control-sm mb-2">
+                                <button class="btn btn-primary btn-sm w-100"
+                                        th:onclick="'uploadHcv(' + ${pid} + ')'">
+                                    Загрузить данные
+                                </button>
+                                <div th:id="'hcvStatus' + ${pid}" class="mt-2" style="font-size:0.82rem; display:none;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 rounded" style="background: #F4F6FB; font-size:0.82rem; color: #5f7f9e;">
+                        <strong>Подсказка:</strong> Названия МО в файле должны точно совпадать с плановыми
+                        (допускаются отличия в кавычках и регистре).
+                        После загрузки данные сразу отобразятся на
+                        <a th:href="${basePath + '/hepatitis'}">дашборде Гепатит С</a>.
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </div>
@@ -429,6 +496,70 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- ══ ПОРУЧЕНИЯ МО ══════════════════════════════════════════ -->
+<div style="max-width:860px;margin:32px auto 0;padding:0 16px 48px;">
+    <h5 style="font-weight:700;margin-bottom:20px;">📋 Поручения МО</h5>
+
+    <!-- Форма добавления -->
+    <div style="background:#fff;border:1px solid #e8ecf5;border-radius:12px;padding:24px;margin-bottom:24px;">
+        <div style="font-weight:600;margin-bottom:16px;font-size:.95rem;">Добавить поручение</div>
+        <form id="task-form" onsubmit="event.preventDefault();submitTask();">
+            <div style="margin-bottom:12px;">
+                <label style="font-size:.8rem;color:#6B7A99;font-weight:600;display:block;margin-bottom:4px;">Что сделать *</label>
+                <textarea name="title" required rows="2"
+                    style="width:100%;border:1px solid #dee2e6;border-radius:8px;padding:8px 12px;font-size:.88rem;font-family:inherit;resize:vertical;"
+                    placeholder="Опишите поручение..."></textarea>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+                <div>
+                    <label style="font-size:.8rem;color:#6B7A99;font-weight:600;display:block;margin-bottom:4px;">Приоритет *</label>
+                    <select name="priority" required style="width:100%;border:1px solid #dee2e6;border-radius:8px;padding:7px 10px;font-size:.85rem;">
+                        <option value="URGENT">🔴 Срочно</option>
+                        <option value="HIGH">🟡 Высокий</option>
+                        <option value="NORMAL">🟢 Обычный</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:.8rem;color:#6B7A99;font-weight:600;display:block;margin-bottom:4px;">Статус *</label>
+                    <select name="status" required style="width:100%;border:1px solid #dee2e6;border-radius:8px;padding:7px 10px;font-size:.85rem;">
+                        <option value="IN_PROGRESS">В работе</option>
+                        <option value="DONE">Выполнено</option>
+                        <option value="OVERDUE">Просрочено</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:.8rem;color:#6B7A99;font-weight:600;display:block;margin-bottom:4px;">Срок</label>
+                    <input type="date" name="deadline"
+                        style="width:100%;border:1px solid #dee2e6;border-radius:8px;padding:7px 10px;font-size:.85rem;">
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+                <div>
+                    <label style="font-size:.8rem;color:#6B7A99;font-weight:600;display:block;margin-bottom:4px;">Ответственный</label>
+                    <input type="text" name="responsible" placeholder="Руководители МО"
+                        style="width:100%;border:1px solid #dee2e6;border-radius:8px;padding:7px 10px;font-size:.85rem;">
+                </div>
+                <div>
+                    <label style="font-size:.8rem;color:#6B7A99;font-weight:600;display:block;margin-bottom:4px;">Тег</label>
+                    <input type="text" name="tag" placeholder="Скрининг 25+, Лечение..."
+                        style="width:100%;border:1px solid #dee2e6;border-radius:8px;padding:7px 10px;font-size:.85rem;">
+                </div>
+            </div>
+            <button id="task-btn" type="submit"
+                style="background:#3B5BD8;color:#fff;border:none;border-radius:8px;padding:9px 24px;font-size:.88rem;font-weight:600;cursor:pointer;">
+                Добавить поручение
+            </button>
+            <div id="task-status" style="display:none;margin-top:10px;"></div>
+        </form>
+    </div>
+
+    <!-- Список поручений -->
+    <div style="background:#fff;border:1px solid #e8ecf5;border-radius:12px;padding:20px 24px;">
+        <div style="font-weight:600;margin-bottom:12px;font-size:.95rem;">Текущие поручения</div>
+        <div id="tasks-list"><p style="color:#9AA5BE;font-size:.85rem;">Загрузка...</p></div>
     </div>
 </div>
 
@@ -1041,6 +1172,152 @@
         el.innerHTML = html;
     }
 
+    // ── Свод ВГС ──────────────────────────────────────────────────────────────
+
+    function uploadHcvRegistry() {
+        const fileInput = document.getElementById('hcvRegistryFile');
+        const status    = document.getElementById('hcvRegistryStatus');
+        if (!fileInput.files.length) { status.textContent = 'Выберите файл'; return; }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        status.innerHTML = '<span class="text-primary">Загрузка...</span>';
+        fetch(BASE_PATH + '/api/hcv/upload-registry', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    status.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>' + data.message + '</span>';
+                    loadHcvRegistryCount();
+                } else {
+                    status.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle me-1"></i>' + data.message + '</span>';
+                }
+            })
+            .catch(() => { status.innerHTML = '<span class="text-danger">Ошибка соединения</span>'; });
+    }
+
+    function loadHcvRegistryCount() {
+        fetch(BASE_PATH + '/api/hcv/registry/count')
+            .then(r => r.json())
+            .then(data => {
+                const el = document.getElementById('hcvRegistryCount');
+                if (el) el.textContent = data.count > 0
+                    ? 'В базе: ' + data.count.toLocaleString('ru-RU') + ' пациентов'
+                    : 'Данные не загружены';
+            });
+    }
+
+    // Загружаем счётчик при открытии таба
+    document.querySelector('[data-bs-target="#tab-hcv"]')
+        .addEventListener('shown.bs.tab', loadHcvRegistryCount);
+
+    // ── Гепатит С (4ДИ) ──────────────────────────────────────────────────────
+
+    function uploadHcv(projectId) {
+        const fileInput = document.getElementById('hcvFile' + projectId);
+        const statusEl  = document.getElementById('hcvStatus' + projectId);
+        if (!fileInput.files.length) {
+            showHcvStatus(statusEl, 'warning', 'Выберите файл');
+            return;
+        }
+        showHcvStatus(statusEl, 'secondary', 'Загружаю...');
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('project', projectId);
+        fetch(BASE_PATH + '/api/hcv/upload-progress', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showHcvStatus(statusEl, 'success', '✓ ' + data.message);
+                    fileInput.value = '';
+                } else {
+                    const errs = (data.errors || ['Неизвестная ошибка']).map(e => safeEsc(e)).join('<br>');
+                    showHcvStatus(statusEl, 'danger', '✗ ' + errs);
+                }
+            })
+            .catch(err => showHcvStatus(statusEl, 'danger', '✗ ' + safeEsc(err.message)));
+    }
+
+    function showHcvStatus(el, type, html) {
+        el.style.display = 'block';
+        el.className = 'alert alert-' + type + ' py-1 px-2';
+        el.innerHTML = html;
+    }
+
+</script>
+
+<script>
+/* ── Поручения МО ── */
+function submitTask() {
+    const form = document.getElementById('task-form');
+    const btn  = document.getElementById('task-btn');
+    const status = document.getElementById('task-status');
+    const data = new URLSearchParams(new FormData(form));
+    btn.disabled = true;
+    fetch(BASE_PATH + '/api/tasks', {method:'POST', body: data})
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(() => {
+            status.className = 'alert alert-success py-1 px-2 mt-2';
+            status.textContent = '✓ Поручение добавлено';
+            status.style.display = 'block';
+            form.reset();
+            loadTasks();
+        })
+        .catch(() => {
+            status.className = 'alert alert-danger py-1 px-2 mt-2';
+            status.textContent = '✗ Ошибка при добавлении';
+            status.style.display = 'block';
+        })
+        .finally(() => btn.disabled = false);
+}
+
+function deleteTask(id) {
+    if (!confirm('Удалить поручение?')) return;
+    fetch(BASE_PATH + '/api/tasks/' + id, {method:'DELETE'}).then(() => loadTasks());
+}
+
+function updateTaskStatus(id, status) {
+    fetch(BASE_PATH + '/api/tasks/' + id + '/status', {
+        method:'POST',
+        body: new URLSearchParams({status})
+    }).then(() => loadTasks());
+}
+
+function loadTasks() {
+    fetch(BASE_PATH + '/api/tasks/list')
+        .then(r => r.json())
+        .then(tasks => {
+            const container = document.getElementById('tasks-list');
+            if (!tasks.length) {
+                container.innerHTML = '<p style="color:#9AA5BE;font-size:.85rem;">Поручений пока нет</p>';
+                return;
+            }
+            container.innerHTML = tasks.map(t => `
+                <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #e8ecf5;">
+                    <div style="flex:1;">
+                        <div style="font-weight:600;font-size:.9rem;">${t.priorityLabel} &nbsp;${escHtml(t.title)}</div>
+                        <div style="font-size:.76rem;color:#9AA5BE;margin-top:4px;">
+                            ${t.deadline ? 'Срок: ' + t.deadline + ' · ' : ''}
+                            ${t.responsible ? 'Ответственный: ' + escHtml(t.responsible) + ' · ' : ''}
+                            ${t.tag ? escHtml(t.tag) : ''}
+                        </div>
+                    </div>
+                    <select onchange="updateTaskStatus(${t.id}, this.value)" style="font-size:.78rem;border-radius:6px;border:1px solid #dee2e6;padding:3px 8px;background:#fff;">
+                        <option value="IN_PROGRESS" ${t.status==='IN_PROGRESS'?'selected':''}>В работе</option>
+                        <option value="DONE"        ${t.status==='DONE'?'selected':''}>Выполнено</option>
+                        <option value="OVERDUE"     ${t.status==='OVERDUE'?'selected':''}>Просрочено</option>
+                    </select>
+                    <button onclick="deleteTask(${t.id})" style="background:none;border:none;color:#dc3545;cursor:pointer;font-size:1rem;" title="Удалить">🗑</button>
+                </div>
+            `).join('');
+        });
+}
+
+function escHtml(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+document.addEventListener('DOMContentLoaded', loadTasks);
 </script>
 
 </body>

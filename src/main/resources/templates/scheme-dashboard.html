@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Схемы назначения — Гепатит С</title>
+    <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('emias-theme')||'light')}catch(e){}</script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231C3A5E'/><text y='22' x='6' font-size='20'>💊</text></svg>">
+    <link th:href="${basePath + '/css/fonts.css'}" rel="stylesheet">
+    <link th:href="${basePath + '/css/bootstrap.min.css'}" rel="stylesheet">
+    <link th:href="${basePath + '/css/bootstrap-icons.css'}" rel="stylesheet">
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Inter',sans-serif;background:#EEF1F6;color:#1A2332;min-height:100vh;}
+
+        .top-bar{
+            background:#1C2B3A;
+            padding:16px 32px;
+            display:flex;align-items:center;justify-content:space-between;
+            position:sticky;top:0;z-index:100;
+        }
+        .title{font-size:1.05rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px;}
+        .back-btn{
+            font-size:.82rem;font-weight:600;color:rgba(255,255,255,.7);
+            padding:7px 16px;border-radius:8px;border:1px solid rgba(255,255,255,.2);
+            text-decoration:none;transition:all .15s;
+        }
+        .back-btn:hover{background:rgba(255,255,255,.1);color:#fff;}
+
+        .content{padding:28px 36px;}
+
+        /* KPI плитки */
+        .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+        @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+        .kpi-card{background:#fff;border-radius:16px;padding:20px 22px;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+        .kpi-label{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9AA5BE;margin-bottom:8px;}
+        .kpi-value{font-size:2.4rem;font-weight:800;line-height:1;letter-spacing:-.03em;color:#1A2332;}
+        .kpi-value.blue{color:#2563EB;}
+        .kpi-value.green{color:#16A34A;}
+        .kpi-value.purple{color:#7C3AED;}
+        .kpi-sub{font-size:.76rem;color:#9AA5BE;margin-top:6px;}
+
+        /* Секция */
+        .section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+        .section-title{font-size:1.15rem;font-weight:700;color:#1A2332;font-family:'Plus Jakarta Sans','Inter',sans-serif;}
+
+        /* Таблица схем */
+        .table-card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;}
+        table{width:100%;border-collapse:collapse;font-size:.82rem;}
+        thead tr{position:sticky;top:56px;z-index:2;}
+        th{
+            background:#F5F7FB;color:#9AA5BE;
+            font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;
+            padding:11px 14px;border-bottom:2px solid #EEF1F6;white-space:nowrap;
+        }
+        th.left{text-align:left;}
+        th.center{text-align:center;}
+        th.right{text-align:right;}
+        td{padding:10px 14px;border-bottom:1px solid #EEF1F6;vertical-align:top;}
+        tr:last-child td{border-bottom:none;}
+        tr:hover td{background:#F9FAFB;}
+
+        .scheme-badge{
+            display:inline-block;padding:3px 10px;border-radius:6px;
+            background:#EFF6FF;color:#1D4ED8;font-weight:700;font-size:.8rem;
+            white-space:nowrap;
+        }
+        .duration-badge{
+            display:inline-block;padding:3px 10px;border-radius:6px;
+            background:#F0FDF4;color:#15803D;font-weight:600;font-size:.78rem;
+            white-space:nowrap;
+        }
+        .count-val{font-size:1.1rem;font-weight:800;color:#2563EB;text-align:right;}
+
+        /* Маршруты (chips) */
+        .route-chips{display:flex;flex-wrap:wrap;gap:5px;}
+        .route-chip{
+            display:inline-flex;align-items:center;gap:4px;
+            padding:3px 9px;border-radius:20px;
+            background:#F5F7FB;border:1px solid #E2E6F0;
+            font-size:.72rem;color:#1A2332;white-space:nowrap;
+        }
+        .route-chip .cnt{
+            font-weight:700;color:#2563EB;
+            background:#EFF6FF;border-radius:20px;
+            padding:1px 6px;font-size:.68rem;
+        }
+
+        /* Топ-маршруты */
+        .routes-grid{
+            display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+            gap:12px;margin-bottom:28px;
+        }
+        .route-card{
+            background:#fff;border-radius:12px;padding:14px 18px;
+            box-shadow:0 2px 8px rgba(0,0,0,.05);
+            display:flex;align-items:center;justify-content:space-between;gap:12px;
+        }
+        .route-name{font-size:.82rem;font-weight:600;color:#1A2332;flex:1;line-height:1.3;}
+        .route-count{font-size:1.4rem;font-weight:800;color:#2563EB;flex-shrink:0;}
+        .route-bar-wrap{height:4px;background:#EEF1F6;border-radius:99px;margin-top:6px;overflow:hidden;}
+        .route-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,#93C5FD,#2563EB);}
+
+        .error-box{
+            background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;
+            padding:20px 24px;color:#991B1B;font-size:.9rem;margin-top:20px;
+        }
+
+        /* Фильтр */
+        .filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px;}
+        .filter-input{
+            padding:8px 14px;border:1.5px solid #D0D7E8;border-radius:10px;
+            font-size:.82rem;background:#fff;color:#1A2332;outline:none;min-width:220px;
+        }
+        .filter-input:focus{border-color:#2E5BFF;}
+
+        .no-data{text-align:center;padding:48px 24px;color:#9AA5BE;font-size:.9rem;}
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="title">
+        💊 Схемы назначения
+    </div>
+    <a th:href="${basePath + '/hepatitis'}" class="back-btn">← Назад к дашборду</a>
+</div>
+
+<div class="content">
+
+    <!-- Ошибка -->
+    <div class="error-box" th:if="${error}" th:text="${error}"></div>
+
+    <th:block th:if="${stats != null}">
+
+        <!-- KPI -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Всего записей</div>
+                <div class="kpi-value" th:text="${#numbers.formatInteger(stats.totalAll,0,'DEFAULT')}">0</div>
+                <div class="kpi-sub">в своде ВГС</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Заключение МОНИКИ / Центр СПИД</div>
+                <div class="kpi-value blue" th:text="${#numbers.formatInteger(stats.withScheme,0,'DEFAULT')}">0</div>
+                <div class="kpi-sub" th:text="${stats.totalAll > 0 ? #numbers.formatDecimal(stats.withScheme * 100.0 / stats.totalAll, 1, 1) : '0'} + '% · ответ «да»'"></div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Уникальных схем</div>
+                <div class="kpi-value green" th:text="${stats.uniqueSchemes}">0</div>
+                <div class="kpi-sub">кодов схем лечения</div>
+            </div>
+        </div>
+
+        <!-- Топ маршруты -->
+        <div th:if="${!stats.topRoutes.isEmpty()}">
+            <div class="section-hd">
+                <div class="section-title">Топ организаций маршрутизации</div>
+                <span style="font-size:.78rem;color:#9AA5BE;">столбец P · топ-10</span>
+            </div>
+            <div class="routes-grid" th:with="maxVal=${stats.topRoutes.values().iterator().next()}">
+                <div class="route-card" th:each="entry : ${stats.topRoutes}">
+                    <div style="flex:1;min-width:0;">
+                        <div class="route-name" th:text="${entry.key}"></div>
+                        <div class="route-bar-wrap">
+                            <div class="route-bar"
+                                 th:style="'width:' + ${maxVal > 0 ? entry.value * 100 / maxVal : 0} + '%'"></div>
+                        </div>
+                    </div>
+                    <div class="route-count" th:text="${entry.value}">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Таблица схем -->
+        <div class="section-hd" style="margin-top:4px;">
+            <div class="section-title">Схемы назначения</div>
+            <span style="font-size:.78rem;color:#9AA5BE;">М — схема · N — продолжительность · P — маршрут</span>
+        </div>
+
+        <!-- Фильтр -->
+        <div class="filter-bar">
+            <input class="filter-input" id="schemeFilter" type="text"
+                   placeholder="Фильтр по коду схемы..." oninput="filterTable()">
+            <input class="filter-input" id="routeFilter" type="text"
+                   placeholder="Фильтр по маршруту..." oninput="filterTable()">
+        </div>
+
+        <div class="table-card">
+            <div style="overflow-x:auto;max-height:600px;overflow-y:auto;scrollbar-width:thin;">
+                <table id="schemeTable">
+                    <thead>
+                        <tr>
+                            <th class="left" style="min-width:180px;">Схема лечения (M)</th>
+                            <th class="right" style="min-width:100px;">Количество</th>
+                            <th class="left" style="min-width:160px;">Продолжительность (N)</th>
+                            <th class="left" style="min-width:300px;">Маршрутизация (P)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="row : ${stats.groups}"
+                            th:attr="data-scheme=${row.scheme}, data-routes=${row.routedToCounts.keySet().toString()}">
+                            <td>
+                                <span class="scheme-badge"
+                                      th:style="${row.scheme == 'Не указана'} ? 'background:#F5F7FB;color:#9AA5BE;' : ''"
+                                      th:text="${row.scheme}"></span>
+                            </td>
+                            <td class="count-val" th:text="${#numbers.formatInteger(row.count,0,'DEFAULT')}">0</td>
+                            <td>
+                                <div class="route-chips">
+                                    <span class="duration-badge" th:each="de : ${row.durationCounts}"
+                                          th:style="${de.key == 'Не указана'} ? 'background:#F5F7FB;color:#9AA5BE;' : ''">
+                                        <span th:text="${de.key}"></span>
+                                        <span style="margin-left:4px;font-weight:800;color:#555;" th:if="${row.durationCounts.size() > 1}" th:text="'×' + ${de.value}"></span>
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="route-chips">
+                                    <span class="route-chip" th:each="re : ${row.routedToCounts}"
+                                          th:style="${re.key == 'Не указана'} ? 'color:#9AA5BE;' : ''">
+                                        <span th:text="${re.key}"></span>
+                                        <span class="cnt" th:text="${re.value}"></span>
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="no-data" id="noDataMsg" style="display:none;">Нет данных по выбранному фильтру</div>
+            </div>
+        </div>
+
+    </th:block>
+
+    <th:block th:unless="${stats != null}">
+        <div class="no-data" style="margin-top:60px;">
+            <div style="font-size:2rem;margin-bottom:12px;">📭</div>
+            Данные свода ВГС не загружены.<br>
+            <a th:href="${basePath + '/admin'}" style="color:#2E5BFF;font-weight:600;">Перейдите в панель администратора →</a>
+        </div>
+    </th:block>
+
+</div>
+
+<script th:src="${basePath + '/js/bootstrap.bundle.min.js'}"></script>
+<script>
+    function filterTable() {
+        const sf = document.getElementById('schemeFilter').value.toLowerCase().trim();
+        const rf = document.getElementById('routeFilter').value.toLowerCase().trim();
+        const rows = document.querySelectorAll('#schemeTable tbody tr');
+        let visible = 0;
+        rows.forEach(row => {
+            const scheme = (row.dataset.scheme || '').toLowerCase();
+            const routes = (row.dataset.routes || '').toLowerCase();
+            const match = (!sf || scheme.includes(sf)) && (!rf || routes.includes(rf));
+            row.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+        document.getElementById('noDataMsg').style.display = visible === 0 ? '' : 'none';
+    }
+</script>
+</body>
+</html>
