@@ -518,6 +518,75 @@ public class HcvRegistryService {
         });
     }
 
+    /**
+     * Аналитика: топ-5 МО по среднему ожиданию (МОНИКИ → лечение, 2026)
+     * и топ-5 МО по риску УВО12 (завершили, но УВО12 не проведён).
+     * Возвращает Map с ключами "waitingTop5" и "uvoRiskTop5".
+     * Каждый элемент waitingTop5: Object[]{moName, patientCount, avgDays}.
+     * Каждый элемент uvoRiskTop5: Object[]{moName, completedCount, uvo12Count, withoutUvo12Count}.
+     */
+    public Map<String, Object> buildAnalyticsStats() {
+        List<HcvRegistry> all = repo.findAll();
+
+        // Топ-5 МО по среднему ожиданию МОНИКИ → начало лечения (2026)
+        Map<String, long[]> waitMap = new java.util.LinkedHashMap<>(); // mo -> [sumDays, count]
+        for (HcvRegistry r : all) {
+            if (!isYear2026(r.getTreatmentStartDate())) continue;
+            String monik = r.getMonikConclusionDate();
+            String start = r.getTreatmentStartDate();
+            if (monik == null || monik.isBlank() || start == null || start.isBlank()) continue;
+            LocalDate d1 = parseLocalDate(monik);
+            LocalDate d2 = parseLocalDate(start);
+            if (d1 == null || d2 == null || !d2.isAfter(d1)) continue;
+            long days = java.time.temporal.ChronoUnit.DAYS.between(d1, d2);
+            String mo = r.getTerritory() != null && !r.getTerritory().isBlank() ? r.getTerritory().trim() : "Не указано";
+            waitMap.computeIfAbsent(mo, k -> new long[]{0, 0});
+            waitMap.get(mo)[0] += days;
+            waitMap.get(mo)[1]++;
+        }
+        List<Object[]> waitingTop5 = waitMap.entrySet().stream()
+                .filter(e -> e.getValue()[1] > 0)
+                .sorted((a, b) -> Long.compare(b.getValue()[0] / b.getValue()[1], a.getValue()[0] / a.getValue()[1]))
+                .limit(5)
+                .map(e -> new Object[]{e.getKey(), e.getValue()[1], e.getValue()[0] / e.getValue()[1]})
+                .collect(java.util.stream.Collectors.toList());
+
+        // Топ-5 МО по риску УВО12: завершили курс, но нет даты ПЦР УВО12
+        Map<String, long[]> uvoMap = new java.util.LinkedHashMap<>(); // mo -> [completed, uvo12Done]
+        for (HcvRegistry r : all) {
+            String status = lower(r.getTreatmentStatus());
+            boolean completed = status.contains("завершен") || status.contains("завершён");
+            if (!completed) continue;
+            String mo = r.getTerritory() != null && !r.getTerritory().isBlank() ? r.getTerritory().trim() : "Не указано";
+            uvoMap.computeIfAbsent(mo, k -> new long[]{0, 0});
+            uvoMap.get(mo)[0]++;
+            if (r.getUvo12PcrDate() != null && !r.getUvo12PcrDate().isBlank()) uvoMap.get(mo)[1]++;
+        }
+        List<Object[]> uvoRiskTop5 = uvoMap.entrySet().stream()
+                .filter(e -> e.getValue()[0] > 0)
+                .sorted((a, b) -> {
+                    long withoutA = a.getValue()[0] - a.getValue()[1];
+                    long withoutB = b.getValue()[0] - b.getValue()[1];
+                    return Long.compare(withoutB, withoutA);
+                })
+                .limit(5)
+                .map(e -> new Object[]{e.getKey(), e.getValue()[0], e.getValue()[1], e.getValue()[0] - e.getValue()[1]})
+                .collect(java.util.stream.Collectors.toList());
+
+        Map<String, Object> result = new java.util.LinkedHashMap<>();
+        result.put("waitingTop5", waitingTop5);
+        result.put("uvoRiskTop5", uvoRiskTop5);
+        return result;
+    }
+
+    private LocalDate parseLocalDate(String s) {
+        if (s == null || s.isBlank()) return null;
+        for (DateTimeFormatter f : DATE_FORMATS) {
+            try { return LocalDate.parse(s.trim(), f); } catch (DateTimeParseException ignored) {}
+        }
+        return null;
+    }
+
     private List<Object[]> buildMoRating(java.util.function.Predicate<HcvRegistry> filter) {
         Map<String, Long> counts = new TreeMap<>();
         for (HcvRegistry r : repo.findAll()) {
