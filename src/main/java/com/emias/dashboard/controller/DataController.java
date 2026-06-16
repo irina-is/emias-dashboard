@@ -131,7 +131,7 @@ public class DataController {
 
     @GetMapping("/tasks/list")
     public ResponseEntity<java.util.List<MoTask>> listTasks() {
-        return ResponseEntity.ok(moTaskRepository.findAllByOrderByIdDesc());
+        return ResponseEntity.ok(moTaskRepository.findAllByOrderByIdAsc());
     }
 
     /**
@@ -644,11 +644,125 @@ public class DataController {
     }
 
     /**
+     * Загружает недельный план из файла «Недельный план.xlsx» для указанной недели.
+     */
+    @PostMapping("/hcv/upload-weekly-plan")
+    public ResponseEntity<?> uploadHcvWeeklyPlan(@RequestParam("file") MultipartFile file,
+                                                  @RequestParam("week") String week) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Файл не выбран"));
+        }
+        String filename = file.getOriginalFilename();
+        if (filename == null || !filename.toLowerCase().endsWith(".xlsx")) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Нужен файл формата .xlsx"));
+        }
+        if (week == null || week.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Не указана неделя"));
+        }
+        try {
+            LocalDate reportWeek = LocalDate.parse(week);
+            int count = hcvService.uploadWeeklyPlan(file, reportWeek);
+            return ResponseEntity.ok(Map.of("success", true,
+                    "message", "Недельный план за " + week + " загружен: " + count + " строк",
+                    "week", week));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("success", false, "message", "Ошибка: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Возвращает данные недельного плана за указанную неделю.
+     */
+    @GetMapping("/hcv/weekly-plan")
+    public ResponseEntity<?> getHcvWeeklyPlan(@RequestParam String week) {
+        try {
+            LocalDate reportWeek = LocalDate.parse(week);
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (com.emias.dashboard.entity.HcvWeeklyPlanRow row : hcvService.getWeeklyPlan(reportWeek)) {
+                Map<String, Object> m = new LinkedHashMap<>();
+                m.put("orgName",        row.getOrgName());
+                m.put("planYearAmb",    row.getPlanYearAmb());
+                m.put("planMonthAmb",   row.getPlanMonthAmb());
+                m.put("waitingAmb",     row.getWaitingAmb());
+                m.put("weeklyPlanAmb",  row.getWeeklyPlanAmb());
+                m.put("weeklyFactAmb",  row.getWeeklyFactAmb());
+                m.put("planYearStat",   row.getPlanYearStat());
+                m.put("referralsStat",  row.getReferralsStat());
+                m.put("weeklyPlanStat", row.getWeeklyPlanStat());
+                m.put("weeklyFactStat", row.getWeeklyFactStat());
+                result.add(m);
+            }
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Возвращает список недель, за которые загружен план.
+     */
+    @GetMapping("/hcv/weekly-plan/weeks")
+    public ResponseEntity<?> getHcvWeeklyPlanWeeks() {
+        try {
+            List<String> weeks = hcvService.getWeeklyPlanWeeks().stream()
+                    .map(LocalDate::toString)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(weeks);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
      * Количество записей в реестре ВГС.
      */
     @GetMapping("/hcv/registry/count")
     public Map<String, Object> getHcvRegistryCount() {
         return Map.of("count", hcvRegistryService.count());
+    }
+
+    // ── Пациенты с отклонениями при скрининге ХВГС ──────────────────────────
+
+    @GetMapping("/screening/deviations/facilities")
+    public ResponseEntity<List<String>> getDeviationFacilities() {
+        return ResponseEntity.ok(screeningRepository.findDeviationFacilities());
+    }
+
+    @GetMapping("/screening/deviations")
+    public ResponseEntity<?> getDeviations(
+            @RequestParam(defaultValue = "")  String facility,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
+        try {
+            PageRequest pageable = PageRequest.of(page, Math.min(size, 200));
+            Page<Screening> pageResult = screeningRepository.findDeviations(facility.trim(), pageable);
+            List<Map<String, String>> records = pageResult.getContent().stream()
+                    .map(s -> {
+                        Map<String, String> m = new LinkedHashMap<>();
+                        m.put("lastName",       nvl(s.getLastName()));
+                        m.put("firstName",      nvl(s.getFirstName()));
+                        m.put("middleName",     nvl(s.getMiddleName()));
+                        m.put("birthDate",      nvl(s.getBirthDate()));
+                        m.put("facilityFrom",   nvl(s.getFacilityFrom()));
+                        m.put("researchDate",   nvl(s.getResearchDate()));
+                        m.put("researchStatus", nvl(s.getResearchStatus()));
+                        m.put("researchResult", nvl(s.getResearchResult()));
+                        m.put("pcrDone",        nvl(s.getPcrDone()));
+                        m.put("pcrResult",      nvl(s.getPcrResult()));
+                        m.put("snils",          nvl(s.getSnils()));
+                        return m;
+                    })
+                    .collect(Collectors.toList());
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("records",     records);
+            response.put("totalCount",  pageResult.getTotalElements());
+            response.put("totalPages",  pageResult.getTotalPages());
+            response.put("page",        page);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Ошибка: " + e.getMessage());
+        }
     }
 
     // Диагностика: показывает что лежит в базе

@@ -2,10 +2,12 @@ package com.emias.dashboard.service;
 
 import com.emias.dashboard.entity.HcvPlan;
 import com.emias.dashboard.entity.HcvProgress;
+import com.emias.dashboard.entity.HcvWeeklyPlanRow;
 import com.emias.dashboard.model.HcvOrgRow;
 import com.emias.dashboard.model.HcvProjectData;
 import com.emias.dashboard.repository.HcvPlanRepository;
 import com.emias.dashboard.repository.HcvProgressRepository;
+import com.emias.dashboard.repository.HcvWeeklyPlanRepository;
 import jakarta.annotation.PostConstruct;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Service;
@@ -196,12 +198,15 @@ public class HcvService {
 
     private static final Object[][][] ALL_PLANS = {null, PLANS_P1, PLANS_P2, PLANS_P3};
 
-    private final HcvPlanRepository     planRepo;
-    private final HcvProgressRepository progressRepo;
+    private final HcvPlanRepository       planRepo;
+    private final HcvProgressRepository   progressRepo;
+    private final HcvWeeklyPlanRepository weeklyPlanRepo;
 
-    public HcvService(HcvPlanRepository planRepo, HcvProgressRepository progressRepo) {
-        this.planRepo     = planRepo;
-        this.progressRepo = progressRepo;
+    public HcvService(HcvPlanRepository planRepo, HcvProgressRepository progressRepo,
+                      HcvWeeklyPlanRepository weeklyPlanRepo) {
+        this.planRepo       = planRepo;
+        this.progressRepo   = progressRepo;
+        this.weeklyPlanRepo = weeklyPlanRepo;
     }
 
     @PostConstruct
@@ -297,6 +302,77 @@ public class HcvService {
             }
         }
         return updated;
+    }
+
+    /**
+     * Загружает «Недельный план.xlsx» в таблицу hcv_weekly_plan для указанной недели.
+     * Столбцы (0-based):
+     *   B(1) — МО
+     *   C(2) — план год амбулаторно
+     *   D(3) — план месяц амбулаторно
+     *   E(4) — план месяц стационар
+     *   H(7) — план год стационар
+     * Первые 2 строки — заголовки, пропускаются.
+     * Данные за ту же неделю перезаписываются, остальные недели не затрагиваются.
+     */
+    @Transactional
+    public int uploadWeeklyPlan(MultipartFile file, LocalDate reportWeek) throws Exception {
+        weeklyPlanRepo.deleteByReportWeek(reportWeek);
+
+        List<HcvWeeklyPlanRow> rows = new ArrayList<>();
+
+        try (Workbook wb = WorkbookFactory.create(file.getInputStream())) {
+            Sheet sheet = wb.getSheetAt(0);
+            DataFormatter fmt = new DataFormatter();
+
+            for (int r = 2; r <= sheet.getLastRowNum(); r++) {
+                Row row = sheet.getRow(r);
+                if (row == null) continue;
+
+                String orgName = fmt.formatCellValue(row.getCell(1)).trim();
+                if (orgName.isEmpty()) continue;
+
+                Integer planYearAmb    = parseIntOrNull(fmt, row.getCell(2));
+                Integer planMonthAmb   = parseIntOrNull(fmt, row.getCell(3));
+                Integer waitingAmb     = parseIntOrNull(fmt, row.getCell(4));  // E
+                Integer weeklyFactAmb  = parseIntOrNull(fmt, row.getCell(5));  // F
+                Integer weeklyPlanAmb  = parseIntOrNull(fmt, row.getCell(6));  // G
+                Integer planYearStat   = parseIntOrNull(fmt, row.getCell(7));  // H
+                Integer referralsStat  = parseIntOrNull(fmt, row.getCell(9));  // J
+                Integer weeklyFactStat = parseIntOrNull(fmt, row.getCell(10)); // K
+                Integer weeklyPlanStat = parseIntOrNull(fmt, row.getCell(11)); // L
+
+                rows.add(new HcvWeeklyPlanRow(orgName,
+                        planYearAmb, planMonthAmb, waitingAmb, weeklyPlanAmb, weeklyFactAmb,
+                        planYearStat, referralsStat, weeklyPlanStat, weeklyFactStat,
+                        reportWeek));
+            }
+        }
+
+        weeklyPlanRepo.saveAll(rows);
+        return rows.size();
+    }
+
+    public List<HcvWeeklyPlanRow> getWeeklyPlan(LocalDate reportWeek) {
+        return weeklyPlanRepo.findByReportWeekOrderByOrgNameAsc(reportWeek);
+    }
+
+    public List<LocalDate> getWeeklyPlanWeeks() {
+        return weeklyPlanRepo.findDistinctWeeks();
+    }
+
+    /** Возвращает данные последней загруженной недели, либо пустой список. */
+    public List<HcvWeeklyPlanRow> getLatestWeeklyPlan() {
+        List<LocalDate> weeks = weeklyPlanRepo.findDistinctWeeks();
+        if (weeks.isEmpty()) return List.of();
+        return weeklyPlanRepo.findByReportWeekOrderByOrgNameAsc(weeks.get(0));
+    }
+
+    private Integer parseIntOrNull(DataFormatter fmt, org.apache.poi.ss.usermodel.Cell cell) {
+        if (cell == null) return null;
+        String s = fmt.formatCellValue(cell).trim().replace(" ", "").replace(",", ".");
+        if (s.isEmpty()) return null;
+        try { return (int) Double.parseDouble(s); } catch (NumberFormatException e) { return null; }
     }
 
     private String normalize(String s) {

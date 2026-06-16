@@ -40,4 +40,7 @@ public class HcvPlan {
     public String getOrgName()    { return orgName; }
     public int    getAnnualPlan() { return annualPlan; }
     public int    getWeeklyPlan() { return weeklyPlan; }
+
+    public void setAnnualPlan(int annualPlan) { this.annualPlan = annualPlan; }
+    public void setWeeklyPlan(int weeklyPlan) { this.weeklyPlan = weeklyPlan; }
 }
