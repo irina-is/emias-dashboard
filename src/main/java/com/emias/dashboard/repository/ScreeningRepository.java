@@ -31,4 +31,23 @@ public interface ScreeningRepository extends JpaRepository<Screening, Long> {
     @Modifying
     @Query("DELETE FROM Screening s WHERE s.reportDate = :date")
     void deleteByReportDate(@Param("date") LocalDate date);
+
+    @Query("SELECT s FROM Screening s " +
+           "WHERE LOWER(s.researchStatus) LIKE '%завершено%' " +
+           "AND LOWER(s.researchResult) LIKE '%выявлено%' " +
+           "AND (:facility = '' OR s.facilityFrom = :facility) " +
+           "ORDER BY s.lastName, s.firstName, s.middleName")
+    Page<Screening> findDeviations(@Param("facility") String facility, Pageable pageable);
+
+    @Query("SELECT DISTINCT s.facilityFrom FROM Screening s " +
+           "WHERE LOWER(s.researchStatus) LIKE '%завершено%' " +
+           "AND LOWER(s.researchResult) LIKE '%выявлено%' " +
+           "AND s.facilityFrom IS NOT NULL AND s.facilityFrom <> '' " +
+           "ORDER BY s.facilityFrom")
+    List<String> findDeviationFacilities();
+
+    @Query("SELECT COUNT(s) FROM Screening s " +
+           "WHERE LOWER(s.researchStatus) LIKE '%завершено%' " +
+           "AND LOWER(s.researchResult) LIKE '%выявлено%'")
+    long countDeviations();
 }
