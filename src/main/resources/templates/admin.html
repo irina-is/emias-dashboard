@@ -417,6 +417,73 @@
         <!-- ── Таб: Гепатит С (4ДИ) ── -->
         <div class="tab-pane fade" id="tab-hcv">
 
+            <!-- Недельный план -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="mb-1">Загрузка недельного плана</h5>
+                    <p class="text-muted mb-3" style="font-size:0.85rem;">
+                        Файл «Недельный план.xlsx» — один лист, первые 2 строки заголовки.
+                        <strong>B</strong> — МО, <strong>C</strong> — план год (амб.),
+                        <strong>D</strong> — план месяц (амб.), <strong>E</strong> — план месяц (ДС),
+                        <strong>H</strong> — план год (ДС).
+                    </p>
+                    <div class="d-flex align-items-center gap-3 flex-wrap mb-3">
+                        <input type="file" id="hcvWeeklyPlanFile" accept=".xlsx" class="form-control" style="max-width:280px;">
+                        <div>
+                            <label class="form-label mb-1" style="font-size:0.8rem;color:var(--emias-muted);">Неделя</label>
+                            <input type="week" id="hcvWeeklyPlanWeek" class="form-control" style="max-width:200px;"
+                                   oninput="updateWeekDatesLabel()">
+                            <div id="hcvWeekDatesLabel" class="text-muted mt-1" style="font-size:0.78rem;min-height:1.2em;"></div>
+                        </div>
+                        <div style="align-self:flex-end;">
+                            <button class="btn btn-primary" onclick="uploadHcvWeeklyPlan()">
+                                <i class="bi bi-upload me-1"></i>Загрузить
+                            </button>
+                        </div>
+                        <span id="hcvWeeklyPlanStatus" class="text-muted" style="font-size:0.85rem;align-self:flex-end;"></span>
+                    </div>
+
+                    <!-- Превью -->
+                    <div id="hcvWeeklyPlanPreview" style="display:none;">
+                        <hr class="my-3">
+                        <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                            <span class="fw-semibold" style="font-size:0.88rem;">Данные за неделю:</span>
+                            <select id="hcvWeeklyPlanWeekSelect" class="form-select form-select-sm" style="max-width:200px;" onchange="loadHcvWeeklyPlanPreview()">
+                            </select>
+                            <span id="hcvWeeklyPlanCount" class="text-muted ms-auto" style="font-size:0.82rem;"></span>
+                        </div>
+                        <div style="max-height:420px;overflow-y:auto;border-radius:8px;border:1px solid var(--emias-border,#E8ECF5);">
+                            <table class="table table-sm table-hover mb-0" style="font-size:0.8rem;">
+                                <thead style="position:sticky;top:0;z-index:1;" class="table-light">
+                                    <tr>
+                                        <th colspan="2"></th>
+                                        <th colspan="6" class="text-center" style="border-left:2px solid #dee2e6;">Амбулаторная помощь</th>
+                                        <th colspan="6" class="text-center" style="border-left:2px solid #dee2e6;">Стационарная помощь</th>
+                                    </tr>
+                                    <tr>
+                                        <th style="width:36px;">№</th>
+                                        <th>Медицинская организация</th>
+                                        <th class="text-end" style="border-left:2px solid #dee2e6;">План 2026</th>
+                                        <th class="text-end">Ожидают лечение</th>
+                                        <th class="text-end">% плана</th>
+                                        <th class="text-end">Неделя план</th>
+                                        <th class="text-end">Неделя факт</th>
+                                        <th class="text-end">Динамика</th>
+                                        <th class="text-end" style="border-left:2px solid #dee2e6;">План 2026</th>
+                                        <th class="text-end">Направлены на лечение</th>
+                                        <th class="text-end">% от плана</th>
+                                        <th class="text-end">Недельный план (стац.)</th>
+                                        <th class="text-end">Неделя факт</th>
+                                        <th class="text-end">Динамика</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="hcvWeeklyPlanBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Свод ВГС -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body p-4">
@@ -1173,6 +1240,145 @@
     }
 
     // ── Свод ВГС ──────────────────────────────────────────────────────────────
+
+    function uploadHcvWeeklyPlan() {
+        const fileInput = document.getElementById('hcvWeeklyPlanFile');
+        const weekInput = document.getElementById('hcvWeeklyPlanWeek');
+        const status    = document.getElementById('hcvWeeklyPlanStatus');
+
+        if (!fileInput.files.length) {
+            status.innerHTML = '<span class="text-warning">Выберите файл</span>'; return;
+        }
+        if (!weekInput.value) {
+            status.innerHTML = '<span class="text-warning">Укажите неделю</span>'; return;
+        }
+
+        const monday  = weekInputToMonday(weekInput.value);
+        const isoDate = dateToISO(monday);
+
+        const sel = document.getElementById('hcvWeeklyPlanWeekSelect');
+        const existingWeeks = sel ? Array.from(sel.options).map(o => o.value) : [];
+        if (existingWeeks.includes(isoDate)) {
+            const label = formatWeekLabel(isoDate);
+            if (!confirm(`Данные за «${label}» уже загружены.\nЗаменить их новыми данными?`)) return;
+        }
+
+        doUploadHcvWeeklyPlan(fileInput, isoDate, status);
+    }
+
+    function doUploadHcvWeeklyPlan(fileInput, week, status) {
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('week', week);
+
+        status.innerHTML = '<span class="text-primary">Загрузка...</span>';
+        fetch(BASE_PATH + '/api/hcv/upload-weekly-plan', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    status.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>' + safeEsc(data.message) + '</span>';
+                    fileInput.value = '';
+                    loadHcvWeeklyPlanWeeks(week);
+                } else {
+                    status.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle me-1"></i>' + safeEsc(data.message) + '</span>';
+                }
+            })
+            .catch(() => { status.innerHTML = '<span class="text-danger">Ошибка соединения</span>'; });
+    }
+
+    function loadHcvWeeklyPlanWeeks(selectWeek) {
+        fetch(BASE_PATH + '/api/hcv/weekly-plan/weeks')
+            .then(r => r.json())
+            .then(weeks => {
+                if (!Array.isArray(weeks) || weeks.length === 0) return;
+                const sel = document.getElementById('hcvWeeklyPlanWeekSelect');
+                sel.innerHTML = weeks.map(w => {
+                    const d = new Date(w);
+                    const end = new Date(d); end.setDate(d.getDate() + 6);
+                    const fmt = dt => dt.toLocaleDateString('ru-RU', { day:'2-digit', month:'2-digit' });
+                    const label = `Неделя ${fmt(d)} – ${fmt(end)}`;
+                    return `<option value="${w}"${w === selectWeek ? ' selected' : ''}>${label}</option>`;
+                }).join('');
+                document.getElementById('hcvWeeklyPlanPreview').style.display = 'block';
+                loadHcvWeeklyPlanPreview();
+            })
+            .catch(() => {});
+    }
+
+    function loadHcvWeeklyPlanPreview() {
+        const sel = document.getElementById('hcvWeeklyPlanWeekSelect');
+        if (!sel || !sel.value) return;
+
+        fetch(BASE_PATH + '/api/hcv/weekly-plan?week=' + sel.value)
+            .then(r => r.json())
+            .then(rows => {
+                if (!Array.isArray(rows)) return;
+                document.getElementById('hcvWeeklyPlanCount').textContent = rows.length + ' организаций';
+                document.getElementById('hcvWeeklyPlanBody').innerHTML = rows.map((r, i) => {
+                    const pctAmb  = r.planYearAmb  ? Math.round((r.waitingAmb    || 0) / r.planYearAmb  * 100) : null;
+                    const pctStat = r.planYearStat ? Math.round((r.referralsStat || 0) / r.planYearStat * 100) : null;
+                    const dynAmb  = (r.weeklyFactAmb  != null && r.weeklyPlanAmb  != null) ? r.weeklyFactAmb  - r.weeklyPlanAmb  : null;
+                    const dynStat = (r.weeklyFactStat != null && r.weeklyPlanStat != null) ? r.weeklyFactStat - r.weeklyPlanStat : null;
+                    const dynColor = v => v == null ? '' : v > 0 ? 'color:#198754;font-weight:600;' : v < 0 ? 'color:#dc3545;font-weight:600;' : '';
+                    const fmtDyn  = v => v == null ? '—' : (v > 0 ? '+' : '') + v;
+                    return `<tr>
+                        <td class="text-muted">${i + 1}</td>
+                        <td>${safeEsc(r.orgName)}</td>
+                        <td class="text-end" style="border-left:2px solid #dee2e6;">${r.planYearAmb ?? '—'}</td>
+                        <td class="text-end">${r.waitingAmb ?? '—'}</td>
+                        <td class="text-end">${pctAmb != null ? pctAmb + '%' : '—'}</td>
+                        <td class="text-end">${r.weeklyPlanAmb ?? '—'}</td>
+                        <td class="text-end">${r.weeklyFactAmb ?? '—'}</td>
+                        <td class="text-end" style="${dynColor(dynAmb)}">${fmtDyn(dynAmb)}</td>
+                        <td class="text-end" style="border-left:2px solid #dee2e6;">${r.planYearStat ?? '—'}</td>
+                        <td class="text-end">${r.referralsStat ?? '—'}</td>
+                        <td class="text-end">${pctStat != null ? pctStat + '%' : '—'}</td>
+                        <td class="text-end">${r.weeklyPlanStat ?? '—'}</td>
+                        <td class="text-end">${r.weeklyFactStat ?? '—'}</td>
+                        <td class="text-end" style="${dynColor(dynStat)}">${fmtDyn(dynStat)}</td>
+                    </tr>`;
+                }).join('');
+            })
+            .catch(() => {});
+    }
+
+    // "2026-W25" → Date (понедельник)
+    function weekInputToMonday(weekStr) {
+        const [year, w] = weekStr.split('-W').map(Number);
+        const jan4 = new Date(year, 0, 4);
+        const monday1 = new Date(jan4);
+        monday1.setDate(jan4.getDate() - ((jan4.getDay() || 7) - 1));
+        const monday = new Date(monday1);
+        monday.setDate(monday1.getDate() + (w - 1) * 7);
+        return monday;
+    }
+
+    // Date → "YYYY-MM-DD"
+    function dateToISO(d) {
+        return d.toISOString().slice(0, 10);
+    }
+
+    function formatWeekLabel(dateStr) {
+        const d = new Date(dateStr);
+        const end = new Date(d);
+        end.setDate(d.getDate() + 6);
+        const fmt = dt => dt.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+        return `с ${fmt(d)} по ${fmt(end)}`;
+    }
+
+    function updateWeekDatesLabel() {
+        const weekInput = document.getElementById('hcvWeeklyPlanWeek');
+        const label     = document.getElementById('hcvWeekDatesLabel');
+        if (!weekInput.value) { label.textContent = ''; return; }
+        const monday = weekInputToMonday(weekInput.value);
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        const fmt = dt => dt.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        label.textContent = `${fmt(monday)} — ${fmt(sunday)}`;
+    }
+
+    document.querySelector('[data-bs-target="#tab-hcv"]')
+        .addEventListener('shown.bs.tab', () => loadHcvWeeklyPlanWeeks(null));
 
     function uploadHcvRegistry() {
         const fileInput = document.getElementById('hcvRegistryFile');

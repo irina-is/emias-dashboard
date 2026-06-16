@@ -149,13 +149,13 @@
 
         <!-- Плитка 1 — активная -->
         <div class="col-md-4 col-sm-6">
-            <a th:href="${basePath + '/dashboard'}" class="tile-card tile-active d-flex">
+            <div class="tile-card tile-disabled d-flex">
                 <div class="tile-icon"><i class="bi bi-clipboard2-pulse-fill"></i></div>
                 <div class="tile-title" th:text="${tile1Name}">Контроль выполнения плана скрининга ХВГС</div>
                 <div th:if="${lastUploadDate}" style="font-size: 0.72rem; margin-top: 10px; color: var(--emias-muted); font-weight: 400;">
                     Последнее обновление: <span th:text="${lastUploadDate}"></span>
                 </div>
-            </a>
+            </div>
         </div>
 
         <!-- Плитка 2 — Гепатит С -->

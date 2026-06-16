@@ -109,7 +109,7 @@
         .section-subtitle{font-size:.86rem;color:rgba(255,255,255,.4);line-height:1.6;max-width:680px;margin-bottom:24px;}
 
         /* ── KVC CARDS ── */
-        .kvc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+        .kvc-grid{display:grid;grid-template-columns:1fr;gap:20px;}
         .kvc-card{
             border-radius:16px;padding:24px 26px;
             border:1px solid rgba(255,255,255,.08);
@@ -168,6 +168,22 @@
         .kpi-card.c-green::before{background:linear-gradient(90deg,#22c55e,#4ade80);}
         .kpi-card.c-yellow::before{background:linear-gradient(90deg,#f59e0b,#fcd34d);}
         .kpi-card.c-red::before{background:linear-gradient(90deg,#ef4444,#f87171);}
+        .kpi-card--link{display:block;text-decoration:none;color:inherit;cursor:pointer;transition:transform .15s,box-shadow .15s;}
+        /* ── RISKS ── */
+        .risks-wrap{padding:.5rem 0}
+        .risks-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.4);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+        .risk-card{background:#111827;border-radius:12px;border:1px solid rgba(255,255,255,.07);padding:14px 16px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start}
+        .risk-card:last-child{margin-bottom:0}
+        .risk-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;margin-top:1px}
+        .risk-num.red{background:rgba(239,68,68,.15);color:#f87171}
+        .risk-num.amber{background:rgba(245,158,11,.15);color:#fbbf24}
+        .risk-body{flex:1}
+        .risk-tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;display:inline-block;margin-bottom:6px}
+        .risk-tag.red{background:rgba(239,68,68,.12);color:#f87171}
+        .risk-tag.amber{background:rgba(245,158,11,.12);color:#fbbf24}
+        .risk-text{font-size:13px;color:rgba(255,255,255,.8);line-height:1.55;margin-bottom:5px}
+        .risk-impact{font-size:12px;color:rgba(255,255,255,.35);display:flex;align-items:center;gap:5px}
+        .kpi-card--link:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.35);}
         .kpi-tag{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);margin-bottom:10px;}
         .kpi-val{font-size:2.4rem;font-weight:900;line-height:1;letter-spacing:-.03em;color:#fff;margin-bottom:5px;}
         .kpi-desc{font-size:.74rem;color:rgba(255,255,255,.35);line-height:1.4;min-height:30px;}
@@ -310,6 +326,82 @@
         .foot{font-size:.72rem;color:rgba(255,255,255,.2);text-align:center;padding:16px 0 32px;}
         .foot a{color:#818cf8;}
 
+        /* ── ANALYTICS ── */
+        .anl-wrap{margin-top:28px;}
+        .anl-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+        .anl-card{background:#0d1117;border-radius:14px;border:1px solid rgba(255,255,255,.06);padding:16px;}
+        .anl-card-title{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,.25);margin-bottom:14px;}
+        .anl-fc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+        .anl-fc{background:#111827;border-radius:10px;padding:12px;}
+        .anl-fc-label{font-size:.72rem;color:rgba(255,255,255,.3);margin-bottom:5px;}
+        .anl-fc-deficit{font-size:1.6rem;font-weight:700;color:#f87171;margin-bottom:4px;letter-spacing:-.02em;}
+        .anl-fc-lines{font-size:.72rem;color:rgba(255,255,255,.3);line-height:1.8;}
+        .anl-fc-lines b{color:rgba(255,255,255,.6);font-weight:600;}
+        .anl-prog-row{margin-top:10px;}
+        .anl-prog-lbl{display:flex;justify-content:space-between;font-size:.68rem;color:rgba(255,255,255,.3);margin-bottom:4px;}
+        .anl-prog-track{height:5px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden;}
+        .anl-prog-fill{height:100%;border-radius:3px;}
+        .anl-alert{background:rgba(239,68,68,.08);border-left:3px solid #f87171;border-radius:0 6px 6px 0;padding:8px 10px;margin-top:10px;font-size:.72rem;color:#f87171;line-height:1.5;}
+        .anl-alert b{font-weight:600;}
+        .anl-funnel{display:flex;flex-direction:column;gap:6px;}
+        .anl-f-step{display:grid;grid-template-columns:140px 1fr 55px 60px;align-items:center;gap:8px;}
+        .anl-f-name{font-size:.72rem;color:rgba(255,255,255,.5);}
+        .anl-f-track{height:7px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden;}
+        .anl-f-fill{height:100%;border-radius:4px;}
+        .anl-f-count{font-size:.75rem;font-weight:600;color:#e0e0e0;text-align:right;}
+        .anl-f-pct{font-size:.72rem;text-align:right;}
+        .anl-f-conv{display:flex;align-items:center;gap:8px;padding:1px 0 1px 148px;}
+        .anl-f-conv-line{flex:1;height:1px;background:rgba(255,255,255,.06);}
+        .anl-conv-pill{font-size:.65rem;padding:2px 7px;border-radius:3px;}
+        .anl-conv-pill.ok{background:rgba(74,222,128,.1);color:#4ade80;}
+        .anl-conv-pill.warn{background:rgba(251,191,36,.1);color:#fbbf24;}
+        .anl-conv-pill.bad{background:rgba(239,68,68,.1);color:#f87171;}
+        .anl-tbl-head{display:grid;gap:8px;margin-bottom:6px;padding-bottom:6px;border-bottom:.5px solid rgba(255,255,255,.06);font-size:.6rem;color:rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:.05em;}
+        .anl-tbl-row{display:grid;gap:8px;padding:5px 0;border-bottom:.5px solid rgba(255,255,255,.03);align-items:center;}
+        .anl-tbl-row:last-child{border-bottom:none;}
+        .anl-t-name{font-size:.75rem;color:rgba(255,255,255,.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+        .anl-t-val{font-size:.75rem;text-align:right;}
+        .anl-t-bar-track{height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;}
+        .anl-t-bar-fill{height:100%;border-radius:2px;}
+
+        /* ── DRUG RATING ── */
+        .drug-rating-wrap{margin-top:28px;}
+        .drug-rating-notice{background:rgba(239,168,0,.07);border:.5px solid rgba(239,168,0,.2);border-radius:10px;padding:9px 14px;margin-bottom:16px;display:flex;gap:8px;align-items:flex-start;font-size:.72rem;color:#fbbf24;line-height:1.5;}
+        .drug-rating-notice strong{font-weight:600;color:#fcd34d;}
+        .drug-rating-controls{display:flex;gap:8px;margin-bottom:14px;align-items:center;}
+        .drug-rating-search{flex:1;position:relative;}
+        .drug-rating-search i{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;color:rgba(255,255,255,.2);pointer-events:none;}
+        .drug-rating-search input{width:100%;background:#0d1117;border:.5px solid rgba(255,255,255,.08);color:rgba(255,255,255,.7);padding:7px 12px 7px 32px;border-radius:8px;font-size:.75rem;outline:none;font-family:inherit;}
+        .drug-rating-search input:focus{border-color:#3a7bd5;}
+        .drug-rating-search input::placeholder{color:rgba(255,255,255,.2);}
+        .drug-rating-block{margin-bottom:24px;}
+        .drug-rating-block-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+        .drug-rating-block-icon{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        .drug-rating-block-title{font-size:.88rem;font-weight:700;color:#e0e0e0;}
+        .drug-rating-block-sub{font-size:.72rem;color:rgba(255,255,255,.25);}
+        .drug-rating-block-total{margin-left:auto;font-size:.75rem;color:rgba(255,255,255,.3);}
+        .drug-rating-table{width:100%;border-collapse:collapse;}
+        .drug-rating-table thead tr{border-bottom:.5px solid rgba(255,255,255,.07);}
+        .drug-rating-table th{padding:6px 10px;text-align:right;font-size:.62rem;font-weight:700;color:rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;cursor:pointer;user-select:none;}
+        .drug-rating-table th:first-child{text-align:left;cursor:default;}
+        .drug-rating-table th:hover:not(:first-child){color:rgba(255,255,255,.5);}
+        .drug-rating-table th.drs-sorted{color:#818cf8;}
+        .drug-rating-table th .drs-arrow{margin-left:3px;font-size:.6rem;}
+        .drug-rating-table td{padding:5px 10px;text-align:right;border-bottom:.5px solid rgba(255,255,255,.03);white-space:nowrap;font-size:.78rem;}
+        .drug-rating-table td:first-child{text-align:left;color:rgba(255,255,255,.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:185px;}
+        .drug-rating-table tbody tr:hover td{background:rgba(255,255,255,.03);}
+        .drug-rating-table .drs-val-plan{color:rgba(255,255,255,.2);}
+        .drug-rating-table .drs-val-ok{color:#4ade80;font-weight:700;}
+        .drug-rating-table .drs-val-warn{color:#fbbf24;font-weight:700;}
+        .drug-rating-table .drs-val-bad{color:#f87171;font-weight:700;}
+        .drug-rating-table .drs-val-zero{color:rgba(255,255,255,.06);}
+        .drs-pct-bar{display:inline-block;height:3px;border-radius:2px;vertical-align:middle;margin-left:5px;}
+        .drug-rating-table .drs-totals-row td{border-top:.5px solid rgba(255,255,255,.1);color:#e0e0e0;font-weight:600;border-bottom:none;padding-top:8px;}
+        .drug-rating-table .drs-no-plan{color:rgba(255,255,255,.15);font-size:.68rem;}
+        .drug-rating-empty{padding:14px 10px;color:rgba(255,255,255,.2);font-size:.78rem;text-align:center;}
+        .drug-rating-divider{height:.5px;background:rgba(255,255,255,.06);margin:4px 0 20px;}
+        .drug-rating-footnote{font-size:.68rem;color:rgba(239,168,0,.4);padding:6px 10px 0;display:flex;align-items:center;gap:5px;}
+
         /* ── PRINT ── */
         @media print{
             .topnav{display:none!important;}
@@ -342,6 +434,7 @@
                 </div>
             </div>
         </div>
+        <a href="/plan-deystviy.html" class="tn-link" target="_blank">План действий</a>
         <div class="tn-dropdown">
             <a href="#drugs" class="tn-link tn-dropdown-toggle" onclick="navClick(this,'drugs')">Лекарства <span class="tn-caret">▾</span></a>
             <div class="tn-dropdown-menu">
@@ -386,79 +479,61 @@
         <div class="section-heading">
             <div class="section-title">Критически важные цели</div>
         </div>
-        <div class="section-subtitle">Долгосрочные целевые показатели проекта к 31.12.2030 — снижение заболеваемости и смертности в Московской области</div>
 
         <div class="kvc-grid">
 
             <!-- КВЦ 1 -->
             <div class="kvc-card blue">
                 <div class="kvc-label blue">КВЦ 1</div>
-                <div class="kvc-title">Снижение заболеваемости хроническим гепатитом С</div>
-                <div class="kvc-goal blue">Цель: ≥ 15% к 31.12.2030</div>
+                <div class="kvc-title">Лечение гепатита С и достижение УВО</div>
+                <div class="kvc-goal blue">Цель: Вылечено: 5 163 пациента / год (план 2026)</div>
 
                 <hr class="kvc-divider">
-                <div class="tab-hd">
-                    <div class="tab-pill lead"><div class="tab-dot"></div>↑ Опережающий показатель</div>
-                </div>
-                <div class="kvc-item">
-                    <div class="kvc-dot blue"></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
                     <div>
-                        <div class="kvc-item-title">Охват скринингом на антитела к гепатиту С</div>
-                        <div class="kvc-item-sub">430 271 чел. / год · граждане 25+ лет · 1 раз в 10 лет</div>
-                    </div>
-                </div>
-
-                <hr class="kvc-divider">
-                <div class="tab-hd">
-                    <div class="tab-pill lag"><div class="tab-dot"></div>↓ Запаздывающий показатель</div>
-                </div>
-                <div class="kvc-item">
-                    <div class="kvc-dot blue"></div>
-                    <div>
-                        <div class="kvc-item-title">Проведение ПЦР-теста и определение генотипа</div>
-                        <div class="kvc-item-sub">Для постановки диагноза хронического гепатита С</div>
-                        <div style="display:inline-flex;align-items:center;gap:6px;margin-top:6px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);border-radius:20px;padding:3px 10px;">
-                            <span style="font-size:.72rem;font-weight:700;color:#a5b4fc;">≥ 80%</span>
-                            <span style="font-size:.7rem;color:rgba(255,255,255,.4);">от выявленных отклонений при скрининге</span>
+                        <div class="tab-hd">
+                            <div class="tab-pill lead"><div class="tab-dot"></div>↑ Опережающие показатели</div>
+                        </div>
+                        <div class="kvc-item">
+                            <div class="kvc-dot blue"></div>
+                            <div>
+                                <div class="kvc-item-title">Направлены на амбулаторное лечение</div>
+                                <div class="kvc-item-sub">1 416 пациентов / год (план 2026)</div>
+                            </div>
+                        </div>
+                        <div class="kvc-item">
+                            <div class="kvc-dot blue"></div>
+                            <div>
+                                <div class="kvc-item-title">Направлены в дневной стационар</div>
+                                <div class="kvc-item-sub">4 105 пациентов / год (план 2026)</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- КВЦ 2 -->
-            <div class="kvc-card blue">
-                <div class="kvc-label blue">КВЦ 2</div>
-                <div class="kvc-title">Снижение смертности от хронического гепатита С</div>
-                <div class="kvc-goal blue">Цель: ≥ 20% к 31.12.2030</div>
-
-                <hr class="kvc-divider">
-                <div class="tab-hd">
-                    <div class="tab-pill lead"><div class="tab-dot"></div>↑ Опережающие показатели</div>
-                </div>
-                <div class="kvc-item">
-                    <div class="kvc-dot blue"></div>
                     <div>
-                        <div class="kvc-item-title">Выданы лекарственные препараты амбулаторно</div>
-                        <div class="kvc-item-sub">1 416 пациентов / год (план 2026)</div>
-                    </div>
-                </div>
-                <div class="kvc-item">
-                    <div class="kvc-dot blue"></div>
-                    <div>
-                        <div class="kvc-item-title">Пролечены в условиях дневного стационара (ОМС)</div>
-                        <div class="kvc-item-sub">4 105 пациентов / год (план 2026–2030)</div>
-                    </div>
-                </div>
-
-                <hr class="kvc-divider">
-                <div class="tab-hd">
-                    <div class="tab-pill lag"><div class="tab-dot"></div>↓ Запаздывающий показатель</div>
-                </div>
-                <div class="kvc-item">
-                    <div class="kvc-dot blue"></div>
-                    <div>
-                        <div class="kvc-item-title">Устойчивый вирусологический ответ (УВО)</div>
-                        <div class="kvc-item-sub">93% → 95% излечившихся от числа завершивших курс ПВТ</div>
+                        <div class="tab-hd">
+                            <div class="tab-pill lag"><div class="tab-dot"></div>↓ Запаздывающие показатели</div>
+                        </div>
+                        <div class="kvc-item">
+                            <div class="kvc-dot blue"></div>
+                            <div>
+                                <div class="kvc-item-title">Завершили лечение амбулаторно</div>
+                                <div class="kvc-item-sub">1 416 пациентов</div>
+                            </div>
+                        </div>
+                        <div class="kvc-item">
+                            <div class="kvc-dot blue"></div>
+                            <div>
+                                <div class="kvc-item-title">Завершили лечение в дневном стационаре</div>
+                                <div class="kvc-item-sub">4 105 пациентов</div>
+                            </div>
+                        </div>
+                        <div class="kvc-item">
+                            <div class="kvc-dot blue"></div>
+                            <div>
+                                <div class="kvc-item-title">Устойчивый вирусологический ответ (УВО)</div>
+                                <div class="kvc-item-sub">Вылечено: 5 163 пациента / год (план 2026)</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -476,34 +551,6 @@
 
         <div class="kpi-grid">
 
-            <!-- Скрининг -->
-            <div class="kpi-card c-blue">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
-                    <div class="kpi-tag" style="margin-bottom:0;">Скрининг 25+</div>
-                    <th:block th:if="${screeningStats != null}">
-                        <div class="traffic-light"
-                             th:attr="data-actual=${screeningStats.completionPercent}"
-                             th:title="${screeningStats.completionPercent} + '% от плана'"></div>
-                    </th:block>
-                </div>
-                <th:block th:if="${screeningStats != null}">
-                    <div class="kpi-val" th:text="${#numbers.formatInteger(screeningStats.plan,0,'DEFAULT')}">0</div>
-                    <div class="kpi-desc">план пациентов на 2026 год</div>
-                    <div class="kpi-prog">
-                        <div class="kpi-prog-wrap">
-                            <div class="kpi-prog-bar blue" th:attr="data-width=${screeningStats.completionPercent}"></div>
-                        </div>
-                    </div>
-                    <div class="kpi-sub">
-                        <div class="kpi-sub-val" th:text="${#numbers.formatInteger(screeningStats.completedCount,0,'DEFAULT')}">0</div>
-                        <div class="kpi-sub-desc">проведено скринингов в 2026 г.</div>
-                    </div>
-                </th:block>
-                <th:block th:unless="${screeningStats != null}">
-                    <div class="kpi-val">—</div>
-                    <div class="kpi-desc">нет данных</div>
-                </th:block>
-            </div>
 
             <!-- Амбулаторное -->
             <div class="kpi-card c-yellow" th:with="p=${projects[1]}">
@@ -517,12 +564,24 @@
                 <div class="kpi-desc">план пациентов на 2026 год</div>
                 <div class="kpi-prog">
                     <div class="kpi-prog-wrap">
-                        <div class="kpi-prog-bar yellow" th:attr="data-width=${p.completionPercent}"></div>
+                        <div class="kpi-prog-bar red" style="width:28%"></div>
                     </div>
                 </div>
-                <div th:if="${ambulatory2026Count != null}" class="kpi-sub">
-                    <div class="kpi-sub-val" th:text="${#numbers.formatInteger(ambulatory2026Count,0,'DEFAULT')}">0</div>
-                    <div class="kpi-sub-desc">пролечено амбулаторно в 2026 г.</div>
+                <div class="kpi-sub" style="display:flex;flex-direction:column;gap:6px;">
+                    <div>
+                        <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.25);margin-bottom:2px;">↑ Опережающий</div>
+                        <div style="display:flex;align-items:baseline;gap:6px;">
+                            <span class="kpi-sub-val">392</span>
+                            <span class="kpi-sub-desc">выдано рецептов</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.25);margin-bottom:2px;">↓ Запаздывающий</div>
+                        <div style="display:flex;align-items:baseline;gap:6px;">
+                            <span class="kpi-sub-val">0</span>
+                            <span class="kpi-sub-desc">завершили лечение</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -538,12 +597,24 @@
                 <div class="kpi-desc">полный курс терапии в ОМС</div>
                 <div class="kpi-prog">
                     <div class="kpi-prog-wrap">
-                        <div class="kpi-prog-bar green" th:attr="data-width=${p.completionPercent}"></div>
+                        <div class="kpi-prog-bar red" style="width:23%"></div>
                     </div>
                 </div>
-                <div th:if="${dayHospital2026Count != null}" class="kpi-sub">
-                    <div class="kpi-sub-val" th:text="${#numbers.formatInteger(dayHospital2026Count,0,'DEFAULT')}">0</div>
-                    <div class="kpi-sub-desc">пролечено в ДС в 2026 г.</div>
+                <div class="kpi-sub" style="display:flex;flex-direction:column;gap:6px;">
+                    <div>
+                        <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.25);margin-bottom:2px;">↑ Опережающий</div>
+                        <div style="display:flex;align-items:baseline;gap:6px;">
+                            <span class="kpi-sub-val">1 741</span>
+                            <span class="kpi-sub-desc">направлены на лечение</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.25);margin-bottom:2px;">↓ Запаздывающий</div>
+                        <div style="display:flex;align-items:baseline;gap:6px;">
+                            <span class="kpi-sub-val">977</span>
+                            <span class="kpi-sub-desc">закончили лечение</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -571,9 +642,548 @@
         </div>
     </div>
 
+    <!-- ══ РИСКИ ════════════════════════════════════════════ -->
+    <div class="section-block" id="risks">
+        <div class="risks-wrap">
+            <div class="risks-title">
+                <i class="ti ti-alert-triangle" style="font-size:16px;color:#f87171" aria-hidden="true"></i>
+                Риски проекта
+            </div>
+            <div class="risk-card">
+                <div class="risk-num red">1</div>
+                <div class="risk-body">
+                    <span class="risk-tag red">Критичный</span>
+                    <div class="risk-text">Недоступность ТМК в ГБУЗ МО МОНИКИ к врачу-гепатологу</div>
+                </div>
+            </div>
+            <div class="risk-card">
+                <div class="risk-num red">2</div>
+                <div class="risk-body">
+                    <span class="risk-tag red">Критичный</span>
+                    <div class="risk-text">Нет технической возможности направить в Центр СПИД на ТМК и на очный приём. В соответствии с проектом приказа об организации оказания медицинской помощи взрослому населению с хроническими вирусными гепатитами в Московской области (согл-314738753-19)</div>
+                </div>
+            </div>
+            <div class="risk-card">
+                <div class="risk-num red">3</div>
+                <div class="risk-body">
+                    <span class="risk-tag red">Критичный</span>
+                    <div class="risk-text">Дубна — контракт в стадии заключения, самые ранние возможные поставки препаратов ожидаются в конце августа 2026 (около 465 пациентов)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ РЕЙТИНГ НЕДЕЛЬНОГО ПЛАНА ════════════════════════ -->
+    <div class="section-block" id="weekly-rating"
+         th:if="${weeklyPlanDate != null}"
+         th:attr="data-week=${weeklyPlanDate}">
+        <div class="section-num">03</div>
+        <div class="sec-hd">
+            <div class="section-title">Рейтинг исполнения недельного плана</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span class="sec-link" id="weekly-rating-date"></span>
+                <button onclick="openWeeklyPlanModal()"
+                        style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#a5b4fc;border-radius:8px;padding:5px 14px;font-size:.75rem;font-weight:600;cursor:pointer;">
+                    Все данные
+                </button>
+            </div>
+        </div>
+
+        <!-- Амбулаторная помощь -->
+        <div style="margin-bottom:36px;">
+            <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#818cf8;margin-bottom:14px;">
+                Амбулаторная помощь
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div class="rating-card">
+                    <div class="rating-head">
+                        <span style="font-size:.9rem;font-weight:700;color:#4ade80;">▲ Топ-10 лучших</span>
+                    </div>
+                    <div class="rating-scroll"><table class="rating-table">
+                        <thead><tr>
+                            <th style="text-align:left;">МО</th>
+                            <th style="text-align:right;">План 2026</th>
+                            <th style="text-align:right;">Ожид.</th>
+                            <th style="text-align:right;">%</th>
+                            <th style="text-align:right;">Нед. план</th>
+                            <th style="text-align:right;">Нед. факт</th>
+                            <th style="text-align:right;">Динамика</th>
+                        </tr></thead>
+                        <tbody id="amb-top-body"></tbody>
+                    </table></div>
+                </div>
+                <div class="rating-card">
+                    <div class="rating-head">
+                        <span style="font-size:.9rem;font-weight:700;color:#f87171;">▼ Топ-10 отстающих</span>
+                    </div>
+                    <div class="rating-scroll"><table class="rating-table">
+                        <thead><tr>
+                            <th style="text-align:left;">МО</th>
+                            <th style="text-align:right;">План 2026</th>
+                            <th style="text-align:right;">Ожид.</th>
+                            <th style="text-align:right;">%</th>
+                            <th style="text-align:right;">Нед. план</th>
+                            <th style="text-align:right;">Нед. факт</th>
+                            <th style="text-align:right;">Динамика</th>
+                        </tr></thead>
+                        <tbody id="amb-bot-body"></tbody>
+                    </table></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Стационарная помощь -->
+        <div>
+            <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#4ade80;margin-bottom:14px;">
+                Стационарная помощь
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div class="rating-card">
+                    <div class="rating-head">
+                        <span style="font-size:.9rem;font-weight:700;color:#4ade80;">▲ Топ-10 лучших</span>
+                    </div>
+                    <div class="rating-scroll"><table class="rating-table">
+                        <thead><tr>
+                            <th style="text-align:left;">МО</th>
+                            <th style="text-align:right;">План 2026</th>
+                            <th style="text-align:right;">Направл.</th>
+                            <th style="text-align:right;">%</th>
+                            <th style="text-align:right;">Нед. план</th>
+                            <th style="text-align:right;">Нед. факт</th>
+                            <th style="text-align:right;">Динамика</th>
+                        </tr></thead>
+                        <tbody id="stat-top-body"></tbody>
+                    </table></div>
+                </div>
+                <div class="rating-card">
+                    <div class="rating-head">
+                        <span style="font-size:.9rem;font-weight:700;color:#f87171;">▼ Топ-10 отстающих</span>
+                    </div>
+                    <div class="rating-scroll"><table class="rating-table">
+                        <thead><tr>
+                            <th style="text-align:left;">МО</th>
+                            <th style="text-align:right;">План 2026</th>
+                            <th style="text-align:right;">Направл.</th>
+                            <th style="text-align:right;">%</th>
+                            <th style="text-align:right;">Нед. план</th>
+                            <th style="text-align:right;">Нед. факт</th>
+                            <th style="text-align:right;">Динамика</th>
+                        </tr></thead>
+                        <tbody id="stat-bot-body"></tbody>
+                    </table></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно: все данные -->
+    <div id="weeklyPlanModal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.75);overflow-y:auto;">
+        <div style="max-width:1100px;margin:40px auto;background:#111827;border-radius:16px;border:1px solid rgba(255,255,255,.1);padding:28px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                <span style="font-size:1.05rem;font-weight:700;color:#fff;">Недельный план — все данные</span>
+                <button onclick="closeWeeklyPlanModal()"
+                        style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:#e2e8f0;border-radius:8px;padding:6px 16px;cursor:pointer;font-size:.85rem;">
+                    Закрыть ✕
+                </button>
+            </div>
+            <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:.78rem;color:rgba(255,255,255,.7);">
+                    <thead>
+                        <tr style="background:rgba(255,255,255,.04);">
+                            <th rowspan="2" style="padding:8px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.3);font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;">МО</th>
+                            <th colspan="6" style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06);border-left:1px solid rgba(255,255,255,.08);color:#818cf8;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;">Амбулаторная помощь</th>
+                            <th colspan="6" style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06);border-left:1px solid rgba(255,255,255,.08);color:#4ade80;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;">Стационарная помощь</th>
+                        </tr>
+                        <tr style="background:rgba(255,255,255,.02);">
+                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);border-left:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.25);font-size:.6rem;">План 2026</th>
+                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Ожид.</th>
+                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">%</th>
+                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Нед. план</th>
+                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Нед. факт</th>
+                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Динамика</th>
+                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);border-left:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.25);font-size:.6rem;">План 2026</th>
+                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Направл.</th>
+                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">%</th>
+                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Нед. план</th>
+                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Нед. факт</th>
+                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Динамика</th>
+                        </tr>
+                    </thead>
+                    <tbody id="weeklyPlanModalBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+    (function() {
+        const section = document.getElementById('weekly-rating');
+        if (!section) return;
+        const week = section.dataset.week;
+
+        function pct(actual, plan) {
+            if (!plan) return null;
+            return Math.round((actual || 0) / plan * 100);
+        }
+        function pctColor(p) {
+            if (p === null) return 'rgba(255,255,255,.2)';
+            if (p >= 80)  return '#4ade80';
+            if (p >= 50)  return '#fcd34d';
+            return '#f87171';
+        }
+        function shortName(n) {
+            return (n || '').replace(/ГБУЗ МО\s*/gi, '').replace(/[«»"]/g, '').trim();
+        }
+        function fmtDate(iso) {
+            const d = new Date(iso);
+            const e = new Date(d); e.setDate(d.getDate() + 6);
+            const f = dt => dt.toLocaleDateString('ru-RU', {day:'2-digit',month:'2-digit',year:'numeric'});
+            return f(d) + ' – ' + f(e);
+        }
+
+        const dateEl = document.getElementById('weekly-rating-date');
+        if (dateEl && week) dateEl.textContent = 'Неделя ' + fmtDate(week);
+
+        let ALL_ROWS = [];
+
+        function renderRating(tbodyId, rows, actualKey, planKey, weekPlanKey, weekFactKey, ascending) {
+            const sorted = rows
+                .filter(r => r.orgName)
+                .map(r => ({ ...r, _pct: pct(r[actualKey], r[planKey]) }))
+                .sort((a, b) => ascending
+                    ? (a._pct ?? 9999) - (b._pct ?? 9999)
+                    : (b._pct ?? -1)   - (a._pct ?? -1))
+                .slice(0, 10);
+            const fmtDyn = v => v == null ? '—' : (v > 0 ? '+' : '') + v;
+            const dynColor = v => v == null ? 'rgba(255,255,255,.3)' : v > 0 ? '#4ade80' : v < 0 ? '#f87171' : 'rgba(255,255,255,.3)';
+            document.getElementById(tbodyId).innerHTML = sorted.map(r => {
+                const c = pctColor(r._pct);
+                const wPlan = r[weekPlanKey];
+                const wFact = r[weekFactKey];
+                const dyn   = (wFact != null && wPlan != null) ? wFact - wPlan : null;
+                return `<tr>
+                    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.orgName}">${shortName(r.orgName)}</td>
+                    <td style="text-align:right;color:rgba(255,255,255,.3);">${r[planKey] ?? '—'}</td>
+                    <td style="text-align:right;color:rgba(255,255,255,.5);">${r[actualKey] ?? '—'}</td>
+                    <td style="text-align:right;font-weight:700;color:${c};">${r._pct !== null ? r._pct + '%' : '—'}</td>
+                    <td style="text-align:right;color:rgba(255,255,255,.3);">${wPlan ?? '—'}</td>
+                    <td style="text-align:right;color:rgba(255,255,255,.5);">${wFact ?? '—'}</td>
+                    <td style="text-align:right;font-weight:600;color:${dynColor(dyn)};">${fmtDyn(dyn)}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderAll(rows) {
+            ALL_ROWS = rows;
+            renderRating('amb-top-body',  rows, 'waitingAmb',    'planYearAmb',  'weeklyPlanAmb',  'weeklyFactAmb',  false);
+            renderRating('amb-bot-body',  rows, 'waitingAmb',    'planYearAmb',  'weeklyPlanAmb',  'weeklyFactAmb',  true);
+            renderRating('stat-top-body', rows, 'referralsStat', 'planYearStat', 'weeklyPlanStat', 'weeklyFactStat', false);
+            renderRating('stat-bot-body', rows, 'referralsStat', 'planYearStat', 'weeklyPlanStat', 'weeklyFactStat', true);
+        }
+
+        const BASE_PATH = /*[[${basePath}]]*/ '';
+        fetch(BASE_PATH + '/api/hcv/weekly-plan?week=' + week)
+            .then(r => r.json())
+            .then(renderAll)
+            .catch(console.error);
+
+        window.openWeeklyPlanModal = function() {
+            const sorted = [...ALL_ROWS].sort((a, b) => (a.orgName || '').localeCompare(b.orgName || '', 'ru'));
+            document.getElementById('weeklyPlanModalBody').innerHTML = sorted.map(r => {
+                const pctAmb  = r.planYearAmb  ? Math.round((r.waitingAmb    || 0) / r.planYearAmb  * 100) : null;
+                const pctStat = r.planYearStat ? Math.round((r.referralsStat || 0) / r.planYearStat * 100) : null;
+                const dynAmb  = (r.weeklyFactAmb  != null && r.weeklyPlanAmb  != null) ? r.weeklyFactAmb  - r.weeklyPlanAmb  : null;
+                const dynStat = (r.weeklyFactStat != null && r.weeklyPlanStat != null) ? r.weeklyFactStat - r.weeklyPlanStat : null;
+                const fmtDyn  = v => v == null ? '—' : (v > 0 ? '+' : '') + v;
+                const dynClr  = v => v == null ? '' : v > 0 ? 'color:#4ade80;font-weight:600;' : v < 0 ? 'color:#f87171;font-weight:600;' : '';
+                const pctClr  = p => p == null ? '' : p >= 80 ? 'color:#4ade80;font-weight:700;' : p >= 50 ? 'color:#fcd34d;font-weight:700;' : 'color:#f87171;font-weight:700;';
+                return `<tr style="border-bottom:.5px solid rgba(255,255,255,.05);">
+                    <td style="padding:6px 12px;">${r.orgName}</td>
+                    <td style="padding:6px 10px;text-align:right;border-left:1px solid rgba(255,255,255,.08);">${r.planYearAmb ?? '—'}</td>
+                    <td style="padding:6px 10px;text-align:right;">${r.waitingAmb ?? '—'}</td>
+                    <td style="padding:6px 10px;text-align:right;${pctClr(pctAmb)}">${pctAmb != null ? pctAmb + '%' : '—'}</td>
+                    <td style="padding:6px 10px;text-align:right;">${r.weeklyPlanAmb ?? '—'}</td>
+                    <td style="padding:6px 10px;text-align:right;">${r.weeklyFactAmb ?? '—'}</td>
+                    <td style="padding:6px 10px;text-align:right;${dynClr(dynAmb)}">${fmtDyn(dynAmb)}</td>
+                    <td style="padding:6px 10px;text-align:right;border-left:1px solid rgba(255,255,255,.08);">${r.planYearStat ?? '—'}</td>
+                    <td style="padding:6px 10px;text-align:right;">${r.referralsStat ?? '—'}</td>
+                    <td style="padding:6px 10px;text-align:right;${pctClr(pctStat)}">${pctStat != null ? pctStat + '%' : '—'}</td>
+                    <td style="padding:6px 10px;text-align:right;">${r.weeklyPlanStat ?? '—'}</td>
+                    <td style="padding:6px 10px;text-align:right;">${r.weeklyFactStat ?? '—'}</td>
+                    <td style="padding:6px 10px;text-align:right;${dynClr(dynStat)}">${fmtDyn(dynStat)}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('weeklyPlanModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeWeeklyPlanModal = function() {
+            document.getElementById('weeklyPlanModal').style.display = 'none';
+            document.body.style.overflow = '';
+        };
+
+        document.getElementById('weeklyPlanModal').addEventListener('click', function(e) {
+            if (e.target === this) closeWeeklyPlanModal();
+        });
+    })();
+    </script>
+
+    <!-- ══ ЛЕКАРСТВА ════════════════════════════════════════ -->
+    <div class="section-block" id="drugs" style="display:none">
+        <div class="section-num">03</div>
+        <div class="sec-hd">
+            <div class="section-title">Лекарственное обеспечение
+                <span style="font-size:.68rem;font-weight:700;background:rgba(239,68,68,.12);color:#f87171;border-radius:20px;padding:3px 10px;margin-left:10px;vertical-align:middle;">⚠ Критично</span>
+            </div>
+            <span class="sec-link">ПППД · 2026</span>
+        </div>
+
+        <div class="drug-grid">
+
+            <!-- Амбулаторное -->
+            <div class="drug-card">
+                <div class="drug-card-head blue">
+                    <span class="drug-card-emo">💊</span>
+                    <span class="drug-card-title">Амбулаторное лечение</span>
+                    <span class="drug-card-sub">рецепты / льготный отпуск</span>
+                    <span class="drug-card-tag blue">план 2026</span>
+                </div>
+                <div class="drug-kpi-row">
+                    <div class="drug-kpi-cell">
+                        <div class="drug-kpi-label">Потребность</div>
+                        <div class="drug-kpi-val" th:text="${#numbers.formatInteger(projects[1].target,0,'DEFAULT')}">1 416</div>
+                        <div class="drug-kpi-unit">человек</div>
+                    </div>
+                    <div class="drug-kpi-cell">
+                        <div class="drug-kpi-label">Законтрактовано</div>
+                        <div class="drug-kpi-val green">1 416</div>
+                        <div class="drug-kpi-unit">курсов</div>
+                    </div>
+                    <div class="drug-kpi-cell">
+                        <div class="drug-kpi-label">Отпущено</div>
+                        <div class="drug-kpi-val blue" th:text="${#numbers.formatInteger(projects[1].totalAccumulated,0,'DEFAULT')}">0</div>
+                        <div class="drug-kpi-unit">пациентов</div>
+                    </div>
+                    <div class="drug-kpi-cell">
+                        <div class="drug-kpi-label">Остатки</div>
+                        <div class="drug-kpi-val yellow">~320</div>
+                        <div class="drug-kpi-unit">упаковок</div>
+                    </div>
+                </div>
+                <div class="drug-prog">
+                    <div class="drug-prog-row">
+                        <span class="drug-prog-label">Выполнение плана 2026</span>
+                        <span class="drug-prog-pct"
+                              th:style="${projects[1].completionPercent >= 80} ? 'color:#4ade80' : 'color:#f87171'"
+                              th:text="${#numbers.formatDecimal(projects[1].planCompletionDouble,1,1)} + '%'">0%</span>
+                    </div>
+                    <div class="drug-prog-track">
+                        <div class="drug-prog-fill blue" th:attr="data-width=${projects[1].completionPercent}"></div>
+                    </div>
+                    <div class="drug-prog-row" style="margin-top:12px;">
+                        <span class="drug-prog-label">Выдано рецептов</span>
+                        <span class="drug-prog-pct" style="color:#f87171;"
+                              th:text="${#numbers.formatInteger(projects[1].totalAccumulated,0,'DEFAULT')} + ' / ' + ${#numbers.formatInteger(projects[1].target,0,'DEFAULT')}">0 / 1 416</span>
+                    </div>
+                    <div class="drug-prog-track">
+                        <div class="drug-prog-fill blue" th:attr="data-width=${projects[1].completionPercent}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Стационар -->
+            <div class="drug-card">
+                <div class="drug-card-head green">
+                    <span class="drug-card-emo">🏥</span>
+                    <span class="drug-card-title">Дневной стационар</span>
+                    <span class="drug-card-sub">полный курс ПВТ в ОМС</span>
+                    <span class="drug-card-tag green">план 2026</span>
+                </div>
+                <div class="drug-kpi-row">
+                    <div class="drug-kpi-cell">
+                        <div class="drug-kpi-label">Потребность</div>
+                        <div class="drug-kpi-val" th:text="${#numbers.formatInteger(projects[0].target,0,'DEFAULT')}">4 105</div>
+                        <div class="drug-kpi-unit">человек</div>
+                    </div>
+                    <div class="drug-kpi-cell">
+                        <div class="drug-kpi-label">Законтрактовано</div>
+                        <div class="drug-kpi-val green" th:text="${#numbers.formatInteger(projects[0].target,0,'DEFAULT')}">4 105</div>
+                        <div class="drug-kpi-unit">курсов</div>
+                    </div>
+                    <div class="drug-kpi-cell">
+                        <div class="drug-kpi-label">Получают</div>
+                        <div class="drug-kpi-val blue" th:text="${#numbers.formatInteger(projects[0].totalAccumulated,0,'DEFAULT')}">730</div>
+                        <div class="drug-kpi-unit">пациентов</div>
+                    </div>
+                    <div class="drug-kpi-cell">
+                        <div class="drug-kpi-label">Остатки</div>
+                        <div class="drug-kpi-val yellow">~890</div>
+                        <div class="drug-kpi-unit">упаковок</div>
+                    </div>
+                </div>
+                <div class="drug-prog">
+                    <div class="drug-prog-row">
+                        <span class="drug-prog-label">Выполнение плана 2026</span>
+                        <span class="drug-prog-pct"
+                              th:style="${projects[0].completionPercent >= 80} ? 'color:#4ade80' : 'color:#f87171'"
+                              th:text="${#numbers.formatDecimal(projects[0].planCompletionDouble,1,1)} + '%'">0%</span>
+                    </div>
+                    <div class="drug-prog-track">
+                        <div class="drug-prog-fill green" th:attr="data-width=${projects[0].completionPercent}"></div>
+                    </div>
+                    <div class="drug-prog-row" style="margin-top:12px;">
+                        <span class="drug-prog-label">Завершили курс</span>
+                        <span class="drug-prog-pct" style="color:#4ade80;">2 293 (56%)</span>
+                    </div>
+                    <div class="drug-prog-track">
+                        <div class="drug-prog-fill green" style="width:56%;"></div>
+                    </div>
+                    <div class="drug-prog-row" style="margin-top:8px;">
+                        <span class="drug-prog-label">В очереди на госпитализацию</span>
+                        <span class="drug-prog-pct" style="color:#fcd34d;">1 133</span>
+                    </div>
+                    <div class="drug-prog-track">
+                        <div class="drug-prog-fill" style="width:28%;background:linear-gradient(90deg,#d97706,#fcd34d);"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ══ АНАЛИТИКА ══════════════════════════════════════ -->
+        <div class="anl-wrap" th:if="${pathwayStats != null or dayHospital2026Count != null}">
+
+            <!-- Прогноз + Воронка -->
+            <div class="anl-grid">
+
+                <!-- Прогноз -->
+                <div class="anl-card">
+                    <div class="anl-card-title">📈 Прогноз выполнения плана к 01.08.2026</div>
+                    <div class="anl-fc-grid">
+                        <div class="anl-fc">
+                            <div class="anl-fc-label">Дневной стационар</div>
+                            <div class="anl-fc-deficit" id="anl-ds-deficit">—</div>
+                            <div class="anl-fc-lines">
+                                Факт 2026: <b th:text="${dayHospital2026Count ?: 0}">0</b> / план <b th:text="${projects != null ? projects[0].target : 0}">4 135</b><br>
+                                Темп: <b id="anl-ds-tempo">—</b><br>
+                                Нужно: <b id="anl-ds-needed">—</b>
+                            </div>
+                            <div class="anl-prog-row">
+                                <div class="anl-prog-lbl"><span>Выполнено</span><span id="anl-ds-pct" style="color:#f87171">—</span></div>
+                                <div class="anl-prog-track"><div class="anl-prog-fill" id="anl-ds-bar" style="background:#f87171"></div></div>
+                            </div>
+                            <div class="anl-prog-row">
+                                <div class="anl-prog-lbl"><span>Прогноз к 01.08</span><span id="anl-ds-forecast-lbl">—</span></div>
+                                <div class="anl-prog-track"><div class="anl-prog-fill" id="anl-ds-forecast-bar" style="background:rgba(255,255,255,.1)"></div></div>
+                            </div>
+                            <div class="anl-alert" id="anl-ds-alert"></div>
+                        </div>
+                        <div class="anl-fc">
+                            <div class="anl-fc-label">Амбулаторно</div>
+                            <div class="anl-fc-deficit" id="anl-amb-deficit">—</div>
+                            <div class="anl-fc-lines">
+                                Факт 2026: <b th:text="${ambulatory2026Count ?: 0}">0</b> / план <b th:text="${projects != null ? projects[1].target : 0}">1 442</b><br>
+                                Темп: <b id="anl-amb-tempo">—</b><br>
+                                Нужно: <b id="anl-amb-needed">—</b>
+                            </div>
+                            <div class="anl-prog-row">
+                                <div class="anl-prog-lbl"><span>Выполнено</span><span id="anl-amb-pct" style="color:#f87171">—</span></div>
+                                <div class="anl-prog-track"><div class="anl-prog-fill" id="anl-amb-bar" style="background:#f87171"></div></div>
+                            </div>
+                            <div class="anl-prog-row">
+                                <div class="anl-prog-lbl"><span>Прогноз к 01.08</span><span id="anl-amb-forecast-lbl">—</span></div>
+                                <div class="anl-prog-track"><div class="anl-prog-fill" id="anl-amb-forecast-bar" style="background:rgba(255,255,255,.1)"></div></div>
+                            </div>
+                            <div class="anl-alert" id="anl-amb-alert"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="anl-card" th:if="${analyticsStats != null}">
+                    <div class="anl-card-title">⏱ 5 МО с самым долгим ожиданием (МОНИКИ → лечение)</div>
+                    <div style="font-size:.72rem;color:rgba(255,255,255,.25);margin-bottom:10px">
+                        Среднее время по МО с известными датами
+                    </div>
+                    <div class="anl-tbl-head" style="grid-template-columns:1fr 70px 60px">
+                        <div>МО</div><div style="text-align:right">Пациентов</div><div style="text-align:right">Дней</div>
+                    </div>
+                    <div th:each="row,i : ${analyticsStats['waitingTop5']}"
+                         class="anl-tbl-row" style="grid-template-columns:1fr 70px 60px">
+                        <span class="anl-t-name" th:text="${row[0]}">МО</span>
+                        <span class="anl-t-val" style="color:rgba(255,255,255,.4)" th:text="${row[1]}">0</span>
+                        <span class="anl-t-val" style="color:#fbbf24;font-weight:700" th:text="${row[2]}">0</span>
+                    </div>
+                    <div th:if="${#lists.isEmpty(analyticsStats['waitingTop5'])}"
+                         style="font-size:.75rem;color:rgba(255,255,255,.2);padding:12px 0;text-align:center">
+                        Недостаточно данных о датах
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ══ РЕЙТИНГ МО ПО ЛЕКАРСТВЕННОМУ ОБЕСПЕЧЕНИЮ ══════ -->
+        <div class="drug-rating-wrap">
+            <div class="drug-rating-notice">
+                <i class="ti ti-info-circle" style="font-size:14px;flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
+                <div><strong>Факт — только пациенты, начавшие лечение в 2026 году</strong> (дата начала курса ≥ 01.01.2026). Дополнительно <strong>39 пациентов</strong> без указания условия (амб./ДС) не учтены.</div>
+            </div>
+
+            <div class="drug-rating-controls">
+                <div class="drug-rating-search">
+                    <i class="ti ti-search" aria-hidden="true"></i>
+                    <input type="text" id="drs-search" placeholder="Поиск по медицинской организации..." oninput="drsRenderAll()">
+                </div>
+            </div>
+
+            <div class="drug-rating-block">
+                <div class="drug-rating-block-head">
+                    <div class="drug-rating-block-icon" style="background:rgba(99,102,241,.15)"><i class="ti ti-pill" style="color:#818cf8;font-size:13px" aria-hidden="true"></i></div>
+                    <span class="drug-rating-block-title">Амбулаторное лечение</span>
+                    <span class="drug-rating-block-sub">рецепты / льготный отпуск · п. 1.4</span>
+                    <span class="drug-rating-block-total" id="drs-amb-total"></span>
+                </div>
+                <table class="drug-rating-table">
+                    <thead><tr>
+                        <th style="text-align:left;cursor:default">Медицинская организация</th>
+                        <th onclick="drsSetSort('amb','py')"><span>Годовой план</span><span class="drs-arrow" id="drs-amb-arr-py"></span></th>
+                        <th onclick="drsSetSort('amb','pw')"><span>Недельный план</span><span class="drs-arrow" id="drs-amb-arr-pw"></span></th>
+                        <th onclick="drsSetSort('amb','f')"><span>Факт 2026</span><span class="drs-arrow" id="drs-amb-arr-f"></span></th>
+                        <th onclick="drsSetSort('amb','pct')" class="drs-sorted"><span>Выполнено</span><span class="drs-arrow" id="drs-amb-arr-pct">↓</span></th>
+                    </tr></thead>
+                    <tbody id="drs-amb-body"></tbody>
+                </table>
+                <div class="drug-rating-footnote"><i class="ti ti-alert-circle" style="font-size:12px" aria-hidden="true"></i>39 пациентов без указания условия не учтены</div>
+            </div>
+
+            <div class="drug-rating-divider"></div>
+
+            <div class="drug-rating-block">
+                <div class="drug-rating-block-head">
+                    <div class="drug-rating-block-icon" style="background:rgba(74,222,128,.1)"><i class="ti ti-building-hospital" style="color:#4ade80;font-size:13px" aria-hidden="true"></i></div>
+                    <span class="drug-rating-block-title">Дневной стационар</span>
+                    <span class="drug-rating-block-sub">полный курс ПВТ в ОМС · п. 1.5</span>
+                    <span class="drug-rating-block-total" id="drs-ds-total"></span>
+                </div>
+                <table class="drug-rating-table">
+                    <thead><tr>
+                        <th style="text-align:left;cursor:default">Медицинская организация</th>
+                        <th onclick="drsSetSort('ds','py')"><span>Годовой план</span><span class="drs-arrow" id="drs-ds-arr-py"></span></th>
+                        <th onclick="drsSetSort('ds','pw')"><span>Недельный план</span><span class="drs-arrow" id="drs-ds-arr-pw"></span></th>
+                        <th onclick="drsSetSort('ds','f')"><span>Факт 2026</span><span class="drs-arrow" id="drs-ds-arr-f"></span></th>
+                        <th onclick="drsSetSort('ds','pct')" class="drs-sorted"><span>Выполнено</span><span class="drs-arrow" id="drs-ds-arr-pct">↓</span></th>
+                    </tr></thead>
+                    <tbody id="drs-ds-body"></tbody>
+                </table>
+                <div class="drug-rating-footnote"><i class="ti ti-alert-circle" style="font-size:12px" aria-hidden="true"></i>39 пациентов без указания условия не учтены</div>
+            </div>
+        </div>
+
+    </div>
+
     <!-- ══ ПУТЬ ПАЦИЕНТА ══════════════════════════════════════ -->
     <div class="section-block" id="pathway">
-        <div class="section-num">03</div>
+        <div class="section-num">04</div>
         <div class="sec-hd">
             <div class="section-title">Путь пациента</div>
             <span class="sec-link">сквозной контроль →</span>
@@ -679,110 +1289,148 @@
         </div>
     </div>
 
-    <!-- ══ ЛЕКАРСТВА ════════════════════════════════════════ -->
-    <div class="section-block" id="drugs">
-        <div class="section-num">04</div>
+    <!-- ══ ПЛАН ДЕЙСТВИЙ ════════════════════════════════════ -->
+    <div class="section-block" id="plan">
+        <div class="section-num">05</div>
         <div class="sec-hd">
-            <div class="section-title">Лекарственное обеспечение
-                <span style="font-size:.68rem;font-weight:700;background:rgba(251,191,36,.12);color:#fcd34d;border-radius:20px;padding:3px 10px;margin-left:10px;vertical-align:middle;">🚧 В разработке</span>
+            <div class="section-title">План мероприятий</div>
+        </div>
+        <div class="section-subtitle">2 944 пациента не отработаны · Дедлайн: 10.07.2026 · Осталось 23 дня</div>
+
+        <!-- KPI строка -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">
+            <div style="background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px 20px;">
+                <div style="font-size:2rem;font-weight:800;color:#02C39A;margin-bottom:4px;">2 944</div>
+                <div style="font-size:.75rem;color:rgba(255,255,255,.4);">пациентов не отработаны МО из еженедельного отчета</div>
             </div>
-            <span class="sec-link">ПППД · 2026</span>
+            <div style="background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px 20px;">
+                <div style="font-size:2rem;font-weight:800;color:#f59e0b;margin-bottom:4px;">915</div>
+                <div style="font-size:.75rem;color:rgba(255,255,255,.4);">уже есть заключение МОНИКИ</div>
+            </div>
+            <div style="background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px 20px;">
+                <div style="font-size:2rem;font-weight:800;color:#ef4444;margin-bottom:4px;">2 029</div>
+                <div style="font-size:.75rem;color:rgba(255,255,255,.4);">нужно направить на консультацию</div>
+            </div>
         </div>
 
-        <div class="drug-grid">
-
-            <!-- Амбулаторное -->
-            <div class="drug-card">
-                <div class="drug-card-head blue">
-                    <span class="drug-card-emo">💊</span>
-                    <span class="drug-card-title">Амбулаторное лечение</span>
-                    <span class="drug-card-sub">рецепты / льготный отпуск</span>
-                    <span class="drug-card-tag blue">п. 1.4 · план 2026</span>
+        <!-- Две группы пациентов -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
+            <div style="background:#111827;border:1px solid rgba(34,197,94,.2);border-radius:12px;padding:22px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                    <div style="width:34px;height:34px;border-radius:50%;background:rgba(34,197,94,.12);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;">✅</div>
+                    <div style="font-size:14px;font-weight:600;color:#22c55e;">Уже готовы к лечению — 1 166 чел.</div>
                 </div>
-                <div class="drug-kpi-row">
-                    <div class="drug-kpi-cell">
-                        <div class="drug-kpi-label">Потребность</div>
-                        <div class="drug-kpi-val" th:text="${#numbers.formatInteger(projects[1].target,0,'DEFAULT')}">1 416</div>
-                        <div class="drug-kpi-unit">человек</div>
-                    </div>
-                    <div class="drug-kpi-cell">
-                        <div class="drug-kpi-label">Законтрактовано</div>
-                        <div class="drug-kpi-val green">1 416</div>
-                        <div class="drug-kpi-unit">курсов</div>
-                    </div>
-                    <div class="drug-kpi-cell">
-                        <div class="drug-kpi-label">Отпущено</div>
-                        <div class="drug-kpi-val blue" th:text="${projects[1].totalAccumulated > 0 ? #numbers.formatInteger(projects[1].totalAccumulated,0,'DEFAULT') : '—'}">—</div>
-                        <div class="drug-kpi-unit">пациентов</div>
-                    </div>
-                    <div class="drug-kpi-cell">
-                        <div class="drug-kpi-label">Остатки</div>
-                        <div class="drug-kpi-val yellow">~320</div>
-                        <div class="drug-kpi-unit">упаковок</div>
-                    </div>
-                </div>
-                <div class="drug-prog">
-                    <div class="drug-prog-row">
-                        <span class="drug-prog-label">Выполнение плана 2026</span>
-                        <span class="drug-prog-pct"
-                              th:style="${projects[1].completionPercent >= 80} ? 'color:#4ade80' : 'color:#f87171'"
-                              th:text="${#numbers.formatDecimal(projects[1].planCompletionDouble,1,1)} + '%'">0%</span>
-                    </div>
-                    <div class="drug-prog-track">
-                        <div class="drug-prog-fill blue" th:attr="data-width=${projects[1].completionPercent}"></div>
-                    </div>
+                <div style="display:flex;flex-direction:column;gap:7px;">
+                    <div style="display:flex;gap:9px;font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;"><div style="width:5px;height:5px;border-radius:50%;background:#22c55e;flex-shrink:0;margin-top:7px;"></div>ПЦР-положительный результат подтверждён</div>
+                    <div style="display:flex;gap:9px;font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;"><div style="width:5px;height:5px;border-radius:50%;background:#22c55e;flex-shrink:0;margin-top:7px;"></div>Заключение МОНИКИ / Центра СПИД получено</div>
                 </div>
             </div>
-
-            <!-- Стационар -->
-            <div class="drug-card">
-                <div class="drug-card-head green">
-                    <span class="drug-card-emo">🏥</span>
-                    <span class="drug-card-title">Дневной стационар</span>
-                    <span class="drug-card-sub">полный курс ПВТ в ОМС</span>
-                    <span class="drug-card-tag green">п. 1.5 · план 2026</span>
+            <div style="background:#111827;border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:22px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                    <div style="width:34px;height:34px;border-radius:50%;background:rgba(245,158,11,.12);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;">⏳</div>
+                    <div style="font-size:14px;font-weight:600;color:#f59e0b;">Нужна консультация МОНИКИ — 3 096 чел.</div>
                 </div>
-                <div class="drug-kpi-row">
-                    <div class="drug-kpi-cell">
-                        <div class="drug-kpi-label">Потребность</div>
-                        <div class="drug-kpi-val" th:text="${#numbers.formatInteger(projects[0].target,0,'DEFAULT')}">4 105</div>
-                        <div class="drug-kpi-unit">человек</div>
-                    </div>
-                    <div class="drug-kpi-cell">
-                        <div class="drug-kpi-label">Законтрактовано</div>
-                        <div class="drug-kpi-val green" th:text="${#numbers.formatInteger(projects[0].target,0,'DEFAULT')}">4 105</div>
-                        <div class="drug-kpi-unit">курсов</div>
-                    </div>
-                    <div class="drug-kpi-cell">
-                        <div class="drug-kpi-label">Отпущено</div>
-                        <div class="drug-kpi-val blue" th:text="${projects[0].totalAccumulated > 0 ? #numbers.formatInteger(projects[0].totalAccumulated,0,'DEFAULT') : '—'}">—</div>
-                        <div class="drug-kpi-unit">пациентов</div>
-                    </div>
-                    <div class="drug-kpi-cell">
-                        <div class="drug-kpi-label">Остатки</div>
-                        <div class="drug-kpi-val yellow">~890</div>
-                        <div class="drug-kpi-unit">упаковок</div>
-                    </div>
-                </div>
-                <div class="drug-prog">
-                    <div class="drug-prog-row">
-                        <span class="drug-prog-label">Выполнение плана 2026</span>
-                        <span class="drug-prog-pct"
-                              th:style="${projects[0].completionPercent >= 80} ? 'color:#4ade80' : 'color:#f87171'"
-                              th:text="${#numbers.formatDecimal(projects[0].planCompletionDouble,1,1)} + '%'">0%</span>
-                    </div>
-                    <div class="drug-prog-track">
-                        <div class="drug-prog-fill green" th:attr="data-width=${projects[0].completionPercent}"></div>
-                    </div>
+                <div style="display:flex;flex-direction:column;gap:7px;">
+                    <div style="display:flex;gap:9px;font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;"><div style="width:5px;height:5px;border-radius:50%;background:#f59e0b;flex-shrink:0;margin-top:7px;"></div>ПЦР-положительный результат есть</div>
+                    <div style="display:flex;gap:9px;font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;"><div style="width:5px;height:5px;border-radius:50%;background:#f59e0b;flex-shrink:0;margin-top:7px;"></div>Заключение МОНИКИ / Центра СПИД отсутствует</div>
+                    <div style="display:flex;gap:9px;font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;"><div style="width:5px;height:5px;border-radius:50%;background:#f59e0b;flex-shrink:0;margin-top:7px;"></div>Требуется срочное направление на консультацию</div>
+                    <div style="display:flex;gap:9px;font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;"><div style="width:5px;height:5px;border-radius:50%;background:#f59e0b;flex-shrink:0;margin-top:7px;"></div>Открыть дополнительные ячейки для записи</div>
                 </div>
             </div>
-
         </div>
+
+        <!-- Цель -->
+        <div style="background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(129,140,248,.08));border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:13px 20px;text-align:center;font-size:14px;font-weight:600;color:#fff;margin-bottom:28px;">
+            🎯 Цель: все 2944 пациента должны быть отработаны и начать лечение до 10.07.2026
+        </div>
+
+        <!-- Понедельный план отработки МО -->
+        <div style="background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:24px;margin-bottom:24px;">
+            <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);margin-bottom:4px;">Распределение по МО</div>
+            <div style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:4px;">Понедельный план отработки медорганизаций</div>
+            <div style="font-size:.78rem;color:rgba(255,255,255,.35);margin-bottom:16px;">Щёлковская больница — 4 недели; МО с &lt; 20 пациентами — всё в неделю 1; остальные — равномерно на 3 недели</div>
+            <div style="max-height:520px;overflow-y:auto;border-radius:8px;border:1px solid rgba(255,255,255,.07);">
+                <table style="width:100%;border-collapse:collapse;font-size:.8rem;color:rgba(255,255,255,.75);">
+                    <thead style="position:sticky;top:0;z-index:1;background:#1a2235;">
+                        <tr>
+                            <th style="padding:10px 12px;text-align:center;width:36px;color:rgba(255,255,255,.35);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">№</th>
+                            <th style="padding:10px 12px;text-align:left;color:rgba(255,255,255,.35);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Медицинская организация</th>
+                            <th style="padding:10px 12px;text-align:right;color:rgba(255,255,255,.35);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Всего</th>
+                            <th style="padding:10px 12px;text-align:right;color:#818cf8;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Неделя 1</th>
+                            <th style="padding:10px 12px;text-align:right;color:#34d399;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Неделя 2</th>
+                            <th style="padding:10px 12px;text-align:right;color:#fbbf24;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Неделя 3</th>
+                            <th style="padding:10px 12px;text-align:right;color:#f87171;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Неделя 4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">1</td><td style="padding:7px 12px;">ГБУЗ МО "Щелковская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">417</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">105</td><td style="padding:7px 12px;text-align:right;color:#34d399;">104</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">104</td><td style="padding:7px 12px;text-align:right;color:#f87171;">104</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">2</td><td style="padding:7px 12px;">ГБУЗ МО "Подольская ОКБ"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">231</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">77</td><td style="padding:7px 12px;text-align:right;color:#34d399;">77</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">77</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">3</td><td style="padding:7px 12px;">ГБУЗ МО "Раменская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">196</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">66</td><td style="padding:7px 12px;text-align:right;color:#34d399;">65</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">65</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">4</td><td style="padding:7px 12px;">ГБУЗ МО «Мытищинская ОКБ"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">181</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">61</td><td style="padding:7px 12px;text-align:right;color:#34d399;">60</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">60</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">5</td><td style="padding:7px 12px;">ГБУЗ МО "Балашихинская ОБ"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">164</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">55</td><td style="padding:7px 12px;text-align:right;color:#34d399;">55</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">54</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">6</td><td style="padding:7px 12px;">ГБУЗ МО "Одинцовская ОБ"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">161</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">54</td><td style="padding:7px 12px;text-align:right;color:#34d399;">54</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">53</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">7</td><td style="padding:7px 12px;">ГБУЗ МО "Домодедовская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">155</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">52</td><td style="padding:7px 12px;text-align:right;color:#34d399;">52</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">51</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">8</td><td style="padding:7px 12px;">ГБУЗ МО "Сергиево-Посадская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">137</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">46</td><td style="padding:7px 12px;text-align:right;color:#34d399;">46</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">45</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">9</td><td style="padding:7px 12px;">ГБУЗ МО "Дмитровская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">136</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">46</td><td style="padding:7px 12px;text-align:right;color:#34d399;">45</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">45</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">10</td><td style="padding:7px 12px;">ГБУЗ МО "Видновская клиническая больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">123</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">41</td><td style="padding:7px 12px;text-align:right;color:#34d399;">41</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">41</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">11</td><td style="padding:7px 12px;">ГБУЗ МО "Жуковская ОКБ"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">114</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">38</td><td style="padding:7px 12px;text-align:right;color:#34d399;">38</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">38</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">12</td><td style="padding:7px 12px;">ГБУЗ МО "Истринская клиническая больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">61</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">21</td><td style="padding:7px 12px;text-align:right;color:#34d399;">20</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">20</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">13</td><td style="padding:7px 12px;">ГБУЗ МО "Солнечногорская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">61</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">21</td><td style="padding:7px 12px;text-align:right;color:#34d399;">20</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">20</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">14</td><td style="padding:7px 12px;">ГБУЗ МО "Королевская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">53</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">18</td><td style="padding:7px 12px;text-align:right;color:#34d399;">18</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">17</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">15</td><td style="padding:7px 12px;">ГБУЗ МО "Люберецкая областная больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">53</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">18</td><td style="padding:7px 12px;text-align:right;color:#34d399;">18</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">17</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">16</td><td style="padding:7px 12px;">ГБУЗ МО "Красногорская клиническая больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">52</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">18</td><td style="padding:7px 12px;text-align:right;color:#34d399;">17</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">17</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">17</td><td style="padding:7px 12px;">ГБУЗ МО "Электростальская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">46</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">16</td><td style="padding:7px 12px;text-align:right;color:#34d399;">15</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">15</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">18</td><td style="padding:7px 12px;">ГБУЗ МО "Воскресенская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">43</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">15</td><td style="padding:7px 12px;text-align:right;color:#34d399;">14</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">14</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">19</td><td style="padding:7px 12px;">ГБУЗ МО "Ногинская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">42</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">14</td><td style="padding:7px 12px;text-align:right;color:#34d399;">14</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">14</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">20</td><td style="padding:7px 12px;">ГБУЗ МО "Серпуховская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">40</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">14</td><td style="padding:7px 12px;text-align:right;color:#34d399;">13</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">13</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">21</td><td style="padding:7px 12px;">ГБУЗ МО "ПКБ им. Проф Розанова В.Н."</td><td style="padding:7px 12px;text-align:right;font-weight:600;">38</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">13</td><td style="padding:7px 12px;text-align:right;color:#34d399;">13</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">12</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">22</td><td style="padding:7px 12px;">ГБУЗ МО "Клинская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">35</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">12</td><td style="padding:7px 12px;text-align:right;color:#34d399;">12</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">11</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">23</td><td style="padding:7px 12px;">ГБУЗ МО "Павлово-Посадская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">32</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">11</td><td style="padding:7px 12px;text-align:right;color:#34d399;">11</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">10</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">24</td><td style="padding:7px 12px;">ГБУЗ МО "Лобненская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">32</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">11</td><td style="padding:7px 12px;text-align:right;color:#34d399;">11</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">10</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">25</td><td style="padding:7px 12px;">ГБУЗ МО "Коломенская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">30</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">10</td><td style="padding:7px 12px;text-align:right;color:#34d399;">10</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">10</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">26</td><td style="padding:7px 12px;">ГБУЗ МО "Егорьевская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">30</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">10</td><td style="padding:7px 12px;text-align:right;color:#34d399;">10</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">10</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">27</td><td style="padding:7px 12px;">ГБУЗ МО "Шаховская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">29</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">10</td><td style="padding:7px 12px;text-align:right;color:#34d399;">10</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">9</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">28</td><td style="padding:7px 12px;">ГБУЗ МО "Дубненская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">26</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">9</td><td style="padding:7px 12px;text-align:right;color:#34d399;">9</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">8</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">29</td><td style="padding:7px 12px;">ГБУЗ МО "Ступинская клиническая больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">25</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">9</td><td style="padding:7px 12px;text-align:right;color:#34d399;">8</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">8</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">30</td><td style="padding:7px 12px;">ГБУЗ МО "Химкинская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">23</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">8</td><td style="padding:7px 12px;text-align:right;color:#34d399;">8</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">7</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">31</td><td style="padding:7px 12px;">ГБУЗ МО "Чеховская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">22</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">8</td><td style="padding:7px 12px;text-align:right;color:#34d399;">7</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">7</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">32</td><td style="padding:7px 12px;">ГБУЗ МО "Можайская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">21</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">7</td><td style="padding:7px 12px;text-align:right;color:#34d399;">7</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">7</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">33</td><td style="padding:7px 12px;">ГБУЗ МО "Луховицкая больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">19</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">19</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">34</td><td style="padding:7px 12px;">ГБУЗ МО "Зарайская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">13</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">13</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">35</td><td style="padding:7px 12px;">ГБУЗ МО "Котельниковская поликлиника"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">12</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">12</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">36</td><td style="padding:7px 12px;">ГБУЗ МО "Волоколамская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">11</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">11</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">37</td><td style="padding:7px 12px;">ГБУЗ МО "Краснознаменская поликлиника"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">11</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">11</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">38</td><td style="padding:7px 12px;">ГБУЗ МО "Долгопрудненская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">11</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">11</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">39</td><td style="padding:7px 12px;">ГБУЗ МО "Протвинская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">10</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">10</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">40</td><td style="padding:7px 12px;">ГБУЗ МО "НАРО-ФОМИНСКАЯ БОЛЬНИЦА"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">9</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">9</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">41</td><td style="padding:7px 12px;">ГБУЗ МО "Шатурская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">9</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">9</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">42</td><td style="padding:7px 12px;">ГБУЗ МО "Каширская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">8</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">8</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">43</td><td style="padding:7px 12px;">ГБУЗ МО "Реутовская клиническая больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">7</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">7</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">44</td><td style="padding:7px 12px;">ГБУЗ МО "Серебряно-Прудская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">5</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">5</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">45</td><td style="padding:7px 12px;">ГБУЗ МО "Лотошинская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">3</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">3</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">46</td><td style="padding:7px 12px;">ГБУЗ МО «Лыткаринская больница»</td><td style="padding:7px 12px;text-align:right;font-weight:600;">3</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">3</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">47</td><td style="padding:7px 12px;">ГБУЗ МО "Орехово-Зуевская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">2</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">2</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">48</td><td style="padding:7px 12px;">ГБУЗ МО "Рузская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">2</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">2</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
+                    </tbody>
+                    <tfoot>
+                        <tr style="background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.15);">
+                            <td colspan="2" style="padding:10px 12px;font-weight:700;color:#fff;font-size:.85rem;">ИТОГО</td>
+                            <td style="padding:10px 12px;text-align:right;font-weight:700;color:#fff;">2 944</td>
+                            <td style="padding:10px 12px;text-align:right;font-weight:700;color:#818cf8;">1 049</td>
+                            <td style="padding:10px 12px;text-align:right;font-weight:700;color:#34d399;">902</td>
+                            <td style="padding:10px 12px;text-align:right;font-weight:700;color:#fbbf24;">889</td>
+                            <td style="padding:10px 12px;text-align:right;font-weight:700;color:#f87171;">104</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
     </div>
 
     <!-- ══ РЕЙТИНГ МО ════════════════════════════════════════ -->
-    <div class="section-block" id="rating">
-        <div class="section-num">05</div>
+    <div class="section-block" id="rating" style="display:none">
+        <div class="section-num">06</div>
         <div class="sec-hd">
             <div class="section-title">Рейтинг медицинских организаций</div>
             <a th:href="${basePath + '/admin'}" class="sec-link">Загрузить данные →</a>
@@ -1030,6 +1678,294 @@
             l.classList.toggle('active', l.getAttribute('href') === '#' + cur);
         });
     }, {passive:true});
+</script>
+
+<script>
+/* ── FORECAST CALCULATOR ── */
+(function(){
+  const START = new Date('2026-01-01');
+  const TARGET_DATE = new Date('2026-08-01');
+  const now = new Date();
+  const weeksElapsed = Math.max(1, (now - START) / (7 * 86400000));
+  const weeksLeft = Math.max(0, (TARGET_DATE - now) / (7 * 86400000));
+
+  function calcForecast(factEl, deficitEl, tempoEl, neededEl, pctEl, barEl, forecastLblEl, forecastBarEl, alertEl, plan) {
+    if (!factEl) return;
+    const fact = parseInt(factEl.textContent) || 0;
+    const deficit = fact - plan;
+    const pct = plan > 0 ? Math.round(fact / plan * 100) : 0;
+    const tempo = Math.round(fact / weeksElapsed * 10) / 10;
+    const forecastVal = Math.round(fact + tempo * weeksLeft);
+    const forecastPct = plan > 0 ? Math.round(forecastVal / plan * 100) : 0;
+    const needed = weeksLeft > 0 ? Math.ceil((plan - fact) / weeksLeft) : '∞';
+    const accel = tempo > 0 ? Math.round(needed / tempo) : '∞';
+
+    if (deficitEl) deficitEl.textContent = deficit < 0 ? deficit.toLocaleString('ru') : '+' + deficit;
+    if (tempoEl) tempoEl.textContent = tempo.toLocaleString('ru') + ' / нед';
+    if (neededEl) neededEl.textContent = needed + ' / нед';
+    if (pctEl) { pctEl.textContent = pct + '%'; pctEl.style.color = pct >= 80 ? '#4ade80' : '#f87171'; }
+    if (barEl) { barEl.style.width = Math.min(pct, 100) + '%'; barEl.style.background = pct >= 80 ? '#4ade80' : '#f87171'; }
+    if (forecastLblEl) forecastLblEl.textContent = forecastVal.toLocaleString('ru') + ' (' + forecastPct + '%)';
+    if (forecastBarEl) forecastBarEl.style.width = Math.min(forecastPct, 100) + '%';
+    if (alertEl) alertEl.innerHTML = 'К 01.08 при текущем темпе — <b>' + forecastVal.toLocaleString('ru') + '</b> из ' + plan.toLocaleString('ru') + '. Нужно ускорить в <b>' + accel + '×</b>';
+  }
+
+  function g(id) { return document.getElementById(id); }
+
+  const dsFact = document.querySelector('[id="anl-ds-deficit"]') && (() => {
+    const b = document.querySelector('.anl-fc:first-child .anl-fc-lines b');
+    return b ? parseInt(b.textContent) : 0;
+  })();
+
+  // Берём факт и план из текста, который вставил Thymeleaf
+  function extractFactPlan(prefix) {
+    const lines = document.querySelector('#anl-' + prefix + '-deficit')
+      ?.closest('.anl-fc')?.querySelector('.anl-fc-lines');
+    if (!lines) return null;
+    const bTags = lines.querySelectorAll('b');
+    return bTags.length >= 2 ? { fact: parseInt(bTags[0].textContent) || 0, plan: parseInt(bTags[1].textContent.replace(/\s/g,'')) || 0 } : null;
+  }
+
+  window.addEventListener('DOMContentLoaded', function() {
+    ['ds','amb'].forEach(prefix => {
+      const dp = extractFactPlan(prefix);
+      if (!dp) return;
+      calcForecast(
+        { textContent: dp.fact },
+        g('anl-' + prefix + '-deficit'),
+        g('anl-' + prefix + '-tempo'),
+        g('anl-' + prefix + '-needed'),
+        g('anl-' + prefix + '-pct'),
+        g('anl-' + prefix + '-bar'),
+        g('anl-' + prefix + '-forecast-lbl'),
+        g('anl-' + prefix + '-forecast-bar'),
+        g('anl-' + prefix + '-alert'),
+        dp.plan
+      );
+    });
+  });
+})();
+
+/* ── DRUG RATING TABLES ── */
+const drsAmbRaw = [
+  {n:"Королевская",py:48,pw:5,f:34},
+  {n:"Люберецкая ОБ",py:102,pw:10,f:31},
+  {n:"Балашихинская ОБ",py:113,pw:11,f:20},
+  {n:"Щелковская",py:66,pw:7,f:10},
+  {n:"Химкинская",py:52,pw:5,f:7},
+  {n:"Серпуховская",py:30,pw:3,f:7},
+  {n:"Воскресенская",py:45,pw:5,f:6},
+  {n:"Каширская",py:8,pw:1,f:5},
+  {n:"Клинская",py:22,pw:2,f:5},
+  {n:"Жуковская ОКБ",py:22,pw:2,f:4},
+  {n:"Долгопрудненская",py:9,pw:1,f:3},
+  {n:"Электростальская",py:29,pw:3,f:3},
+  {n:"Солнечногорская",py:15,pw:2,f:3},
+  {n:"Рузская",py:11,pw:1,f:3},
+  {n:"Лобненская",py:19,pw:2,f:2},
+  {n:"Котельниковская поликлиника",py:11,pw:1,f:2},
+  {n:"Дубненская",py:5,pw:1,f:1},
+  {n:"Чеховская",py:17,pw:2,f:1},
+  {n:"Подольская ОКБ",py:101,pw:10,f:1},
+  {n:"Мытищинская ОКБ",py:72,pw:7,f:1},
+  {n:"Реутовская",py:14,pw:1,f:1},
+];
+const drsDsRaw = [
+  {n:"Королевская",py:135,pw:14,f:60},
+  {n:"Мытищинская ОКБ",py:202,pw:20,f:36},
+  {n:"Балашихинская ОБ",py:319,pw:32,f:24},
+  {n:"Лобненская",py:56,pw:6,f:22},
+  {n:"Воскресенская",py:126,pw:13,f:20},
+  {n:"Серпуховская",py:85,pw:9,f:19},
+  {n:"Щелковская",py:186,pw:19,f:17},
+  {n:"Павлово-Посадская",py:60,pw:6,f:14},
+  {n:"Жуковская ОКБ",py:62,pw:6,f:14},
+  {n:"Ступинская",py:37,pw:4,f:11},
+  {n:"Луховицкая",py:29,pw:3,f:11},
+  {n:"Долгопрудненская",py:25,pw:3,f:10},
+  {n:"Каширская",py:22,pw:2,f:10},
+  {n:"Раменская",py:125,pw:13,f:10},
+  {n:"Люберецкая ОБ",py:290,pw:29,f:10},
+  {n:"Подольская ОКБ",py:292,pw:29,f:9},
+  {n:"Котельниковская поликлиника",py:32,pw:3,f:8},
+  {n:"Электростальская",py:83,pw:8,f:7},
+  {n:"Коломенская",py:113,pw:11,f:6},
+  {n:"Егорьевская",py:30,pw:3,f:6},
+  {n:"Клинская",py:62,pw:6,f:5},
+  {n:"Дмитровская",py:95,pw:10,f:4},
+  {n:"Чеховская",py:48,pw:5,f:4},
+  {n:"Реутовская",py:41,pw:4,f:4},
+  {n:"Солнечногорская",py:42,pw:4,f:4},
+  {n:"Истринская",py:74,pw:7,f:3},
+  {n:"Рузская",py:30,pw:3,f:3},
+];
+
+const drsState = {
+  amb: {col:'pct', dir:-1},
+  ds:  {col:'pct', dir:-1},
+};
+
+function drsGetPct(d) { return d.py>0 ? d.f/d.py : (d.f>0 ? 999 : -1); }
+
+function drsSetSort(tbl, col) {
+  const s = drsState[tbl];
+  if (s.col === col) { s.dir *= -1; } else { s.col = col; s.dir = -1; }
+  drsRenderAll();
+}
+
+function drsUpdateArrows(tbl) {
+  const s = drsState[tbl];
+  ['py','pw','f','pct'].forEach(c => {
+    const el = document.getElementById(`drs-${tbl}-arr-${c}`);
+    if (!el) return;
+    el.textContent = s.col===c ? (s.dir===-1?'↓':'↑') : '';
+    const th = el.closest('th');
+    if (th) th.classList.toggle('drs-sorted', s.col===c);
+  });
+}
+
+function drsPctColor(pct, hasplan) {
+  if (!hasplan) return 'drs-val-zero';
+  if (pct >= 100) return 'drs-val-ok';
+  if (pct >= 50)  return 'drs-val-warn';
+  return 'drs-val-bad';
+}
+
+function drsRenderTable(rawData, tbl) {
+  const s = drsState[tbl];
+  const searchEl = document.getElementById('drs-search');
+  const q = searchEl ? searchEl.value.toLowerCase().trim() : '';
+  const tbody = document.getElementById(`drs-${tbl}-body`);
+  const totalEl = document.getElementById(`drs-${tbl}-total`);
+  if (!tbody) return;
+
+  let data = rawData.map(d => ({...d, pctVal: drsGetPct(d)}));
+  if (q) data = data.filter(d => d.n.toLowerCase().includes(q));
+
+  data.sort((a,b) => {
+    const va = s.col==='pct' ? a.pctVal : a[s.col];
+    const vb = s.col==='pct' ? b.pctVal : b[s.col];
+    return s.dir*(vb-va);
+  });
+
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="5" class="drug-rating-empty">Ничего не найдено</td></tr>`;
+    if (totalEl) totalEl.textContent = '';
+    drsUpdateArrows(tbl);
+    return;
+  }
+
+  let tPy=0, tPw=0, tF=0;
+  data.forEach(d => { tPy+=d.py; tPw+=d.pw; tF+=d.f; });
+
+  const totalPct = tPy>0 ? Math.round(tF/tPy*100) : 0;
+  const totCls = drsPctColor(totalPct, tPy>0);
+  const totBarC = totCls==='drs-val-ok'?'#4ade80':totCls==='drs-val-warn'?'#fbbf24':'#f87171';
+  const totBarW = tPy>0 ? Math.min(totalPct,100)*0.44 : 0;
+  const topRow = `<tr class="drs-totals-row">
+    <td>Всего (${data.length} МО)</td><td>${tPy}</td><td>${tPw}</td><td>${tF}</td>
+    <td><span class="${totCls}">${totalPct}%</span><span class="drs-pct-bar" style="width:${totBarW}px;background:${totBarC}"></span></td>
+  </tr>`;
+
+  let rows = topRow + data.map(d => {
+    const pct = d.py>0 ? Math.round(d.f/d.py*100) : null;
+    const cls = drsPctColor(pct, d.py>0);
+    const barC = cls==='drs-val-ok'?'#4ade80':cls==='drs-val-warn'?'#fbbf24':cls==='drs-val-bad'?'#f87171':'rgba(255,255,255,.1)';
+    const barW = d.py>0 ? Math.min(pct,100)*0.44 : 0;
+    const pctStr = d.py>0 ? `${pct}%` : `<span class="drs-no-plan">нет плана</span>`;
+    return `<tr>
+      <td>${d.n}</td>
+      <td class="drs-val-plan">${d.py||'<span class="drs-val-zero">—</span>'}</td>
+      <td class="drs-val-plan">${d.pw||'<span class="drs-val-zero">—</span>'}</td>
+      <td style="color:#e0e0e0;font-weight:600">${d.f}</td>
+      <td><span class="${cls}">${pctStr}</span>${d.py>0?`<span class="drs-pct-bar" style="width:${barW}px;background:${barC}"></span>`:''}</td>
+    </tr>`;
+  }).join('');
+
+  tbody.innerHTML = rows;
+  if (totalEl) totalEl.textContent = `план: ${tPy} · факт 2026: ${tF} · ${totalPct}%`;
+  drsUpdateArrows(tbl);
+}
+
+function drsRenderAll() {
+  drsRenderTable(drsAmbRaw, 'amb');
+  drsRenderTable(drsDsRaw, 'ds');
+}
+
+drsRenderAll();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+  const moData = [
+    {n:"Центр профилактики и борьбы со СПИД",v:688},
+    {n:"Щелковская больница",v:447},
+    {n:"Подольская ОКБ",v:310},
+    {n:"Раменская больница",v:207},
+    {n:"Дмитровская больница",v:189},
+    {n:"Балашихинская ОБ",v:181},
+    {n:"Мытищинская ОКБ",v:179},
+    {n:"Одинцовская ОБ",v:169},
+    {n:"Домодедовская больница",v:155},
+    {n:"Сергиево-Посадская больница",v:137},
+    {n:"Видновская КБ",v:123},
+    {n:"Жуковская ОКБ",v:116},
+    {n:"Королевская больница",v:114},
+    {n:"Воскресенская больница",v:103},
+    {n:"Истринская КБ",v:92},
+    {n:"Электростальская больница",v:65},
+    {n:"Серпуховская больница",v:64},
+    {n:"Солнечногорская больница",v:62},
+    {n:"Павлово-Посадская больница",v:59},
+    {n:"Красногорская КБ",v:56},
+  ];
+  const canvas = document.getElementById('planMoChart');
+  if (!canvas) return;
+  new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: moData.map(d => d.n),
+      datasets: [{
+        label: 'Пациентов',
+        data: moData.map(d => d.v),
+        backgroundColor: moData.map((_,i) => i===0 ? 'rgba(239,68,68,0.85)' : i<3 ? 'rgba(245,158,11,0.85)' : 'rgba(99,102,241,0.85)'),
+        borderRadius: 4,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: {padding: {right: 55}},
+      plugins: {
+        legend: {display: false},
+        tooltip: {callbacks: {label: c => ' ' + c.raw + ' пациентов'}},
+      },
+      scales: {
+        x: {ticks:{color:'rgba(255,255,255,.4)',font:{size:11}}, grid:{color:'rgba(255,255,255,.05)'}, border:{color:'transparent'}},
+        y: {ticks:{color:'rgba(255,255,255,.7)',font:{size:11.5}}, grid:{display:false}, border:{color:'transparent'}}
+      }
+    },
+    plugins: [{
+      id: 'planDatalabels',
+      afterDatasetDraw(chart) {
+        const {ctx, data} = chart;
+        const meta = chart.getDatasetMeta(0);
+        ctx.save();
+        ctx.font = '600 12px Inter,system-ui,sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,.7)';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        meta.data.forEach((bar, i) => {
+          ctx.fillText(data.datasets[0].data[i], bar.x + 7, bar.y);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+})();
 </script>
 </body>
 </html>

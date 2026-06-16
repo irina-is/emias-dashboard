@@ -3,6 +3,7 @@ package com.emias.dashboard.controller;
 import com.emias.dashboard.entity.FacilityPlan;
 import com.emias.dashboard.entity.MoTask;
 import com.emias.dashboard.repository.MoTaskRepository;
+import com.emias.dashboard.repository.ScreeningRepository;
 import com.emias.dashboard.model.AgeDiagram;
 import com.emias.dashboard.model.Conclusions;
 import com.emias.dashboard.model.DashboardConfig;
@@ -41,6 +42,7 @@ public class PageController {
     private final HcvRegistryService     hcvRegistryService;
     private final DashboardCacheService  dashboardCache;
     private final MoTaskRepository       moTaskRepository;
+    private final ScreeningRepository    screeningRepository;
 
     public PageController(ReportService reportService,
                           DiagramService diagramService,
@@ -50,7 +52,8 @@ public class PageController {
                           HcvService hcvService,
                           HcvRegistryService hcvRegistryService,
                           DashboardCacheService dashboardCache,
-                          MoTaskRepository moTaskRepository) {
+                          MoTaskRepository moTaskRepository,
+                          ScreeningRepository screeningRepository) {
         this.reportService          = reportService;
         this.diagramService         = diagramService;
         this.settingsService        = settingsService;
@@ -60,6 +63,7 @@ public class PageController {
         this.hcvRegistryService     = hcvRegistryService;
         this.dashboardCache         = dashboardCache;
         this.moTaskRepository       = moTaskRepository;
+        this.screeningRepository    = screeningRepository;
     }
 
     @GetMapping("/")
@@ -181,10 +185,23 @@ public class PageController {
                 model.addAttribute("uvoRating", hcvRegistryService.buildUvoRatingRows());
                 model.addAttribute("ambulatory2026Count", hcvRegistryService.countAmbulatory2026());
                 model.addAttribute("dayHospital2026Count", hcvRegistryService.countDayHospital2026());
+                model.addAttribute("analyticsStats", hcvRegistryService.buildAnalyticsStats());
             }
         } catch (Exception ignored) {}
 
-        model.addAttribute("moTasks", moTaskRepository.findAllByOrderByIdDesc());
+        model.addAttribute("moTasks", moTaskRepository.findAllByOrderByIdAsc());
+
+        try {
+            model.addAttribute("screeningTotalCount", screeningRepository.count());
+        } catch (Exception ignored) {}
+
+        try {
+            List<com.emias.dashboard.entity.HcvWeeklyPlanRow> wp = hcvService.getLatestWeeklyPlan();
+            if (!wp.isEmpty()) {
+                model.addAttribute("weeklyPlanRows", wp);
+                model.addAttribute("weeklyPlanDate", wp.get(0).getReportWeek().toString());
+            }
+        } catch (Exception ignored) {}
 
         return "hepatitis";
     }

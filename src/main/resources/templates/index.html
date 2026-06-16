@@ -854,6 +854,43 @@
 
     </div>
 
+    <!-- Выявленные отклонения при скрининге ХВГС -->
+    <div class="mt-5" id="deviations">
+        <h4 class="mb-1">Выявленные отклонения при скрининге ХВГС</h4>
+        <div class="mb-3" style="font-size:.82rem;color:var(--emias-muted);">положительный результат на антитела к ВГС</div>
+
+        <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+            <select id="dev-mo-filter" class="form-select" style="max-width:420px;">
+                <option value="">— Все медицинские организации —</option>
+            </select>
+            <span id="dev-count-badge" class="badge bg-danger bg-opacity-25 text-danger fs-6 fw-bold px-3 py-2">загрузка…</span>
+            <span id="dev-pagination-info" class="ms-auto text-muted" style="font-size:.78rem;"></span>
+        </div>
+
+        <div class="table-responsive" style="border-radius:8px;border:1px solid var(--emias-border);">
+            <table class="table table-hover table-sm mb-0" id="dev-table">
+                <thead>
+                    <tr>
+                        <th style="width:46px;">№</th>
+                        <th>ФИО</th>
+                        <th style="white-space:nowrap;">Дата рождения</th>
+                        <th>Медицинская организация</th>
+                        <th style="white-space:nowrap;">Дата исследования</th>
+                        <th style="white-space:nowrap;">Статус лаб. исследования</th>
+                        <th style="white-space:nowrap;">Результат в карте дисп.</th>
+                        <th style="white-space:nowrap;">ПЦР выполнен</th>
+                        <th style="white-space:nowrap;">Результат ПЦР</th>
+                    </tr>
+                </thead>
+                <tbody id="dev-tbody">
+                    <tr><td colspan="9" class="text-center text-muted py-4">Загрузка данных…</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="dev-pager" class="d-flex justify-content-center gap-2 mt-3"></div>
+    </div>
+
 </div>
 
 <script th:src="${basePath + '/js/bootstrap.bundle.min.js'}"></script>
@@ -1144,6 +1181,85 @@
             series: hcSeries
         });
     }
+</script>
+
+<script th:inline="javascript">
+(function() {
+    const basePath = /*[[${basePath}]]*/ '';
+    let devPage = 0, devFacility = '', devTotal = 0, devTotalPages = 0;
+
+    function renderDevRow(r, idx, offset) {
+        const fio = [r.lastName, r.firstName, r.middleName].filter(Boolean).join(' ') || '—';
+        const pcrDone    = r.pcrDone   || '—';
+        const pcrResult  = r.pcrResult ? `<span class="text-danger fw-bold">${r.pcrResult}</span>` : '—';
+        const resStatus  = r.researchStatus || '—';
+        const resResult  = r.researchResult ? `<span class="text-warning fw-semibold">${r.researchResult}</span>` : '—';
+        return `<tr>`
+            + `<td class="text-muted">${offset + idx + 1}</td>`
+            + `<td class="fw-medium">${fio}</td>`
+            + `<td style="white-space:nowrap;">${r.birthDate || '—'}</td>`
+            + `<td style="max-width:260px;white-space:normal;line-height:1.3;">${r.facilityFrom || '—'}</td>`
+            + `<td style="white-space:nowrap;">${r.researchDate || '—'}</td>`
+            + `<td>${resStatus}</td>`
+            + `<td>${resResult}</td>`
+            + `<td>${pcrDone}</td>`
+            + `<td>${pcrResult}</td>`
+            + `</tr>`;
+    }
+
+    function renderPager() {
+        const pager = document.getElementById('dev-pager');
+        if (!pager || devTotalPages <= 1) { if (pager) pager.innerHTML = ''; return; }
+        let html = `<button class="btn btn-sm btn-outline-secondary" ${devPage===0?'disabled':''} onclick="devGoPage(${devPage-1})">‹ Назад</button>`;
+        for (let i = Math.max(0, devPage-2); i <= Math.min(devTotalPages-1, devPage+2); i++) {
+            html += `<button class="btn btn-sm ${i===devPage?'btn-primary':'btn-outline-secondary'}" onclick="devGoPage(${i})">${i+1}</button>`;
+        }
+        html += `<button class="btn btn-sm btn-outline-secondary" ${devPage>=devTotalPages-1?'disabled':''} onclick="devGoPage(${devPage+1})">Вперёд ›</button>`;
+        pager.innerHTML = html;
+    }
+
+    function loadDeviations(page, facility) {
+        devPage = page; devFacility = facility;
+        const tbody = document.getElementById('dev-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4">Загрузка…</td></tr>';
+        fetch(basePath + '/api/screening/deviations?' + new URLSearchParams({ page, size: 50, facility }))
+            .then(r => r.json())
+            .then(data => {
+                devTotal = data.totalCount || 0;
+                devTotalPages = data.totalPages || 0;
+                const offset = page * 50;
+                const badge = document.getElementById('dev-count-badge');
+                if (badge) badge.textContent = devTotal.toLocaleString('ru-RU') + ' пациентов с отклонением';
+                const info = document.getElementById('dev-pagination-info');
+                if (info) info.textContent = devTotal > 0 ? `стр. ${page+1} из ${devTotalPages}` : '';
+                tbody.innerHTML = data.records && data.records.length
+                    ? data.records.map((r, i) => renderDevRow(r, i, offset)).join('')
+                    : '<tr><td colspan="9" class="text-center text-muted py-4">Нет данных</td></tr>';
+                renderPager();
+            })
+            .catch(() => {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center text-danger py-4">Ошибка загрузки данных</td></tr>';
+            });
+    }
+
+    window.devGoPage = function(p) { loadDeviations(p, devFacility); };
+
+    fetch(basePath + '/api/screening/deviations/facilities')
+        .then(r => r.json())
+        .then(list => {
+            const sel = document.getElementById('dev-mo-filter');
+            if (!sel) return;
+            list.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f; opt.textContent = f;
+                sel.appendChild(opt);
+            });
+            sel.addEventListener('change', () => loadDeviations(0, sel.value));
+        });
+
+    loadDeviations(0, '');
+})();
 </script>
 
 </body>
