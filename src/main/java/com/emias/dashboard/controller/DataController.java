@@ -3,6 +3,7 @@ package com.emias.dashboard.controller;
 import com.emias.dashboard.entity.FacilityMapping;
 import com.emias.dashboard.entity.FacilityPlan;
 import com.emias.dashboard.entity.MoTask;
+import com.emias.dashboard.entity.MoWorkPlan;
 import com.emias.dashboard.entity.Screening;
 import com.emias.dashboard.repository.MoTaskRepository;
 import com.emias.dashboard.model.FacilityRating;
@@ -14,6 +15,7 @@ import com.emias.dashboard.service.HcvService;
 import com.emias.dashboard.service.HcvRegistryService;
 import com.emias.dashboard.service.FacilityPlanService;
 import com.emias.dashboard.service.FileValidationException;
+import com.emias.dashboard.service.MoWorkPlanService;
 import com.emias.dashboard.service.ReportService;
 import com.emias.dashboard.service.SettingsService;
 import org.apache.poi.ss.usermodel.Cell;
@@ -42,6 +44,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -73,6 +77,7 @@ public class DataController {
     private final HcvService             hcvService;
     private final HcvRegistryService     hcvRegistryService;
     private final MoTaskRepository       moTaskRepository;
+    private final MoWorkPlanService      moWorkPlanService;
 
     public DataController(ReportService reportService,
                           ScreeningRepository screeningRepository,
@@ -82,7 +87,8 @@ public class DataController {
                           DiagramService diagramService,
                           HcvService hcvService,
                           HcvRegistryService hcvRegistryService,
-                          MoTaskRepository moTaskRepository) {
+                          MoTaskRepository moTaskRepository,
+                          MoWorkPlanService moWorkPlanService) {
         this.reportService          = reportService;
         this.screeningRepository    = screeningRepository;
         this.settingsService        = settingsService;
@@ -92,6 +98,7 @@ public class DataController {
         this.hcvService             = hcvService;
         this.hcvRegistryService     = hcvRegistryService;
         this.moTaskRepository       = moTaskRepository;
+        this.moWorkPlanService      = moWorkPlanService;
     }
 
     /* ── Поручения МО ── */
@@ -683,20 +690,32 @@ public class DataController {
                 Map<String, Object> m = new LinkedHashMap<>();
                 m.put("orgName",        row.getOrgName());
                 m.put("planYearAmb",    row.getPlanYearAmb());
-                m.put("planMonthAmb",   row.getPlanMonthAmb());
                 m.put("waitingAmb",     row.getWaitingAmb());
+                m.put("pctAmb",         row.getPctAmb());
                 m.put("weeklyPlanAmb",  row.getWeeklyPlanAmb());
                 m.put("weeklyFactAmb",  row.getWeeklyFactAmb());
+                m.put("dynamicAmb",     row.getDynamicAmb());
                 m.put("planYearStat",   row.getPlanYearStat());
                 m.put("referralsStat",  row.getReferralsStat());
+                m.put("pctStat",        row.getPctStat());
                 m.put("weeklyPlanStat", row.getWeeklyPlanStat());
                 m.put("weeklyFactStat", row.getWeeklyFactStat());
+                m.put("dynamicStat",    row.getDynamicStat());
                 result.add(m);
             }
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }
+    }
+
+    @GetMapping("/hcv/weekly-plan/template")
+    public ResponseEntity<byte[]> getWeeklyPlanTemplate() throws Exception {
+        byte[] bytes = hcvService.generateWeeklyPlanTemplate();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"weekly_plan_template.xlsx\"")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(bytes);
     }
 
     /**
@@ -788,5 +807,57 @@ public class DataController {
         result.add("Отказ (refusal): " + refusals);
 
         return result;
+    }
+
+    /* ── Понедельный план отработки МО ── */
+
+    @PostMapping("/hcv/mo-work-plan/upload")
+    public ResponseEntity<?> uploadMoWorkPlan(@RequestParam("file") MultipartFile file,
+                                              @RequestParam("month") String month) {
+        try {
+            YearMonth ym = YearMonth.parse(month);
+            int count = moWorkPlanService.upload(file, ym);
+            return ResponseEntity.ok(Map.of("count", count, "month", month));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/hcv/mo-work-plan")
+    public ResponseEntity<?> getMoWorkPlan(@RequestParam(required = false) String month) {
+        try {
+            List<MoWorkPlan> rows = (month != null)
+                    ? moWorkPlanService.getByMonth(YearMonth.parse(month))
+                    : moWorkPlanService.getLatest();
+            return ResponseEntity.ok(rows.stream().map(r -> {
+                Map<String, Object> m = new LinkedHashMap<>();
+                m.put("orgName", r.getOrgName());
+                m.put("week1",   r.getWeek1());
+                m.put("week2",   r.getWeek2());
+                m.put("week3",   r.getWeek3());
+                m.put("week4",   r.getWeek4());
+                m.put("worked",  r.getWorked());
+                return m;
+            }).collect(Collectors.toList()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/hcv/mo-work-plan/months")
+    public ResponseEntity<?> getMoWorkPlanMonths() {
+        List<String> months = moWorkPlanService.getAvailableMonths().stream()
+                .map(d -> d.format(DateTimeFormatter.ofPattern("yyyy-MM")))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(months);
+    }
+
+    @GetMapping("/hcv/mo-work-plan/template")
+    public ResponseEntity<byte[]> getMoWorkPlanTemplate() throws IOException {
+        byte[] bytes = moWorkPlanService.generateTemplate();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"mo_work_plan_template.xlsx\"")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(bytes);
     }
 }

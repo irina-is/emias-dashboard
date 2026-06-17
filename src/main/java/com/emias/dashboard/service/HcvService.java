@@ -10,7 +10,11 @@ import com.emias.dashboard.repository.HcvProgressRepository;
 import com.emias.dashboard.repository.HcvWeeklyPlanRepository;
 import jakarta.annotation.PostConstruct;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
+
+import java.io.ByteArrayOutputStream;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -332,19 +336,22 @@ public class HcvService {
                 String orgName = fmt.formatCellValue(row.getCell(1)).trim();
                 if (orgName.isEmpty()) continue;
 
-                Integer planYearAmb    = parseIntOrNull(fmt, row.getCell(2));
-                Integer planMonthAmb   = parseIntOrNull(fmt, row.getCell(3));
-                Integer waitingAmb     = parseIntOrNull(fmt, row.getCell(4));  // E
-                Integer weeklyFactAmb  = parseIntOrNull(fmt, row.getCell(5));  // F
-                Integer weeklyPlanAmb  = parseIntOrNull(fmt, row.getCell(6));  // G
-                Integer planYearStat   = parseIntOrNull(fmt, row.getCell(7));  // H
+                Integer planYearAmb    = parseIntOrNull(fmt, row.getCell(2));  // C
+                Integer waitingAmb     = parseIntOrNull(fmt, row.getCell(3));  // D
+                Integer pctAmb         = parseIntOrNull(fmt, row.getCell(4));  // E
+                Integer weeklyPlanAmb  = parseIntOrNull(fmt, row.getCell(5));  // F
+                Integer weeklyFactAmb  = parseIntOrNull(fmt, row.getCell(6));  // G
+                Integer dynamicAmb     = parseIntOrNull(fmt, row.getCell(7));  // H
+                Integer planYearStat   = parseIntOrNull(fmt, row.getCell(8));  // I
                 Integer referralsStat  = parseIntOrNull(fmt, row.getCell(9));  // J
-                Integer weeklyFactStat = parseIntOrNull(fmt, row.getCell(10)); // K
+                Integer pctStat        = parseIntOrNull(fmt, row.getCell(10)); // K
                 Integer weeklyPlanStat = parseIntOrNull(fmt, row.getCell(11)); // L
+                Integer weeklyFactStat = parseIntOrNull(fmt, row.getCell(12)); // M
+                Integer dynamicStat    = parseIntOrNull(fmt, row.getCell(13)); // N
 
                 rows.add(new HcvWeeklyPlanRow(orgName,
-                        planYearAmb, planMonthAmb, waitingAmb, weeklyPlanAmb, weeklyFactAmb,
-                        planYearStat, referralsStat, weeklyPlanStat, weeklyFactStat,
+                        planYearAmb, waitingAmb, pctAmb, weeklyPlanAmb, weeklyFactAmb, dynamicAmb,
+                        planYearStat, referralsStat, pctStat, weeklyPlanStat, weeklyFactStat, dynamicStat,
                         reportWeek));
             }
         }
@@ -359,6 +366,58 @@ public class HcvService {
 
     public List<LocalDate> getWeeklyPlanWeeks() {
         return weeklyPlanRepo.findDistinctWeeks();
+    }
+
+    public byte[] generateWeeklyPlanTemplate() throws Exception {
+        try (Workbook wb = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Sheet sheet = wb.createSheet("Недельный план");
+
+            CellStyle groupStyle = wb.createCellStyle();
+            Font gf = wb.createFont(); gf.setBold(true);
+            groupStyle.setFont(gf);
+            groupStyle.setFillForegroundColor(IndexedColors.CORNFLOWER_BLUE.getIndex());
+            groupStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            groupStyle.setAlignment(HorizontalAlignment.CENTER);
+
+            CellStyle headerStyle = wb.createCellStyle();
+            Font hf = wb.createFont(); hf.setBold(true);
+            headerStyle.setFont(hf);
+            headerStyle.setFillForegroundColor(IndexedColors.LIGHT_CORNFLOWER_BLUE.getIndex());
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            headerStyle.setWrapText(true);
+            headerStyle.setAlignment(HorizontalAlignment.CENTER);
+
+            // Строка 1 — группы
+            Row g = sheet.createRow(0);
+            cell(g, 0, "№", groupStyle);
+            cell(g, 1, "МО", groupStyle);
+            cell(g, 2, "Амбулаторная помощь", groupStyle);
+            cell(g, 8, "Стационарная помощь", groupStyle);
+            sheet.addMergedRegion(new CellRangeAddress(0, 0, 2, 7));
+            sheet.addMergedRegion(new CellRangeAddress(0, 0, 8, 13));
+
+            // Строка 2 — заголовки столбцов
+            Row h = sheet.createRow(1);
+            String[] cols = {"№", "МО",
+                "План 2026", "Ожидают лечение", "% плана", "Неделя план", "Неделя факт", "Динамика (амб.)",
+                "План 2026", "Направлены на лечение", "% от плана", "Недельный план (стац.)", "Неделя факт", "Динамика (стац.)"};
+            for (int i = 0; i < cols.length; i++) {
+                cell(h, i, cols[i], headerStyle);
+            }
+
+            sheet.setColumnWidth(0, 1500);
+            sheet.setColumnWidth(1, 14000);
+            for (int i = 2; i <= 13; i++) sheet.setColumnWidth(i, 4500);
+
+            wb.write(out);
+            return out.toByteArray();
+        }
+    }
+
+    private void cell(Row row, int col, String value, CellStyle style) {
+        Cell c = row.createCell(col);
+        c.setCellValue(value);
+        if (style != null) c.setCellStyle(style);
     }
 
     /** Возвращает данные последней загруженной недели, либо пустой список. */

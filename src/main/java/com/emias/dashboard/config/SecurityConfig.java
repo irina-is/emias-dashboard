@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .requestMatchers("/", "/dashboard", "/hepatitis", "/pcr-dashboard", "/naznachenie", "/scheme-dashboard", "/login").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/fonts/**").permitAll()
                 .requestMatchers("/api/hcv/weekly-plan", "/api/hcv/weekly-plan/weeks").permitAll()
+                .requestMatchers("/api/hcv/mo-work-plan", "/api/hcv/mo-work-plan/months").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

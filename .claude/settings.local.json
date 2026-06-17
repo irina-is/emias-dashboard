@@ -12,7 +12,12 @@
       "Bash(python3 -)",
       "Bash(pip3 install *)",
       "Bash(ls /Library/Fonts/ | grep -i times; ls /System/Library/Fonts/ | grep -i times)",
-      "Bash(xargs -I{} bash -c 'fc-query --format=\"%{family}\\\\n\" \"{}\" 2>/dev/null | grep -i \"times\\\\|new roman\" && echo \"{}\"')"
+      "Bash(xargs -I{} bash -c 'fc-query --format=\"%{family}\\\\n\" \"{}\" 2>/dev/null | grep -i \"times\\\\|new roman\" && echo \"{}\"')",
+      "Bash(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 root@186.246.30.21 'ls -la')",
+      "Bash(./mvnw compile *)",
+      "Bash(curl -s http://localhost:8081/spec/api/hcv/mo-work-plan/months)",
+      "Read(//Users/123ira456rambler.ru/Library/Application Support/Claude/local-agent-mode-sessions/skills-plugin/a9c4e9f3-c186-4862-b973-2ba15c50c4f9/faedf4be-98bd-4937-aea1-2edc8f02debd/skills/xlsx/**)",
+      "Bash(extract-text \"/Users/123ira456rambler.ru/Downloads/Недельный план.xlsx\")"
     ]
   }
 }
