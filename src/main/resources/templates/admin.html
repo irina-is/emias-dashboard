@@ -23,7 +23,12 @@
     <!-- Табы -->
     <ul class="nav nav-tabs mb-4" id="adminTabs">
         <li class="nav-item">
-            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-data">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-hcv">
+                Гепатит С (4ДИ)
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-data">
                 Загрузка данных
             </button>
         </li>
@@ -52,17 +57,12 @@
                 Исходные данные
             </button>
         </li>
-        <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-hcv">
-                Гепатит С (4ДИ)
-            </button>
-        </li>
     </ul>
 
     <div class="tab-content">
 
         <!-- ── Таб 1: Загрузка данных ── -->
-        <div class="tab-pane fade show active" id="tab-data">
+        <div class="tab-pane fade" id="tab-data">
             <div class="row g-4">
                 <div class="col-12 col-lg-5 col-xl-4">
                     <div class="card shadow-sm h-100">
@@ -415,7 +415,7 @@
         </div>
 
         <!-- ── Таб: Гепатит С (4ДИ) ── -->
-        <div class="tab-pane fade" id="tab-hcv">
+        <div class="tab-pane fade show active" id="tab-hcv">
 
             <!-- Недельный план -->
             <div class="card shadow-sm mb-4">
@@ -435,10 +435,13 @@
                                    oninput="updateWeekDatesLabel()">
                             <div id="hcvWeekDatesLabel" class="text-muted mt-1" style="font-size:0.78rem;min-height:1.2em;"></div>
                         </div>
-                        <div style="align-self:flex-end;">
+                        <div style="align-self:flex-end;display:flex;gap:8px;">
                             <button class="btn btn-primary" onclick="uploadHcvWeeklyPlan()">
                                 <i class="bi bi-upload me-1"></i>Загрузить
                             </button>
+                            <a class="btn btn-outline-secondary" th:href="${basePath + '/api/hcv/weekly-plan/template'}">
+                                <i class="bi bi-download me-1"></i>Шаблон
+                            </a>
                         </div>
                         <span id="hcvWeeklyPlanStatus" class="text-muted" style="font-size:0.85rem;align-self:flex-end;"></span>
                     </div>
@@ -478,6 +481,59 @@
                                     </tr>
                                 </thead>
                                 <tbody id="hcvWeeklyPlanBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Понедельный план отработки МО -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="mb-1">Понедельный план отработки МО</h5>
+                    <p class="text-muted mb-3" style="font-size:0.85rem;">
+                        Файл Excel — один лист, строка 1 — заголовок, со строки 2 — данные.
+                        Столбцы: <strong>A</strong> — Название МО, <strong>B–E</strong> — Неделя 1–4, <strong>F</strong> — Отработано.
+                        Столбец «Всего» считается автоматически на дашборде.
+                    </p>
+                    <div class="d-flex align-items-end gap-3 flex-wrap mb-3">
+                        <div>
+                            <label class="form-label mb-1" style="font-size:0.8rem;color:var(--emias-muted);">Месяц</label>
+                            <input type="month" id="moWorkPlanMonth" class="form-control" style="max-width:200px;">
+                        </div>
+                        <input type="file" id="moWorkPlanFile" accept=".xlsx" class="form-control" style="max-width:280px;align-self:flex-end;">
+                        <button class="btn btn-primary" onclick="uploadMoWorkPlan()">
+                            <i class="bi bi-upload me-1"></i>Загрузить
+                        </button>
+                        <a class="btn btn-outline-secondary" th:href="${basePath + '/api/hcv/mo-work-plan/template'}">
+                            <i class="bi bi-download me-1"></i>Скачать шаблон
+                        </a>
+                        <span id="moWorkPlanStatus" class="text-muted" style="font-size:0.85rem;"></span>
+                    </div>
+
+                    <!-- Превью -->
+                    <div id="moWorkPlanPreview" style="display:none;">
+                        <hr class="my-3">
+                        <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                            <span class="fw-semibold" style="font-size:0.88rem;">Данные за месяц:</span>
+                            <select id="moWorkPlanMonthSelect" class="form-select form-select-sm" style="max-width:200px;" onchange="loadMoWorkPlanPreview()"></select>
+                            <span id="moWorkPlanCount" class="text-muted ms-auto" style="font-size:0.82rem;"></span>
+                        </div>
+                        <div style="max-height:420px;overflow-y:auto;border-radius:8px;border:1px solid var(--emias-border,#E8ECF5);">
+                            <table class="table table-sm table-hover mb-0" style="font-size:0.8rem;">
+                                <thead style="position:sticky;top:0;z-index:1;" class="table-light">
+                                    <tr>
+                                        <th style="width:36px;">№</th>
+                                        <th>Медицинская организация</th>
+                                        <th class="text-end">Всего</th>
+                                        <th class="text-end">Неделя 1</th>
+                                        <th class="text-end">Неделя 2</th>
+                                        <th class="text-end">Неделя 3</th>
+                                        <th class="text-end">Неделя 4</th>
+                                        <th class="text-end">Отработано</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="moWorkPlanBody"></tbody>
                             </table>
                         </div>
                     </div>
@@ -1314,28 +1370,24 @@
             .then(rows => {
                 if (!Array.isArray(rows)) return;
                 document.getElementById('hcvWeeklyPlanCount').textContent = rows.length + ' организаций';
+                const dynColor = v => v == null ? '' : v > 0 ? 'color:#198754;font-weight:600;' : v < 0 ? 'color:#dc3545;font-weight:600;' : '';
+                const fmtDyn  = v => v == null ? '—' : (v > 0 ? '+' : '') + v;
                 document.getElementById('hcvWeeklyPlanBody').innerHTML = rows.map((r, i) => {
-                    const pctAmb  = r.planYearAmb  ? Math.round((r.waitingAmb    || 0) / r.planYearAmb  * 100) : null;
-                    const pctStat = r.planYearStat ? Math.round((r.referralsStat || 0) / r.planYearStat * 100) : null;
-                    const dynAmb  = (r.weeklyFactAmb  != null && r.weeklyPlanAmb  != null) ? r.weeklyFactAmb  - r.weeklyPlanAmb  : null;
-                    const dynStat = (r.weeklyFactStat != null && r.weeklyPlanStat != null) ? r.weeklyFactStat - r.weeklyPlanStat : null;
-                    const dynColor = v => v == null ? '' : v > 0 ? 'color:#198754;font-weight:600;' : v < 0 ? 'color:#dc3545;font-weight:600;' : '';
-                    const fmtDyn  = v => v == null ? '—' : (v > 0 ? '+' : '') + v;
                     return `<tr>
                         <td class="text-muted">${i + 1}</td>
                         <td>${safeEsc(r.orgName)}</td>
                         <td class="text-end" style="border-left:2px solid #dee2e6;">${r.planYearAmb ?? '—'}</td>
                         <td class="text-end">${r.waitingAmb ?? '—'}</td>
-                        <td class="text-end">${pctAmb != null ? pctAmb + '%' : '—'}</td>
+                        <td class="text-end">${r.pctAmb != null ? r.pctAmb + '%' : '—'}</td>
                         <td class="text-end">${r.weeklyPlanAmb ?? '—'}</td>
                         <td class="text-end">${r.weeklyFactAmb ?? '—'}</td>
-                        <td class="text-end" style="${dynColor(dynAmb)}">${fmtDyn(dynAmb)}</td>
+                        <td class="text-end" style="${dynColor(r.dynamicAmb)}">${fmtDyn(r.dynamicAmb)}</td>
                         <td class="text-end" style="border-left:2px solid #dee2e6;">${r.planYearStat ?? '—'}</td>
                         <td class="text-end">${r.referralsStat ?? '—'}</td>
-                        <td class="text-end">${pctStat != null ? pctStat + '%' : '—'}</td>
+                        <td class="text-end">${r.pctStat != null ? r.pctStat + '%' : '—'}</td>
                         <td class="text-end">${r.weeklyPlanStat ?? '—'}</td>
                         <td class="text-end">${r.weeklyFactStat ?? '—'}</td>
-                        <td class="text-end" style="${dynColor(dynStat)}">${fmtDyn(dynStat)}</td>
+                        <td class="text-end" style="${dynColor(r.dynamicStat)}">${fmtDyn(r.dynamicStat)}</td>
                     </tr>`;
                 }).join('');
             })
@@ -1524,6 +1576,85 @@ function escHtml(s) {
 }
 
 document.addEventListener('DOMContentLoaded', loadTasks);
+</script>
+
+<script>
+/* ── Понедельный план отработки МО ── */
+(function () {
+    const MONTHS_RU = ['январь','февраль','март','апрель','май','июнь',
+                       'июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+
+    function fmtMonth(ym) {
+        const [y, m] = ym.split('-');
+        return MONTHS_RU[parseInt(m, 10) - 1] + ' ' + y;
+    }
+
+    function fmt(v) { return v != null ? v : '—'; }
+
+    window.uploadMoWorkPlan = function () {
+        const fileInput = document.getElementById('moWorkPlanFile');
+        const monthInput = document.getElementById('moWorkPlanMonth');
+        const status = document.getElementById('moWorkPlanStatus');
+
+        if (!fileInput.files.length) { status.textContent = 'Выберите файл'; return; }
+        if (!monthInput.value) { status.textContent = 'Выберите месяц'; return; }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('month', monthInput.value);
+
+        status.textContent = 'Загрузка…';
+        fetch(BASE_PATH + '/api/hcv/mo-work-plan/upload', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) { status.textContent = '✗ ' + data.error; return; }
+                status.textContent = '✓ Загружено ' + data.count + ' строк за ' + fmtMonth(data.month);
+                loadMoWorkPlanMonths(data.month);
+                document.getElementById('moWorkPlanPreview').style.display = 'block';
+            })
+            .catch(() => { status.textContent = '✗ Ошибка при загрузке'; });
+    };
+
+    function loadMoWorkPlanMonths(selectMonth) {
+        fetch(BASE_PATH + '/api/hcv/mo-work-plan/months')
+            .then(r => r.json())
+            .then(months => {
+                const sel = document.getElementById('moWorkPlanMonthSelect');
+                sel.innerHTML = months.map(m =>
+                    `<option value="${m}" ${m === selectMonth ? 'selected' : ''}>${fmtMonth(m)}</option>`
+                ).join('');
+                if (months.length) {
+                    document.getElementById('moWorkPlanPreview').style.display = 'block';
+                    loadMoWorkPlanPreview();
+                }
+            });
+    }
+
+    window.loadMoWorkPlanPreview = function () {
+        const sel = document.getElementById('moWorkPlanMonthSelect');
+        if (!sel.value) return;
+        fetch(BASE_PATH + '/api/hcv/mo-work-plan?month=' + sel.value)
+            .then(r => r.json())
+            .then(rows => {
+                document.getElementById('moWorkPlanCount').textContent = rows.length + ' организаций';
+                document.getElementById('moWorkPlanBody').innerHTML = rows.map((r, i) => {
+                    const total = (r.week1 || 0) + (r.week2 || 0) + (r.week3 || 0) + (r.week4 || 0);
+                    return `<tr>
+                        <td class="text-center text-muted">${i + 1}</td>
+                        <td>${escHtml(r.orgName)}</td>
+                        <td class="text-end fw-semibold">${total || '—'}</td>
+                        <td class="text-end">${fmt(r.week1)}</td>
+                        <td class="text-end">${fmt(r.week2)}</td>
+                        <td class="text-end">${fmt(r.week3)}</td>
+                        <td class="text-end">${fmt(r.week4)}</td>
+                        <td class="text-end">${fmt(r.worked)}</td>
+                    </tr>`;
+                }).join('');
+            });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => loadMoWorkPlanMonths(null));
+})();
 </script>
 
 </body>

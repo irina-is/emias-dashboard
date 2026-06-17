@@ -224,7 +224,7 @@
 
         /* ── PATHWAY ── */
         .pathway-wrap{overflow-x:auto;}
-        .pathway-inner{display:flex;align-items:center;gap:0;min-width:960px;padding:4px 0;}
+        .pathway-inner{display:flex;align-items:stretch;gap:0;min-width:960px;padding:4px 0;}
         .pw-step{
             flex:1;background:#111827;border-radius:12px;
             border:1px solid rgba(255,255,255,.07);
@@ -427,7 +427,7 @@
             <a href="#pathway" class="tn-link tn-dropdown-toggle" onclick="navClick(this,'pathway')">Путь пациента <span class="tn-caret">▾</span></a>
             <div class="tn-dropdown-menu">
                 <div class="tn-dropdown-menu-inner">
-                    <a th:href="${basePath + '/dashboard'}" class="tn-dd-item"><span class="tn-dd-num">1</span>Охват скринингом</a>
+                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">1</span>Охват скринингом</span>
                     <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">2</span><s>Амбулаторное лечение</s></span>
                     <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">3</span><s>Дневной стационар</s></span>
                     <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">4</span><s>УВО</s></span>
@@ -675,7 +675,6 @@
 
     <!-- ══ РЕЙТИНГ НЕДЕЛЬНОГО ПЛАНА ════════════════════════ -->
     <div class="section-block" id="weekly-rating"
-         th:if="${weeklyPlanDate != null}"
          th:attr="data-week=${weeklyPlanDate}">
         <div class="section-num">03</div>
         <div class="sec-hd">
@@ -821,16 +820,17 @@
         if (!section) return;
         const week = section.dataset.week;
 
-        function pct(actual, plan) {
-            if (!plan) return null;
-            return Math.round((actual || 0) / plan * 100);
-        }
         function pctColor(p) {
-            if (p === null) return 'rgba(255,255,255,.2)';
+            if (p == null) return 'rgba(255,255,255,.2)';
             if (p >= 80)  return '#4ade80';
             if (p >= 50)  return '#fcd34d';
             return '#f87171';
         }
+        function dynColor(v) {
+            if (v == null) return 'rgba(255,255,255,.3)';
+            return v > 0 ? '#4ade80' : v < 0 ? '#f87171' : 'rgba(255,255,255,.3)';
+        }
+        function fmtDyn(v) { return v == null ? '—' : (v > 0 ? '+' : '') + v; }
         function shortName(n) {
             return (n || '').replace(/ГБУЗ МО\s*/gi, '').replace(/[«»"]/g, '').trim();
         }
@@ -846,39 +846,34 @@
 
         let ALL_ROWS = [];
 
-        function renderRating(tbodyId, rows, actualKey, planKey, weekPlanKey, weekFactKey, ascending) {
+        function renderRating(tbodyId, rows, pctKey, actualKey, planKey, weekPlanKey, weekFactKey, dynKey, ascending) {
             const sorted = rows
                 .filter(r => r.orgName)
-                .map(r => ({ ...r, _pct: pct(r[actualKey], r[planKey]) }))
+                .slice()
                 .sort((a, b) => ascending
-                    ? (a._pct ?? 9999) - (b._pct ?? 9999)
-                    : (b._pct ?? -1)   - (a._pct ?? -1))
+                    ? (a[pctKey] ?? 9999) - (b[pctKey] ?? 9999)
+                    : (b[pctKey] ?? -1)   - (a[pctKey] ?? -1))
                 .slice(0, 10);
-            const fmtDyn = v => v == null ? '—' : (v > 0 ? '+' : '') + v;
-            const dynColor = v => v == null ? 'rgba(255,255,255,.3)' : v > 0 ? '#4ade80' : v < 0 ? '#f87171' : 'rgba(255,255,255,.3)';
             document.getElementById(tbodyId).innerHTML = sorted.map(r => {
-                const c = pctColor(r._pct);
-                const wPlan = r[weekPlanKey];
-                const wFact = r[weekFactKey];
-                const dyn   = (wFact != null && wPlan != null) ? wFact - wPlan : null;
+                const p = r[pctKey];
                 return `<tr>
                     <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.orgName}">${shortName(r.orgName)}</td>
                     <td style="text-align:right;color:rgba(255,255,255,.3);">${r[planKey] ?? '—'}</td>
                     <td style="text-align:right;color:rgba(255,255,255,.5);">${r[actualKey] ?? '—'}</td>
-                    <td style="text-align:right;font-weight:700;color:${c};">${r._pct !== null ? r._pct + '%' : '—'}</td>
-                    <td style="text-align:right;color:rgba(255,255,255,.3);">${wPlan ?? '—'}</td>
-                    <td style="text-align:right;color:rgba(255,255,255,.5);">${wFact ?? '—'}</td>
-                    <td style="text-align:right;font-weight:600;color:${dynColor(dyn)};">${fmtDyn(dyn)}</td>
+                    <td style="text-align:right;font-weight:700;color:${pctColor(p)};">${p != null ? p + '%' : '—'}</td>
+                    <td style="text-align:right;color:rgba(255,255,255,.3);">${r[weekPlanKey] ?? '—'}</td>
+                    <td style="text-align:right;color:rgba(255,255,255,.5);">${r[weekFactKey] ?? '—'}</td>
+                    <td style="text-align:right;font-weight:600;color:${dynColor(r[dynKey])};">${fmtDyn(r[dynKey])}</td>
                 </tr>`;
             }).join('');
         }
 
         function renderAll(rows) {
             ALL_ROWS = rows;
-            renderRating('amb-top-body',  rows, 'waitingAmb',    'planYearAmb',  'weeklyPlanAmb',  'weeklyFactAmb',  false);
-            renderRating('amb-bot-body',  rows, 'waitingAmb',    'planYearAmb',  'weeklyPlanAmb',  'weeklyFactAmb',  true);
-            renderRating('stat-top-body', rows, 'referralsStat', 'planYearStat', 'weeklyPlanStat', 'weeklyFactStat', false);
-            renderRating('stat-bot-body', rows, 'referralsStat', 'planYearStat', 'weeklyPlanStat', 'weeklyFactStat', true);
+            renderRating('amb-top-body',  rows, 'pctAmb',  'waitingAmb',    'planYearAmb',  'weeklyPlanAmb',  'weeklyFactAmb',  'dynamicAmb',  false);
+            renderRating('amb-bot-body',  rows, 'pctAmb',  'waitingAmb',    'planYearAmb',  'weeklyPlanAmb',  'weeklyFactAmb',  'dynamicAmb',  true);
+            renderRating('stat-top-body', rows, 'pctStat', 'referralsStat', 'planYearStat', 'weeklyPlanStat', 'weeklyFactStat', 'dynamicStat', false);
+            renderRating('stat-bot-body', rows, 'pctStat', 'referralsStat', 'planYearStat', 'weeklyPlanStat', 'weeklyFactStat', 'dynamicStat', true);
         }
 
         const BASE_PATH = /*[[${basePath}]]*/ '';
@@ -889,28 +884,23 @@
 
         window.openWeeklyPlanModal = function() {
             const sorted = [...ALL_ROWS].sort((a, b) => (a.orgName || '').localeCompare(b.orgName || '', 'ru'));
+            const pctClr = p => p == null ? '' : p >= 80 ? 'color:#4ade80;font-weight:700;' : p >= 50 ? 'color:#fcd34d;font-weight:700;' : 'color:#f87171;font-weight:700;';
+            const dynClr = v => v == null ? '' : v > 0 ? 'color:#4ade80;font-weight:600;' : v < 0 ? 'color:#f87171;font-weight:600;' : '';
             document.getElementById('weeklyPlanModalBody').innerHTML = sorted.map(r => {
-                const pctAmb  = r.planYearAmb  ? Math.round((r.waitingAmb    || 0) / r.planYearAmb  * 100) : null;
-                const pctStat = r.planYearStat ? Math.round((r.referralsStat || 0) / r.planYearStat * 100) : null;
-                const dynAmb  = (r.weeklyFactAmb  != null && r.weeklyPlanAmb  != null) ? r.weeklyFactAmb  - r.weeklyPlanAmb  : null;
-                const dynStat = (r.weeklyFactStat != null && r.weeklyPlanStat != null) ? r.weeklyFactStat - r.weeklyPlanStat : null;
-                const fmtDyn  = v => v == null ? '—' : (v > 0 ? '+' : '') + v;
-                const dynClr  = v => v == null ? '' : v > 0 ? 'color:#4ade80;font-weight:600;' : v < 0 ? 'color:#f87171;font-weight:600;' : '';
-                const pctClr  = p => p == null ? '' : p >= 80 ? 'color:#4ade80;font-weight:700;' : p >= 50 ? 'color:#fcd34d;font-weight:700;' : 'color:#f87171;font-weight:700;';
                 return `<tr style="border-bottom:.5px solid rgba(255,255,255,.05);">
                     <td style="padding:6px 12px;">${r.orgName}</td>
                     <td style="padding:6px 10px;text-align:right;border-left:1px solid rgba(255,255,255,.08);">${r.planYearAmb ?? '—'}</td>
                     <td style="padding:6px 10px;text-align:right;">${r.waitingAmb ?? '—'}</td>
-                    <td style="padding:6px 10px;text-align:right;${pctClr(pctAmb)}">${pctAmb != null ? pctAmb + '%' : '—'}</td>
+                    <td style="padding:6px 10px;text-align:right;${pctClr(r.pctAmb)}">${r.pctAmb != null ? r.pctAmb + '%' : '—'}</td>
                     <td style="padding:6px 10px;text-align:right;">${r.weeklyPlanAmb ?? '—'}</td>
                     <td style="padding:6px 10px;text-align:right;">${r.weeklyFactAmb ?? '—'}</td>
-                    <td style="padding:6px 10px;text-align:right;${dynClr(dynAmb)}">${fmtDyn(dynAmb)}</td>
+                    <td style="padding:6px 10px;text-align:right;${dynClr(r.dynamicAmb)}">${fmtDyn(r.dynamicAmb)}</td>
                     <td style="padding:6px 10px;text-align:right;border-left:1px solid rgba(255,255,255,.08);">${r.planYearStat ?? '—'}</td>
                     <td style="padding:6px 10px;text-align:right;">${r.referralsStat ?? '—'}</td>
-                    <td style="padding:6px 10px;text-align:right;${pctClr(pctStat)}">${pctStat != null ? pctStat + '%' : '—'}</td>
+                    <td style="padding:6px 10px;text-align:right;${pctClr(r.pctStat)}">${r.pctStat != null ? r.pctStat + '%' : '—'}</td>
                     <td style="padding:6px 10px;text-align:right;">${r.weeklyPlanStat ?? '—'}</td>
                     <td style="padding:6px 10px;text-align:right;">${r.weeklyFactStat ?? '—'}</td>
-                    <td style="padding:6px 10px;text-align:right;${dynClr(dynStat)}">${fmtDyn(dynStat)}</td>
+                    <td style="padding:6px 10px;text-align:right;${dynClr(r.dynamicStat)}">${fmtDyn(r.dynamicStat)}</td>
                 </tr>`;
             }).join('');
             document.getElementById('weeklyPlanModal').style.display = 'block';
@@ -1185,13 +1175,16 @@
     <div class="section-block" id="pathway">
         <div class="section-num">04</div>
         <div class="sec-hd">
-            <div class="section-title">Путь пациента</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div class="section-title">Путь пациента</div>
+                <span style="font-size:.7rem;font-weight:600;color:#fbbf24;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);border-radius:20px;padding:2px 10px;">в разработке</span>
+            </div>
             <span class="sec-link">сквозной контроль →</span>
         </div>
         <div class="pathway-wrap">
             <div class="pathway-inner">
 
-                <a th:href="${basePath + '/dashboard'}" class="pw-step" id="pw-screening" style="text-decoration:none;">
+                <div class="pw-step" id="pw-screening" style="cursor:default;pointer-events:none;">
                     <div class="pw-icon">🔬</div>
                     <div class="pw-name">Скрининг 25+</div>
                     <div class="pw-sub">антитела к ВГС</div>
@@ -1201,7 +1194,7 @@
                         <div class="pw-bar"><div class="pw-bar-fill" th:style="'width:' + ${screeningStats.completionPercent} + '%'"></div></div>
                     </th:block>
                     <th:block th:unless="${screeningStats != null}"><div class="pw-val">—</div></th:block>
-                </a>
+                </div>
 
                 <div class="pw-arrow">›</div>
 
@@ -1347,9 +1340,13 @@
         <!-- Понедельный план отработки МО -->
         <div style="background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:24px;margin-bottom:24px;">
             <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);margin-bottom:4px;">Распределение по МО</div>
-            <div style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:4px;">Понедельный план отработки медорганизаций</div>
-            <div style="font-size:.78rem;color:rgba(255,255,255,.35);margin-bottom:16px;">Щёлковская больница — 4 недели; МО с &lt; 20 пациентами — всё в неделю 1; остальные — равномерно на 3 недели</div>
-            <div style="max-height:520px;overflow-y:auto;border-radius:8px;border:1px solid rgba(255,255,255,.07);">
+            <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:4px;">
+                <div style="font-size:1.1rem;font-weight:700;color:#fff;">Понедельный план отработки медорганизаций</div>
+                <div id="moWorkPlanMonthLabel" style="display:none;font-size:.78rem;font-weight:600;color:#818cf8;background:rgba(129,140,248,.12);border:1px solid rgba(129,140,248,.3);border-radius:20px;padding:2px 10px;"></div>
+            </div>
+            <div style="font-size:.78rem;color:rgba(255,255,255,.35);margin-bottom:16px;">Данные загружаются из админки. Столбец «Всего» — сумма недель 1–4.</div>
+            <div id="moWorkPlanEmpty" style="display:none;padding:24px;text-align:center;color:rgba(255,255,255,.3);font-size:.85rem;">Данные не загружены. Загрузите файл в <a th:href="${basePath + '/admin'}" style="color:#818cf8;">разделе администратора</a>.</div>
+            <div id="moWorkPlanTableWrap" style="max-height:520px;overflow-y:auto;border-radius:8px;border:1px solid rgba(255,255,255,.07);">
                 <table style="width:100%;border-collapse:collapse;font-size:.8rem;color:rgba(255,255,255,.75);">
                     <thead style="position:sticky;top:0;z-index:1;background:#1a2235;">
                         <tr>
@@ -1360,68 +1357,11 @@
                             <th style="padding:10px 12px;text-align:right;color:#34d399;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Неделя 2</th>
                             <th style="padding:10px 12px;text-align:right;color:#fbbf24;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Неделя 3</th>
                             <th style="padding:10px 12px;text-align:right;color:#f87171;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Неделя 4</th>
+                            <th style="padding:10px 12px;text-align:right;color:#a3e635;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Отработано</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">1</td><td style="padding:7px 12px;">ГБУЗ МО "Щелковская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">417</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">105</td><td style="padding:7px 12px;text-align:right;color:#34d399;">104</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">104</td><td style="padding:7px 12px;text-align:right;color:#f87171;">104</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">2</td><td style="padding:7px 12px;">ГБУЗ МО "Подольская ОКБ"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">231</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">77</td><td style="padding:7px 12px;text-align:right;color:#34d399;">77</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">77</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">3</td><td style="padding:7px 12px;">ГБУЗ МО "Раменская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">196</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">66</td><td style="padding:7px 12px;text-align:right;color:#34d399;">65</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">65</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">4</td><td style="padding:7px 12px;">ГБУЗ МО «Мытищинская ОКБ"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">181</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">61</td><td style="padding:7px 12px;text-align:right;color:#34d399;">60</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">60</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">5</td><td style="padding:7px 12px;">ГБУЗ МО "Балашихинская ОБ"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">164</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">55</td><td style="padding:7px 12px;text-align:right;color:#34d399;">55</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">54</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">6</td><td style="padding:7px 12px;">ГБУЗ МО "Одинцовская ОБ"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">161</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">54</td><td style="padding:7px 12px;text-align:right;color:#34d399;">54</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">53</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">7</td><td style="padding:7px 12px;">ГБУЗ МО "Домодедовская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">155</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">52</td><td style="padding:7px 12px;text-align:right;color:#34d399;">52</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">51</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">8</td><td style="padding:7px 12px;">ГБУЗ МО "Сергиево-Посадская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">137</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">46</td><td style="padding:7px 12px;text-align:right;color:#34d399;">46</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">45</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">9</td><td style="padding:7px 12px;">ГБУЗ МО "Дмитровская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">136</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">46</td><td style="padding:7px 12px;text-align:right;color:#34d399;">45</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">45</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">10</td><td style="padding:7px 12px;">ГБУЗ МО "Видновская клиническая больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">123</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">41</td><td style="padding:7px 12px;text-align:right;color:#34d399;">41</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">41</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">11</td><td style="padding:7px 12px;">ГБУЗ МО "Жуковская ОКБ"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">114</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">38</td><td style="padding:7px 12px;text-align:right;color:#34d399;">38</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">38</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">12</td><td style="padding:7px 12px;">ГБУЗ МО "Истринская клиническая больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">61</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">21</td><td style="padding:7px 12px;text-align:right;color:#34d399;">20</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">20</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">13</td><td style="padding:7px 12px;">ГБУЗ МО "Солнечногорская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">61</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">21</td><td style="padding:7px 12px;text-align:right;color:#34d399;">20</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">20</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">14</td><td style="padding:7px 12px;">ГБУЗ МО "Королевская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">53</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">18</td><td style="padding:7px 12px;text-align:right;color:#34d399;">18</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">17</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">15</td><td style="padding:7px 12px;">ГБУЗ МО "Люберецкая областная больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">53</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">18</td><td style="padding:7px 12px;text-align:right;color:#34d399;">18</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">17</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">16</td><td style="padding:7px 12px;">ГБУЗ МО "Красногорская клиническая больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">52</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">18</td><td style="padding:7px 12px;text-align:right;color:#34d399;">17</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">17</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">17</td><td style="padding:7px 12px;">ГБУЗ МО "Электростальская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">46</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">16</td><td style="padding:7px 12px;text-align:right;color:#34d399;">15</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">15</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">18</td><td style="padding:7px 12px;">ГБУЗ МО "Воскресенская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">43</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">15</td><td style="padding:7px 12px;text-align:right;color:#34d399;">14</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">14</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">19</td><td style="padding:7px 12px;">ГБУЗ МО "Ногинская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">42</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">14</td><td style="padding:7px 12px;text-align:right;color:#34d399;">14</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">14</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">20</td><td style="padding:7px 12px;">ГБУЗ МО "Серпуховская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">40</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">14</td><td style="padding:7px 12px;text-align:right;color:#34d399;">13</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">13</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">21</td><td style="padding:7px 12px;">ГБУЗ МО "ПКБ им. Проф Розанова В.Н."</td><td style="padding:7px 12px;text-align:right;font-weight:600;">38</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">13</td><td style="padding:7px 12px;text-align:right;color:#34d399;">13</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">12</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">22</td><td style="padding:7px 12px;">ГБУЗ МО "Клинская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">35</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">12</td><td style="padding:7px 12px;text-align:right;color:#34d399;">12</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">11</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">23</td><td style="padding:7px 12px;">ГБУЗ МО "Павлово-Посадская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">32</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">11</td><td style="padding:7px 12px;text-align:right;color:#34d399;">11</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">10</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">24</td><td style="padding:7px 12px;">ГБУЗ МО "Лобненская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">32</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">11</td><td style="padding:7px 12px;text-align:right;color:#34d399;">11</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">10</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">25</td><td style="padding:7px 12px;">ГБУЗ МО "Коломенская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">30</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">10</td><td style="padding:7px 12px;text-align:right;color:#34d399;">10</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">10</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">26</td><td style="padding:7px 12px;">ГБУЗ МО "Егорьевская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">30</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">10</td><td style="padding:7px 12px;text-align:right;color:#34d399;">10</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">10</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">27</td><td style="padding:7px 12px;">ГБУЗ МО "Шаховская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">29</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">10</td><td style="padding:7px 12px;text-align:right;color:#34d399;">10</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">9</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">28</td><td style="padding:7px 12px;">ГБУЗ МО "Дубненская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">26</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">9</td><td style="padding:7px 12px;text-align:right;color:#34d399;">9</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">8</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">29</td><td style="padding:7px 12px;">ГБУЗ МО "Ступинская клиническая больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">25</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">9</td><td style="padding:7px 12px;text-align:right;color:#34d399;">8</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">8</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">30</td><td style="padding:7px 12px;">ГБУЗ МО "Химкинская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">23</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">8</td><td style="padding:7px 12px;text-align:right;color:#34d399;">8</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">7</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">31</td><td style="padding:7px 12px;">ГБУЗ МО "Чеховская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">22</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">8</td><td style="padding:7px 12px;text-align:right;color:#34d399;">7</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">7</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">32</td><td style="padding:7px 12px;">ГБУЗ МО "Можайская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">21</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">7</td><td style="padding:7px 12px;text-align:right;color:#34d399;">7</td><td style="padding:7px 12px;text-align:right;color:#fbbf24;">7</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">33</td><td style="padding:7px 12px;">ГБУЗ МО "Луховицкая больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">19</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">19</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">34</td><td style="padding:7px 12px;">ГБУЗ МО "Зарайская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">13</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">13</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">35</td><td style="padding:7px 12px;">ГБУЗ МО "Котельниковская поликлиника"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">12</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">12</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">36</td><td style="padding:7px 12px;">ГБУЗ МО "Волоколамская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">11</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">11</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">37</td><td style="padding:7px 12px;">ГБУЗ МО "Краснознаменская поликлиника"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">11</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">11</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">38</td><td style="padding:7px 12px;">ГБУЗ МО "Долгопрудненская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">11</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">11</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">39</td><td style="padding:7px 12px;">ГБУЗ МО "Протвинская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">10</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">10</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">40</td><td style="padding:7px 12px;">ГБУЗ МО "НАРО-ФОМИНСКАЯ БОЛЬНИЦА"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">9</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">9</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">41</td><td style="padding:7px 12px;">ГБУЗ МО "Шатурская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">9</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">9</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">42</td><td style="padding:7px 12px;">ГБУЗ МО "Каширская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">8</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">8</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">43</td><td style="padding:7px 12px;">ГБУЗ МО "Реутовская клиническая больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">7</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">7</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">44</td><td style="padding:7px 12px;">ГБУЗ МО "Серебряно-Прудская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">5</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">5</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">45</td><td style="padding:7px 12px;">ГБУЗ МО "Лотошинская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">3</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">3</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">46</td><td style="padding:7px 12px;">ГБУЗ МО «Лыткаринская больница»</td><td style="padding:7px 12px;text-align:right;font-weight:600;">3</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">3</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">47</td><td style="padding:7px 12px;">ГБУЗ МО "Орехово-Зуевская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">2</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">2</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                        <tr style="border-bottom:.5px solid rgba(255,255,255,.05);"><td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">48</td><td style="padding:7px 12px;">ГБУЗ МО "Рузская больница"</td><td style="padding:7px 12px;text-align:right;font-weight:600;">2</td><td style="padding:7px 12px;text-align:right;color:#818cf8;">2</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td><td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.2);">—</td></tr>
-                    </tbody>
-                    <tfoot>
-                        <tr style="background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.15);">
-                            <td colspan="2" style="padding:10px 12px;font-weight:700;color:#fff;font-size:.85rem;">ИТОГО</td>
-                            <td style="padding:10px 12px;text-align:right;font-weight:700;color:#fff;">2 944</td>
-                            <td style="padding:10px 12px;text-align:right;font-weight:700;color:#818cf8;">1 049</td>
-                            <td style="padding:10px 12px;text-align:right;font-weight:700;color:#34d399;">902</td>
-                            <td style="padding:10px 12px;text-align:right;font-weight:700;color:#fbbf24;">889</td>
-                            <td style="padding:10px 12px;text-align:right;font-weight:700;color:#f87171;">104</td>
-                        </tr>
-                    </tfoot>
+                    <tbody id="moWorkPlanDashBody"></tbody>
+                    <tfoot id="moWorkPlanDashFoot"></tfoot>
                 </table>
             </div>
         </div>
@@ -1965,6 +1905,86 @@ drsRenderAll();
       }
     }]
   });
+})();
+</script>
+
+<script>
+/* ── Понедельный план отработки МО (дашборд) ── */
+(function () {
+    const BASE_PATH = /*[[${basePath}]]*/ '';
+    const MONTHS_RU = ['январь','февраль','март','апрель','май','июнь',
+                       'июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+
+    function fmtMonth(ym) {
+        const [y, m] = ym.split('-');
+        return MONTHS_RU[parseInt(m, 10) - 1] + ' ' + y;
+    }
+
+    function fmtCell(v, color) {
+        const s = v != null ? v : '—';
+        const c = v != null ? color : 'rgba(255,255,255,.2)';
+        return `<td style="padding:7px 12px;text-align:right;color:${c};">${s}</td>`;
+    }
+
+    function load() {
+        fetch(BASE_PATH + '/api/hcv/mo-work-plan')
+            .then(r => r.json())
+            .then(rows => {
+                if (!rows.length) {
+                    document.getElementById('moWorkPlanEmpty').style.display = 'block';
+                    document.getElementById('moWorkPlanTableWrap').style.display = 'none';
+                    return;
+                }
+
+                let totTotal = 0, totW1 = 0, totW2 = 0, totW3 = 0, totW4 = 0, totWorked = 0;
+
+                document.getElementById('moWorkPlanDashBody').innerHTML = rows.map((r, i) => {
+                    const total = (r.week1 || 0) + (r.week2 || 0) + (r.week3 || 0) + (r.week4 || 0);
+                    totTotal  += total;
+                    totW1     += r.week1  || 0;
+                    totW2     += r.week2  || 0;
+                    totW3     += r.week3  || 0;
+                    totW4     += r.week4  || 0;
+                    totWorked += r.worked || 0;
+                    return `<tr style="border-bottom:.5px solid rgba(255,255,255,.05);">
+                        <td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">${i + 1}</td>
+                        <td style="padding:7px 12px;">${r.orgName}</td>
+                        <td style="padding:7px 12px;text-align:right;font-weight:600;">${total || '—'}</td>
+                        ${fmtCell(r.week1,  '#818cf8')}
+                        ${fmtCell(r.week2,  '#34d399')}
+                        ${fmtCell(r.week3,  '#fbbf24')}
+                        ${fmtCell(r.week4,  '#f87171')}
+                        ${fmtCell(r.worked, '#a3e635')}
+                    </tr>`;
+                }).join('');
+
+                document.getElementById('moWorkPlanDashFoot').innerHTML = `
+                    <tr style="background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.15);">
+                        <td colspan="2" style="padding:10px 12px;font-weight:700;color:#fff;font-size:.85rem;">ИТОГО</td>
+                        <td style="padding:10px 12px;text-align:right;font-weight:700;color:#fff;">${totTotal}</td>
+                        <td style="padding:10px 12px;text-align:right;font-weight:700;color:#818cf8;">${totW1}</td>
+                        <td style="padding:10px 12px;text-align:right;font-weight:700;color:#34d399;">${totW2}</td>
+                        <td style="padding:10px 12px;text-align:right;font-weight:700;color:#fbbf24;">${totW3}</td>
+                        <td style="padding:10px 12px;text-align:right;font-weight:700;color:#f87171;">${totW4}</td>
+                        <td style="padding:10px 12px;text-align:right;font-weight:700;color:#a3e635;">${totWorked}</td>
+                    </tr>`;
+            })
+            .catch(() => {});
+
+        // метка месяца
+        fetch(BASE_PATH + '/api/hcv/mo-work-plan/months')
+            .then(r => r.json())
+            .then(months => {
+                const el = document.getElementById('moWorkPlanMonthLabel');
+                if (months.length) {
+                    el.textContent = fmtMonth(months[0]);
+                    el.style.display = 'block';
+                }
+            })
+            .catch(() => {});
+    }
+
+    document.addEventListener('DOMContentLoaded', load);
 })();
 </script>
 </body>
