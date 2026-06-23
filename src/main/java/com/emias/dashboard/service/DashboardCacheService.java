@@ -11,26 +11,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class DashboardCacheService {
 
-    private volatile String            cachedKey;
-    private volatile DashboardSnapshot cached;
+    private record Entry(String key, DashboardSnapshot snapshot) {}
+
+    private volatile Entry entry;
 
     /** Возвращает кэш, если ключ совпадает, иначе null. */
     public DashboardSnapshot get(String key) {
-        if (key != null && key.equals(cachedKey)) {
-            return cached;
-        }
-        return null;
+        Entry e = entry;
+        return (e != null && e.key().equals(key)) ? e.snapshot() : null;
     }
 
     /** Сохраняет снапшот под указанным ключом. */
     public void put(String key, DashboardSnapshot snapshot) {
-        cached    = snapshot;
-        cachedKey = key;
+        entry = new Entry(key, snapshot);
     }
 
     /** Инвалидирует кэш при изменении данных. */
     public void invalidate() {
-        cachedKey = null;
-        cached    = null;
+        entry = null;
     }
 }
