@@ -6,7 +6,9 @@ REMOTE_HOST="root@186.246.30.21"
 REMOTE_DIR="/opt/emias-dashboard"
 SERVICE_NAME="emias-dashboard"
 JAR_NAME="dashboard-1.0.0.jar"
-HEALTH_URL="http://186.246.30.21:8080"
+HEALTH_URL="http://186.246.30.21/spec/"
+NGINX_CONF="/etc/nginx/sites-available/emias-dashboard"
+NGINX_ENABLED="/etc/nginx/sites-enabled/emias-dashboard"
 HEALTH_TIMEOUT=120
 HEALTH_INTERVAL=3
 SSH_TIMEOUT=10
@@ -129,6 +131,34 @@ elif [[ $SSH_EXIT -ne 0 ]]; then
 fi
 ok "Сервер доступен, пароль верный"
 
+# ── Nginx — применяем конфиг если изменился ───────────────────────────────────
+info "Проверка Nginx-конфига..."
+
+LOCAL_CONF="nginx-novosibirsk.conf"
+[[ -f "$LOCAL_CONF" ]] || fail "Файл $LOCAL_CONF не найден" "Запускайте из корня проекта"
+
+REMOTE_CONF_CONTENT=$(ssh_cmd "cat $NGINX_CONF 2>/dev/null || echo ''")
+LOCAL_CONF_CONTENT=$(cat "$LOCAL_CONF")
+
+if [[ "$REMOTE_CONF_CONTENT" != "$LOCAL_CONF_CONTENT" ]]; then
+  echo -e "  ${YELLOW}${BOLD}⚠${NC}  Обновляю Nginx-конфиг..."
+  ssh_cmd bash << EOF
+set -e
+command -v nginx &>/dev/null || apt-get install -y nginx -q
+mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+cat > ${NGINX_CONF} << 'NGINX'
+$(cat "$LOCAL_CONF")
+NGINX
+ln -sf ${NGINX_CONF} ${NGINX_ENABLED}
+# Отключаем дефолтный сайт если он мешает
+rm -f /etc/nginx/sites-enabled/default
+nginx -t && systemctl reload nginx
+EOF
+  ok "Nginx-конфиг обновлён и применён"
+else
+  ok "Nginx-конфиг актуален"
+fi
+
 # ── 1. Сборка ─────────────────────────────────────────────────────────────────
 step 1 "Сборка (mvn clean package)"
 BUILD_START=$SECONDS
@@ -242,7 +272,7 @@ if [[ "$started" == true ]]; then
   echo "  ║                                                   ║"
   echo "  ║   ✅  ДЕПЛОЙ ЗАВЕРШЁН УСПЕШНО                    ║"
   echo "  ║                                                   ║"
-  printf "  ║   🌐  %-43s║\n" "${HEALTH_URL}"
+  printf "  ║   🌐  %-43s║\n" "http://186.246.30.21/spec/"
   printf "  ║   ⏱   Общее время: %-30s║\n" "${TOTAL_TIME}с"
   echo "  ║                                                   ║"
   echo "  ╚═══════════════════════════════════════════════════╝"
