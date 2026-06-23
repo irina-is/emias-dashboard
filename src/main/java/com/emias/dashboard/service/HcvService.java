@@ -205,12 +205,14 @@ public class HcvService {
     private final HcvPlanRepository       planRepo;
     private final HcvProgressRepository   progressRepo;
     private final HcvWeeklyPlanRepository weeklyPlanRepo;
+    private final KpiService              kpiService;
 
     public HcvService(HcvPlanRepository planRepo, HcvProgressRepository progressRepo,
-                      HcvWeeklyPlanRepository weeklyPlanRepo) {
+                      HcvWeeklyPlanRepository weeklyPlanRepo, KpiService kpiService) {
         this.planRepo       = planRepo;
         this.progressRepo   = progressRepo;
         this.weeklyPlanRepo = weeklyPlanRepo;
+        this.kpiService     = kpiService;
     }
 
     @PostConstruct
@@ -251,10 +253,13 @@ public class HcvService {
             return Double.compare(b.getWeeklyCompletionDouble(), a.getWeeklyCompletionDouble());
         });
 
+        String[] targetKeys = {KpiService.TARGET_STAT, KpiService.TARGET_AMB, KpiService.TARGET_UVO};
+        int target = kpiService.getTarget(targetKeys[idx], PROJECT_TARGETS[idx]);
+
         return new HcvProjectData(
                 projectId,
                 PROJECT_TITLES[idx],
-                PROJECT_TARGETS[idx],
+                target,
                 PROJECT_LEADS[idx],
                 PROJECT_DEADLINES[idx],
                 totalAcc,
@@ -278,16 +283,17 @@ public class HcvService {
         try (Workbook wb = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = wb.getSheetAt(0);
             DataFormatter fmt = new DataFormatter();
+            FormulaEvaluator evaluator = wb.getCreationHelper().createFormulaEvaluator();
 
             for (int r = 1; r <= sheet.getLastRowNum(); r++) {
                 Row row = sheet.getRow(r);
                 if (row == null) continue;
 
-                String orgName = fmt.formatCellValue(row.getCell(0)).trim();
-                if (orgName.isEmpty()) continue;
+                String orgName = fmt.formatCellValue(row.getCell(0), evaluator).trim();
+                if (orgName.isEmpty() || orgName.equalsIgnoreCase("итого")) continue;
 
-                String accStr  = fmt.formatCellValue(row.getCell(1)).trim().replace(" ", "").replace(",", ".");
-                String weekStr = row.getCell(2) != null ? fmt.formatCellValue(row.getCell(2)).trim().replace(" ", "").replace(",", ".") : "";
+                String accStr  = fmt.formatCellValue(row.getCell(1), evaluator).trim().replace(" ", "").replace(",", ".");
+                String weekStr = row.getCell(2) != null ? fmt.formatCellValue(row.getCell(2), evaluator).trim().replace(" ", "").replace(",", ".") : "";
 
                 int acc  = accStr.isEmpty()  ? 0 : (int) Double.parseDouble(accStr);
                 int week = weekStr.isEmpty() ? 0 : (int) Double.parseDouble(weekStr);
@@ -328,26 +334,27 @@ public class HcvService {
         try (Workbook wb = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = wb.getSheetAt(0);
             DataFormatter fmt = new DataFormatter();
+            FormulaEvaluator evaluator = wb.getCreationHelper().createFormulaEvaluator();
 
             for (int r = 2; r <= sheet.getLastRowNum(); r++) {
                 Row row = sheet.getRow(r);
                 if (row == null) continue;
 
-                String orgName = fmt.formatCellValue(row.getCell(1)).trim();
-                if (orgName.isEmpty()) continue;
+                String orgName = fmt.formatCellValue(row.getCell(1), evaluator).trim();
+                if (orgName.isEmpty() || orgName.equalsIgnoreCase("итого")) continue;
 
-                Integer planYearAmb    = parseIntOrNull(fmt, row.getCell(2));  // C
-                Integer waitingAmb     = parseIntOrNull(fmt, row.getCell(3));  // D
-                Integer pctAmb         = parseIntOrNull(fmt, row.getCell(4));  // E
-                Integer weeklyPlanAmb  = parseIntOrNull(fmt, row.getCell(5));  // F
-                Integer weeklyFactAmb  = parseIntOrNull(fmt, row.getCell(6));  // G
-                Integer dynamicAmb     = parseIntOrNull(fmt, row.getCell(7));  // H
-                Integer planYearStat   = parseIntOrNull(fmt, row.getCell(8));  // I
-                Integer referralsStat  = parseIntOrNull(fmt, row.getCell(9));  // J
-                Integer pctStat        = parseIntOrNull(fmt, row.getCell(10)); // K
-                Integer weeklyPlanStat = parseIntOrNull(fmt, row.getCell(11)); // L
-                Integer weeklyFactStat = parseIntOrNull(fmt, row.getCell(12)); // M
-                Integer dynamicStat    = parseIntOrNull(fmt, row.getCell(13)); // N
+                Integer planYearAmb    = parseIntOrNull(fmt, evaluator, row.getCell(2));  // C
+                Integer waitingAmb     = parseIntOrNull(fmt, evaluator, row.getCell(3));  // D
+                Integer pctAmb         = parseIntOrNull(fmt, evaluator, row.getCell(4));  // E
+                Integer weeklyPlanAmb  = parseIntOrNull(fmt, evaluator, row.getCell(5));  // F
+                Integer weeklyFactAmb  = parseIntOrNull(fmt, evaluator, row.getCell(6));  // G
+                Integer dynamicAmb     = parseIntOrNull(fmt, evaluator, row.getCell(7));  // H
+                Integer planYearStat   = parseIntOrNull(fmt, evaluator, row.getCell(8));  // I
+                Integer referralsStat  = parseIntOrNull(fmt, evaluator, row.getCell(9));  // J
+                Integer pctStat        = parseIntOrNull(fmt, evaluator, row.getCell(10)); // K
+                Integer weeklyPlanStat = parseIntOrNull(fmt, evaluator, row.getCell(11)); // L
+                Integer weeklyFactStat = parseIntOrNull(fmt, evaluator, row.getCell(12)); // M
+                Integer dynamicStat    = parseIntOrNull(fmt, evaluator, row.getCell(13)); // N
 
                 rows.add(new HcvWeeklyPlanRow(orgName,
                         planYearAmb, waitingAmb, pctAmb, weeklyPlanAmb, weeklyFactAmb, dynamicAmb,
@@ -425,6 +432,13 @@ public class HcvService {
         List<LocalDate> weeks = weeklyPlanRepo.findDistinctWeeks();
         if (weeks.isEmpty()) return List.of();
         return weeklyPlanRepo.findByReportWeekOrderByOrgNameAsc(weeks.get(0));
+    }
+
+    private Integer parseIntOrNull(DataFormatter fmt, FormulaEvaluator evaluator, org.apache.poi.ss.usermodel.Cell cell) {
+        if (cell == null) return null;
+        String s = fmt.formatCellValue(cell, evaluator).trim().replace(" ", "").replace(",", ".");
+        if (s.isEmpty()) return null;
+        try { return (int) Double.parseDouble(s); } catch (NumberFormatException e) { return null; }
     }
 
     private Integer parseIntOrNull(DataFormatter fmt, org.apache.poi.ss.usermodel.Cell cell) {

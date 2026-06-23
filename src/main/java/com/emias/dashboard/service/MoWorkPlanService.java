@@ -30,6 +30,7 @@ public class MoWorkPlanService {
         try (Workbook wb = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = wb.getSheetAt(0);
             DataFormatter fmt = new DataFormatter();
+            FormulaEvaluator evaluator = wb.getCreationHelper().createFormulaEvaluator();
 
             repo.deleteByReportMonth(reportMonth);
 
@@ -37,16 +38,16 @@ public class MoWorkPlanService {
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
-                String orgName = fmt.formatCellValue(row.getCell(0)).trim();
-                if (orgName.isEmpty()) continue;
+                String orgName = fmt.formatCellValue(row.getCell(0), evaluator).trim();
+                if (orgName.isEmpty() || orgName.equalsIgnoreCase("итого")) continue;
 
                 rows.add(new MoWorkPlan(
                         orgName,
-                        parseIntOrNull(fmt, row.getCell(1)),
-                        parseIntOrNull(fmt, row.getCell(2)),
-                        parseIntOrNull(fmt, row.getCell(3)),
-                        parseIntOrNull(fmt, row.getCell(4)),
-                        parseIntOrNull(fmt, row.getCell(5)),
+                        parseIntOrNull(fmt, evaluator, row.getCell(1)),
+                        parseIntOrNull(fmt, evaluator, row.getCell(2)),
+                        parseIntOrNull(fmt, evaluator, row.getCell(3)),
+                        parseIntOrNull(fmt, evaluator, row.getCell(4)),
+                        parseIntOrNull(fmt, evaluator, row.getCell(5)),
                         reportMonth
                 ));
             }
@@ -95,18 +96,30 @@ public class MoWorkPlanService {
                 sheet.setColumnWidth(i, i == 0 ? 15000 : 4000);
             }
 
-            // пример строки
+            // Пример строки с жёлтым фоном — пользователь заменяет своими данными
+            CellStyle exampleStyle = wb.createCellStyle();
+            exampleStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
+            exampleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
             Row example = sheet.createRow(1);
-            example.createCell(0).setCellValue("ГБУЗ МО \"Название больницы\"");
-            example.createCell(1).setCellValue(10);
-            example.createCell(2).setCellValue(10);
-            example.createCell(3).setCellValue(10);
-            example.createCell(4).setCellValue(0);
-            example.createCell(5).setCellValue(5);
+            example.createCell(0).setCellValue("ГБУЗ МО «Название больницы»");
+            for (int i = 1; i <= 5; i++) {
+                Cell c = example.createCell(i);
+                c.setCellValue(i == 4 ? 0 : 10);
+                c.setCellStyle(exampleStyle);
+            }
+            example.getCell(0).setCellStyle(exampleStyle);
 
             wb.write(out);
             return out.toByteArray();
         }
+    }
+
+    private Integer parseIntOrNull(DataFormatter fmt, FormulaEvaluator evaluator, Cell cell) {
+        if (cell == null) return null;
+        String s = fmt.formatCellValue(cell, evaluator).trim().replace(" ", "").replace(",", ".");
+        if (s.isEmpty() || s.equals("—") || s.equals("-")) return null;
+        try { return (int) Double.parseDouble(s); } catch (NumberFormatException e) { return null; }
     }
 
     private Integer parseIntOrNull(DataFormatter fmt, Cell cell) {

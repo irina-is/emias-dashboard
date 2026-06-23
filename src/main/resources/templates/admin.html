@@ -417,15 +417,154 @@
         <!-- ── Таб: Гепатит С (4ДИ) ── -->
         <div class="tab-pane fade show active" id="tab-hcv">
 
-            <!-- Недельный план -->
+            <!-- Критически важные цели -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body p-4">
-                    <h5 class="mb-1">Загрузка недельного плана</h5>
+                    <h5 class="mb-1"><span class="badge bg-primary me-2" style="font-size:.7rem;vertical-align:middle;">01</span>Критически важные цели (КВЦ)</h5>
+                    <p class="text-muted mb-3" style="font-size:0.85rem;">Заполните заголовок, цель и показатели блока КВЦ 1 на дашборде.</p>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Заголовок</label>
+                        <input type="text" id="kvcTitle" class="form-control" placeholder="Лечение гепатита С и достижение УВО">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Цель</label>
+                        <input type="text" id="kvcGoal" class="form-control" placeholder="Вылечено: 5 163 пациента / год (план 2026)">
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <!-- Опережающие -->
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <label class="form-label fw-semibold mb-0">↑ Опережающие показатели</label>
+                                <button class="btn btn-sm btn-outline-primary" onclick="kvcAddRow('leading')">+ Добавить</button>
+                            </div>
+                            <div id="kvcLeadingRows"></div>
+                        </div>
+                        <!-- Запаздывающие -->
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <label class="form-label fw-semibold mb-0">↓ Запаздывающие показатели</label>
+                                <button class="btn btn-sm btn-outline-primary" onclick="kvcAddRow('lagging')">+ Добавить</button>
+                            </div>
+                            <div id="kvcLaggingRows"></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <button class="btn btn-primary" onclick="saveKvc()"><i class="bi bi-save me-1"></i>Сохранить</button>
+                        <span id="kvcStatus" class="text-muted" style="font-size:0.85rem;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ключевые показатели 2026 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="mb-1"><span class="badge bg-primary me-2" style="font-size:.7rem;vertical-align:middle;">02</span>Ключевые показатели 2026</h5>
+                    <p class="text-muted mb-3" style="font-size:0.85rem;">% исполнения считается автоматически из загруженных данных. Все остальные значения редактируются здесь.</p>
+
+                    <!-- Плановые цифры -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label mb-1" style="font-size:0.8rem;">План — Дневной стационар</label>
+                            <input type="number" id="kpiTargetStat" class="form-control form-control-sm" placeholder="4105">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label mb-1" style="font-size:0.8rem;">План — Амбулаторное лечение</label>
+                            <input type="number" id="kpiTargetAmb" class="form-control form-control-sm" placeholder="1416">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label mb-1" style="font-size:0.8rem;">План — УВО / Излечены</label>
+                            <input type="number" id="kpiTargetUvo" class="form-control form-control-sm" placeholder="5163">
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <!-- Амбулаторное лечение -->
+                        <div class="col-md-6">
+                            <div class="p-3 rounded" style="background:var(--emias-bg,#F8F9FC);border:1px solid var(--emias-border,#E8ECF5);">
+                                <div class="fw-semibold mb-2" style="font-size:0.85rem;text-transform:uppercase;letter-spacing:.05em;color:#888;">Амбулаторное лечение</div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" style="font-size:0.8rem;">↑ Опережающий — значение</label>
+                                    <input type="text" id="kpiAmbLeadVal" class="form-control form-control-sm" placeholder="392">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" style="font-size:0.8rem;">↑ Опережающий — описание</label>
+                                    <input type="text" id="kpiAmbLeadDesc" class="form-control form-control-sm" placeholder="выдано рецептов">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" style="font-size:0.8rem;">↓ Запаздывающий — значение</label>
+                                    <input type="text" id="kpiAmbLagVal" class="form-control form-control-sm" placeholder="0">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" style="font-size:0.8rem;">↓ Запаздывающий — описание</label>
+                                    <input type="text" id="kpiAmbLagDesc" class="form-control form-control-sm" placeholder="завершили лечение">
+                                </div>
+                                <div class="mb-0">
+                                    <label class="form-label mb-1" style="font-size:0.8rem;">Прогресс-бар, % (визуальный)</label>
+                                    <input type="number" id="kpiAmbProgress" class="form-control form-control-sm" placeholder="28" min="0" max="100">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Дневной стационар -->
+                        <div class="col-md-6">
+                            <div class="p-3 rounded" style="background:var(--emias-bg,#F8F9FC);border:1px solid var(--emias-border,#E8ECF5);">
+                                <div class="fw-semibold mb-2" style="font-size:0.85rem;text-transform:uppercase;letter-spacing:.05em;color:#888;">Дневной стационар</div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" style="font-size:0.8rem;">↑ Опережающий — значение</label>
+                                    <input type="text" id="kpiStatLeadVal" class="form-control form-control-sm" placeholder="1 741">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" style="font-size:0.8rem;">↑ Опережающий — описание</label>
+                                    <input type="text" id="kpiStatLeadDesc" class="form-control form-control-sm" placeholder="направлены на лечение">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" style="font-size:0.8rem;">↓ Запаздывающий — значение</label>
+                                    <input type="text" id="kpiStatLagVal" class="form-control form-control-sm" placeholder="977">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" style="font-size:0.8rem;">↓ Запаздывающий — описание</label>
+                                    <input type="text" id="kpiStatLagDesc" class="form-control form-control-sm" placeholder="закончили лечение">
+                                </div>
+                                <div class="mb-0">
+                                    <label class="form-label mb-1" style="font-size:0.8rem;">Прогресс-бар, % (визуальный)</label>
+                                    <input type="number" id="kpiStatProgress" class="form-control form-control-sm" placeholder="23" min="0" max="100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3 mt-3">
+                        <button class="btn btn-primary" onclick="saveKpi()"><i class="bi bi-save me-1"></i>Сохранить</button>
+                        <span id="kpiStatus" class="text-muted" style="font-size:0.85rem;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Риски проекта — на фронте без номера, между 02 и 03 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="mb-1"><span class="badge bg-secondary me-2" style="font-size:.7rem;vertical-align:middle;">—</span>Риски проекта</h5>
+                    <p class="text-muted mb-3" style="font-size:0.85rem;">Добавляйте и редактируйте риски. Уровень: Критичный, Высокий, Средний.</p>
+                    <div id="risksAdminRows"></div>
+                    <button class="btn btn-sm btn-outline-primary mt-2" onclick="risksAddRow()">+ Добавить риск</button>
+                    <div class="d-flex align-items-center gap-3 mt-3">
+                        <button class="btn btn-primary" onclick="saveRisks()"><i class="bi bi-save me-1"></i>Сохранить</button>
+                        <span id="risksStatus" class="text-muted" style="font-size:0.85rem;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 03 Рейтинг исполнения — загрузка недельного плана -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="mb-1"><span class="badge bg-primary me-2" style="font-size:.7rem;vertical-align:middle;">03</span>Загрузка недельного плана</h5>
                     <p class="text-muted mb-3" style="font-size:0.85rem;">
                         Файл «Недельный план.xlsx» — один лист, первые 2 строки заголовки.
                         <strong>B</strong> — МО, <strong>C</strong> — план год (амб.),
                         <strong>D</strong> — план месяц (амб.), <strong>E</strong> — план месяц (ДС),
-                        <strong>H</strong> — план год (ДС).
+                        <strong>H</strong> — план год (ДС). Строки «Итого» пропускаются автоматически.
                     </p>
                     <div class="d-flex align-items-center gap-3 flex-wrap mb-3">
                         <input type="file" id="hcvWeeklyPlanFile" accept=".xlsx" class="form-control" style="max-width:280px;">
@@ -440,13 +579,12 @@
                                 <i class="bi bi-upload me-1"></i>Загрузить
                             </button>
                             <a class="btn btn-outline-secondary" th:href="${basePath + '/api/hcv/weekly-plan/template'}">
-                                <i class="bi bi-download me-1"></i>Шаблон
+                                <i class="bi bi-download me-1"></i>Скачать шаблон
                             </a>
                         </div>
                         <span id="hcvWeeklyPlanStatus" class="text-muted" style="font-size:0.85rem;align-self:flex-end;"></span>
                     </div>
 
-                    <!-- Превью -->
                     <div id="hcvWeeklyPlanPreview" style="display:none;">
                         <hr class="my-3">
                         <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
@@ -487,14 +625,14 @@
                 </div>
             </div>
 
-            <!-- Понедельный план отработки МО -->
+            <!-- 03 (продолжение) — Понедельный план отработки МО -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body p-4">
-                    <h5 class="mb-1">Понедельный план отработки МО</h5>
+                    <h5 class="mb-1"><span class="badge bg-primary me-2" style="font-size:.7rem;vertical-align:middle;">03</span>Понедельный план отработки МО</h5>
                     <p class="text-muted mb-3" style="font-size:0.85rem;">
                         Файл Excel — один лист, строка 1 — заголовок, со строки 2 — данные.
                         Столбцы: <strong>A</strong> — Название МО, <strong>B–E</strong> — Неделя 1–4, <strong>F</strong> — Отработано.
-                        Столбец «Всего» считается автоматически на дашборде.
+                        Строки «Итого» пропускаются автоматически. Столбец «Всего» считается на дашборде.
                     </p>
                     <div class="d-flex align-items-end gap-3 flex-wrap mb-3">
                         <div>
@@ -511,7 +649,6 @@
                         <span id="moWorkPlanStatus" class="text-muted" style="font-size:0.85rem;"></span>
                     </div>
 
-                    <!-- Превью -->
                     <div id="moWorkPlanPreview" style="display:none;">
                         <hr class="my-3">
                         <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
@@ -540,10 +677,12 @@
                 </div>
             </div>
 
-            <!-- Свод ВГС -->
+            <!-- Свод ВГС — питает разделы 04 Путь пациента и 06 Рейтинг МО -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body p-4">
-                    <h5 class="mb-1">Загрузка свода ВГС</h5>
+                    <h5 class="mb-1">
+                        <span class="badge bg-secondary me-2" style="font-size:.7rem;vertical-align:middle;" title="Питает разделы 04 и 06">→04,06</span>Загрузка свода ВГС
+                    </h5>
                     <p class="text-muted mb-3" style="font-size:0.85rem;">
                         Файл «СВОД от ...xlsx» — реестр пациентов с гепатитом С.
                         Лист <strong>СВОД</strong>, строка 1 — заголовки, со строки 2 — данные.
@@ -559,9 +698,13 @@
                     <div id="hcvRegistryCount" class="mt-2 text-muted" style="font-size:0.82rem;"></div>
                 </div>
             </div>
-            <div class="card shadow-sm">
+
+            <!-- 4ДИ — питает разделы 01 КВЦ и 02 КПИ -->
+            <div class="card shadow-sm mb-4">
                 <div class="card-body p-4">
-                    <h5 class="mb-1">Загрузка фактических данных — 4ДИ Гепатит С</h5>
+                    <h5 class="mb-1">
+                        <span class="badge bg-secondary me-2" style="font-size:.7rem;vertical-align:middle;" title="Питает разделы 01 и 02">→01,02</span>Загрузка фактических данных — 4ДИ Гепатит С
+                    </h5>
                     <p class="text-muted mb-4" style="font-size:0.85rem;">
                         Загрузите Excel-файл с еженедельными фактическими данными по одному из трёх проектов.
                         <br>Формат файла: <strong>Столбец A</strong> — название МО,
@@ -597,6 +740,84 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 05 План мероприятий -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="mb-1"><span class="badge bg-primary me-2" style="font-size:.7rem;vertical-align:middle;">05</span>План мероприятий</h5>
+                    <p class="text-muted mb-3" style="font-size:0.85rem;">Подзаголовок и цель формируются автоматически из первой плитки и дедлайна.</p>
+
+                    <div class="mb-3" style="max-width:220px;">
+                        <label class="form-label mb-1" style="font-size:0.8rem;">Дедлайн</label>
+                        <input type="text" id="apDeadline" class="form-control form-control-sm" placeholder="10.07.2026">
+                    </div>
+
+                    <label class="form-label mb-2" style="font-size:0.8rem;">KPI-плитки</label>
+                    <div class="row g-2 mb-3" id="apKpiAdmin"></div>
+
+                    <label class="form-label mb-2" style="font-size:0.8rem;">Группы пациентов</label>
+                    <div class="row g-3 mb-3" id="apGroupsAdmin"></div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <button class="btn btn-primary" onclick="saveActionPlan()"><i class="bi bi-save me-1"></i>Сохранить</button>
+                        <span id="apStatus" class="text-muted" style="font-size:0.85rem;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 06 Поручения МО -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white fw-semibold py-3"><span class="badge bg-primary me-2" style="font-size:.7rem;vertical-align:middle;">06</span>Поручения МО</div>
+                <div class="card-body p-4">
+                    <h6 class="mb-3 text-muted">Добавить поручение</h6>
+                    <form id="task-form" onsubmit="event.preventDefault();submitTask();">
+                        <div class="mb-3">
+                            <label class="form-label mb-1" style="font-size:0.8rem;">Что сделать *</label>
+                            <textarea name="title" required rows="2" class="form-control" placeholder="Опишите поручение..."></textarea>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label mb-1" style="font-size:0.8rem;">Приоритет *</label>
+                                <select name="priority" required class="form-select form-select-sm">
+                                    <option value="URGENT">🔴 Срочно</option>
+                                    <option value="HIGH">🟡 Высокий</option>
+                                    <option value="NORMAL">🟢 Обычный</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label mb-1" style="font-size:0.8rem;">Статус *</label>
+                                <select name="status" required class="form-select form-select-sm">
+                                    <option value="IN_PROGRESS">В работе</option>
+                                    <option value="DONE">Выполнено</option>
+                                    <option value="OVERDUE">Просрочено</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label mb-1" style="font-size:0.8rem;">Срок</label>
+                                <input type="date" name="deadline" class="form-control form-control-sm">
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label mb-1" style="font-size:0.8rem;">Ответственный</label>
+                                <input type="text" name="responsible" class="form-control form-control-sm" placeholder="Руководители МО">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label mb-1" style="font-size:0.8rem;">Тег</label>
+                                <input type="text" name="tag" class="form-control form-control-sm" placeholder="Скрининг 25+, Лечение...">
+                            </div>
+                        </div>
+                        <button id="task-btn" type="submit" class="btn btn-primary btn-sm">Добавить поручение</button>
+                        <div id="task-status" style="display:none;" class="mt-2"></div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <h6 class="mb-3 text-muted">Текущие поручения</h6>
+                    <div id="tasks-list"><p class="text-muted" style="font-size:.85rem;">Загрузка...</p></div>
+                </div>
+            </div>
+
         </div>
 
     </div>
@@ -619,70 +840,6 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- ══ ПОРУЧЕНИЯ МО ══════════════════════════════════════════ -->
-<div style="max-width:860px;margin:32px auto 0;padding:0 16px 48px;">
-    <h5 style="font-weight:700;margin-bottom:20px;">📋 Поручения МО</h5>
-
-    <!-- Форма добавления -->
-    <div style="background:#fff;border:1px solid #e8ecf5;border-radius:12px;padding:24px;margin-bottom:24px;">
-        <div style="font-weight:600;margin-bottom:16px;font-size:.95rem;">Добавить поручение</div>
-        <form id="task-form" onsubmit="event.preventDefault();submitTask();">
-            <div style="margin-bottom:12px;">
-                <label style="font-size:.8rem;color:#6B7A99;font-weight:600;display:block;margin-bottom:4px;">Что сделать *</label>
-                <textarea name="title" required rows="2"
-                    style="width:100%;border:1px solid #dee2e6;border-radius:8px;padding:8px 12px;font-size:.88rem;font-family:inherit;resize:vertical;"
-                    placeholder="Опишите поручение..."></textarea>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
-                <div>
-                    <label style="font-size:.8rem;color:#6B7A99;font-weight:600;display:block;margin-bottom:4px;">Приоритет *</label>
-                    <select name="priority" required style="width:100%;border:1px solid #dee2e6;border-radius:8px;padding:7px 10px;font-size:.85rem;">
-                        <option value="URGENT">🔴 Срочно</option>
-                        <option value="HIGH">🟡 Высокий</option>
-                        <option value="NORMAL">🟢 Обычный</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="font-size:.8rem;color:#6B7A99;font-weight:600;display:block;margin-bottom:4px;">Статус *</label>
-                    <select name="status" required style="width:100%;border:1px solid #dee2e6;border-radius:8px;padding:7px 10px;font-size:.85rem;">
-                        <option value="IN_PROGRESS">В работе</option>
-                        <option value="DONE">Выполнено</option>
-                        <option value="OVERDUE">Просрочено</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="font-size:.8rem;color:#6B7A99;font-weight:600;display:block;margin-bottom:4px;">Срок</label>
-                    <input type="date" name="deadline"
-                        style="width:100%;border:1px solid #dee2e6;border-radius:8px;padding:7px 10px;font-size:.85rem;">
-                </div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-                <div>
-                    <label style="font-size:.8rem;color:#6B7A99;font-weight:600;display:block;margin-bottom:4px;">Ответственный</label>
-                    <input type="text" name="responsible" placeholder="Руководители МО"
-                        style="width:100%;border:1px solid #dee2e6;border-radius:8px;padding:7px 10px;font-size:.85rem;">
-                </div>
-                <div>
-                    <label style="font-size:.8rem;color:#6B7A99;font-weight:600;display:block;margin-bottom:4px;">Тег</label>
-                    <input type="text" name="tag" placeholder="Скрининг 25+, Лечение..."
-                        style="width:100%;border:1px solid #dee2e6;border-radius:8px;padding:7px 10px;font-size:.85rem;">
-                </div>
-            </div>
-            <button id="task-btn" type="submit"
-                style="background:#3B5BD8;color:#fff;border:none;border-radius:8px;padding:9px 24px;font-size:.88rem;font-weight:600;cursor:pointer;">
-                Добавить поручение
-            </button>
-            <div id="task-status" style="display:none;margin-top:10px;"></div>
-        </form>
-    </div>
-
-    <!-- Список поручений -->
-    <div style="background:#fff;border:1px solid #e8ecf5;border-radius:12px;padding:20px 24px;">
-        <div style="font-weight:600;margin-bottom:12px;font-size:.95rem;">Текущие поручения</div>
-        <div id="tasks-list"><p style="color:#9AA5BE;font-size:.85rem;">Загрузка...</p></div>
     </div>
 </div>
 
@@ -1337,9 +1494,13 @@
                     loadHcvWeeklyPlanWeeks(week);
                 } else {
                     status.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle me-1"></i>' + safeEsc(data.message) + '</span>';
+                    showErrors([data.message || 'Ошибка загрузки файла']);
                 }
             })
-            .catch(() => { status.innerHTML = '<span class="text-danger">Ошибка соединения</span>'; });
+            .catch(() => {
+                status.innerHTML = '<span class="text-danger">Ошибка соединения</span>';
+                showErrors(['Ошибка соединения с сервером. Проверьте сеть и попробуйте снова.']);
+            });
     }
 
     function loadHcvWeeklyPlanWeeks(selectWeek) {
@@ -1575,7 +1736,10 @@ function escHtml(s) {
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-document.addEventListener('DOMContentLoaded', loadTasks);
+document.addEventListener('DOMContentLoaded', () => {
+    loadTasks();
+    loadHcvWeeklyPlanWeeks(null);
+});
 </script>
 
 <script>
@@ -1607,12 +1771,19 @@ document.addEventListener('DOMContentLoaded', loadTasks);
         fetch(BASE_PATH + '/api/hcv/mo-work-plan/upload', { method: 'POST', body: formData })
             .then(r => r.json())
             .then(data => {
-                if (data.error) { status.textContent = '✗ ' + data.error; return; }
+                if (data.error) {
+                    status.textContent = '✗ ' + data.error;
+                    showErrors([data.error]);
+                    return;
+                }
                 status.textContent = '✓ Загружено ' + data.count + ' строк за ' + fmtMonth(data.month);
                 loadMoWorkPlanMonths(data.month);
                 document.getElementById('moWorkPlanPreview').style.display = 'block';
             })
-            .catch(() => { status.textContent = '✗ Ошибка при загрузке'; });
+            .catch(() => {
+                status.textContent = '✗ Ошибка при загрузке';
+                showErrors(['Ошибка соединения с сервером. Проверьте сеть и попробуйте снова.']);
+            });
     };
 
     function loadMoWorkPlanMonths(selectMonth) {
@@ -1654,6 +1825,312 @@ document.addEventListener('DOMContentLoaded', loadTasks);
     };
 
     document.addEventListener('DOMContentLoaded', () => loadMoWorkPlanMonths(null));
+})();
+</script>
+
+<script th:inline="javascript">
+/* ── КВЦ (Критически важные цели) ── */
+(function () {
+    function rowHtml(group, idx, title, subtitle) {
+        return `<div class="d-flex gap-2 mb-2 align-items-start" id="kvc-${group}-${idx}">
+            <div class="flex-grow-1">
+                <input type="text" class="form-control form-control-sm mb-1"
+                       id="kvc-${group}-title-${idx}" placeholder="Заголовок показателя" value="${escHtml(title||'')}">
+                <input type="text" class="form-control form-control-sm"
+                       id="kvc-${group}-sub-${idx}" placeholder="Подзаголовок" value="${escHtml(subtitle||'')}">
+            </div>
+            <button class="btn btn-sm btn-outline-danger mt-1" onclick="kvcRemoveRow('${group}',${idx})">✕</button>
+        </div>`;
+    }
+
+    function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    const counters = { leading: 0, lagging: 0 };
+
+    window.kvcAddRow = function(group, title, subtitle) {
+        const idx = ++counters[group];
+        const container = document.getElementById('kvc' + cap(group) + 'Rows');
+        const div = document.createElement('div');
+        div.innerHTML = rowHtml(group, idx, title, subtitle);
+        container.appendChild(div.firstElementChild);
+    };
+
+    window.kvcRemoveRow = function(group, idx) {
+        const el = document.getElementById(`kvc-${group}-${idx}`);
+        if (el) el.remove();
+    };
+
+    function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+    function collectRows(group) {
+        const rows = [];
+        document.querySelectorAll(`[id^="kvc-${group}-title-"]`).forEach(el => {
+            const idx = el.id.split('-').pop();
+            const sub = document.getElementById(`kvc-${group}-sub-${idx}`);
+            if (el.value.trim() || sub?.value.trim()) {
+                rows.push({ title: el.value.trim(), subtitle: sub?.value.trim() || '' });
+            }
+        });
+        return rows;
+    }
+
+    window.saveKvc = function() {
+        const status = document.getElementById('kvcStatus');
+        const payload = {
+            title:   document.getElementById('kvcTitle').value.trim(),
+            goal:    document.getElementById('kvcGoal').value.trim(),
+            leading: collectRows('leading'),
+            lagging: collectRows('lagging')
+        };
+        status.textContent = 'Сохранение…';
+        fetch(BASE_PATH + '/api/hcv/kvc', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(r => r.json())
+        .then(d => { status.textContent = d.success ? '✓ Сохранено' : '✗ ' + d.error; })
+        .catch(() => { status.textContent = '✗ Ошибка'; });
+    };
+
+    function loadKvc() {
+        fetch(BASE_PATH + '/api/hcv/kvc')
+            .then(r => r.json())
+            .then(d => {
+                document.getElementById('kvcTitle').value = d.title || '';
+                document.getElementById('kvcGoal').value  = d.goal  || '';
+                (d.leading || []).forEach(r => kvcAddRow('leading', r.title, r.subtitle));
+                (d.lagging || []).forEach(r => kvcAddRow('lagging', r.title, r.subtitle));
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadKvc);
+})();
+
+/* ── Ключевые показатели 2026 ── */
+(function () {
+    const BASE_PATH = /*[[${basePath}]]*/ '';
+
+    function v(id) { return (document.getElementById(id) || {}).value || ''; }
+    function set(id, val) { const el = document.getElementById(id); if (el && val != null) el.value = val; }
+
+    window.saveKpi = function() {
+        const status = document.getElementById('kpiStatus');
+        status.textContent = 'Сохранение...';
+        fetch(BASE_PATH + '/api/hcv/kpi', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                targetStat:   v('kpiTargetStat'),
+                targetAmb:    v('kpiTargetAmb'),
+                targetUvo:    v('kpiTargetUvo'),
+                ambLeadVal:   v('kpiAmbLeadVal'),
+                ambLeadDesc:  v('kpiAmbLeadDesc'),
+                ambLagVal:    v('kpiAmbLagVal'),
+                ambLagDesc:   v('kpiAmbLagDesc'),
+                ambProgress:  v('kpiAmbProgress'),
+                statLeadVal:  v('kpiStatLeadVal'),
+                statLeadDesc: v('kpiStatLeadDesc'),
+                statLagVal:   v('kpiStatLagVal'),
+                statLagDesc:  v('kpiStatLagDesc'),
+                statProgress: v('kpiStatProgress')
+            })
+        })
+        .then(r => r.json())
+        .then(d => { status.textContent = d.success ? 'Сохранено ✓' : ('Ошибка: ' + d.error); })
+        .catch(() => { status.textContent = 'Ошибка сохранения'; });
+    };
+
+    function loadKpi() {
+        fetch(BASE_PATH + '/api/hcv/kpi')
+            .then(r => r.json())
+            .then(d => {
+                set('kpiTargetStat',   d.targetStat);
+                set('kpiTargetAmb',    d.targetAmb);
+                set('kpiTargetUvo',    d.targetUvo);
+                set('kpiAmbLeadVal',   d.ambLeadVal);
+                set('kpiAmbLeadDesc',  d.ambLeadDesc);
+                set('kpiAmbLagVal',    d.ambLagVal);
+                set('kpiAmbLagDesc',   d.ambLagDesc);
+                set('kpiAmbProgress',  d.ambProgress);
+                set('kpiStatLeadVal',  d.statLeadVal);
+                set('kpiStatLeadDesc', d.statLeadDesc);
+                set('kpiStatLagVal',   d.statLagVal);
+                set('kpiStatLagDesc',  d.statLagDesc);
+                set('kpiStatProgress', d.statProgress);
+            })
+            .catch(() => {});
+    }
+
+    document.addEventListener('DOMContentLoaded', loadKpi);
+})();
+
+/* ── Риски проекта ── */
+(function () {
+    const BASE_PATH = /*[[${basePath}]]*/ '';
+    let riskIdx = 0;
+
+    function rowHtml(idx, level, text) {
+        const levels = ['Критичный', 'Высокий', 'Средний'];
+        const opts = levels.map(l => `<option${l === level ? ' selected' : ''}>${l}</option>`).join('');
+        return `<div class="d-flex gap-2 mb-2 align-items-start" id="risk-row-${idx}">
+            <select class="form-select form-select-sm" id="risk-level-${idx}" style="max-width:140px;">${opts}</select>
+            <textarea class="form-control form-control-sm" id="risk-text-${idx}" rows="2" placeholder="Описание риска">${esc(text||'')}</textarea>
+            <button class="btn btn-sm btn-outline-danger" onclick="document.getElementById('risk-row-${idx}').remove()">✕</button>
+        </div>`;
+    }
+
+    window.risksAddRow = function(level, text) {
+        const container = document.getElementById('risksAdminRows');
+        const div = document.createElement('div');
+        div.innerHTML = rowHtml(riskIdx++, level || 'Критичный', text || '');
+        container.appendChild(div.firstElementChild);
+    };
+
+    window.saveRisks = function() {
+        const status = document.getElementById('risksStatus');
+        status.textContent = 'Сохранение...';
+        const rows = document.querySelectorAll('#risksAdminRows > div[id^="risk-row-"]');
+        const data = Array.from(rows).map(row => {
+            const idx = row.id.replace('risk-row-', '');
+            return {
+                level: (document.getElementById('risk-level-' + idx) || {}).value || '',
+                text:  (document.getElementById('risk-text-'  + idx) || {}).value || ''
+            };
+        }).filter(r => r.text.trim());
+        fetch(BASE_PATH + '/api/hcv/risks', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        })
+        .then(r => r.json())
+        .then(d => { status.textContent = d.success ? 'Сохранено ✓' : ('Ошибка: ' + d.error); })
+        .catch(() => { status.textContent = 'Ошибка сохранения'; });
+    };
+
+    function loadRisks() {
+        fetch(BASE_PATH + '/api/hcv/risks')
+            .then(r => r.json())
+            .then(risks => {
+                document.getElementById('risksAdminRows').innerHTML = '';
+                riskIdx = 0;
+                risks.forEach(r => window.risksAddRow(r.level, r.text));
+            })
+            .catch(() => {});
+    }
+
+    document.addEventListener('DOMContentLoaded', loadRisks);
+})();
+
+/* ── План мероприятий ── */
+(function () {
+    const BASE_PATH = /*[[${basePath}]]*/ '';
+    let apData = {};
+    const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+    const KPI_COLORS = ['#02C39A', '#f59e0b', '#ef4444'];
+
+    function renderKpiAdmin(kpi) {
+        const el = document.getElementById('apKpiAdmin');
+        el.innerHTML = kpi.map((k, i) => `
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body p-3">
+                        <div class="mb-2">
+                            <label class="form-label mb-1" style="font-size:0.75rem;color:#888;">Значение</label>
+                            <input type="text" class="form-control form-control-sm fw-bold" id="apKpiVal${i}"
+                                   value="${esc(k.value||'')}" placeholder="Цифра">
+                        </div>
+                        <div>
+                            <label class="form-label mb-1" style="font-size:0.75rem;color:#888;">Подпись</label>
+                            <input type="text" class="form-control form-control-sm" id="apKpiDesc${i}"
+                                   value="${esc(k.desc||'')}" placeholder="Описание">
+                        </div>
+                    </div>
+                </div>
+            </div>`).join('');
+    }
+
+    function itemRow(gi, ii, text) {
+        return `<div class="d-flex gap-2 mb-1 align-items-center" id="apGrItemRow${gi}_${ii}">
+            <input type="text" class="form-control form-control-sm" id="apGrItem${gi}_${ii}" value="${esc(text||'')}" placeholder="Подпункт">
+            <button class="btn btn-sm btn-outline-danger px-2" onclick="document.getElementById('apGrItemRow${gi}_${ii}').remove()">✕</button>
+        </div>`;
+    }
+
+    function renderGroupsAdmin(groups) {
+        const el = document.getElementById('apGroupsAdmin');
+        el.innerHTML = groups.map((g, gi) => {
+            const items = (g.items || []).map((item, ii) => itemRow(gi, ii, item)).join('');
+            return `<div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span style="font-size:1.3rem;">${esc(g.icon||'')}</span>
+                            <input type="text" class="form-control form-control-sm fw-semibold" id="apGrTitle${gi}"
+                                   value="${esc(g.title||'')}" placeholder="Заголовок группы">
+                        </div>
+                        <div id="apGrItems${gi}">${items}</div>
+                        <button class="btn btn-sm btn-outline-secondary mt-2" onclick="apAddItem(${gi})" style="font-size:.75rem;">+ Пункт</button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    window.apAddItem = function(gi) {
+        const container = document.getElementById('apGrItems' + gi);
+        const ii = container.querySelectorAll('[id^="apGrItemRow"]').length;
+        const div = document.createElement('div');
+        div.innerHTML = itemRow(gi, ii, '');
+        container.appendChild(div.firstElementChild);
+    };
+
+    function collectData() {
+        const kpi = apData.kpi.map((k, i) => ({
+            value: document.getElementById('apKpiVal'  + i)?.value || '',
+            desc:  document.getElementById('apKpiDesc' + i)?.value || '',
+            color: k.color
+        }));
+        const groups = (apData.groups || []).map((g, gi) => {
+            const itemEls = document.querySelectorAll(`#apGrItems${gi} input[type=text]`);
+            return {
+                color: g.color,
+                icon:  g.icon,
+                title: document.getElementById('apGrTitle' + gi)?.value || '',
+                items: Array.from(itemEls).map(el => el.value).filter(v => v.trim())
+            };
+        });
+        return { deadline: document.getElementById('apDeadline')?.value || '', kpi, groups };
+    }
+
+    window.saveActionPlan = function() {
+        const status = document.getElementById('apStatus');
+        status.textContent = 'Сохранение...';
+        fetch(BASE_PATH + '/api/hcv/action-plan', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(collectData())
+        })
+        .then(r => r.json())
+        .then(d => { status.textContent = d.success ? 'Сохранено ✓' : ('Ошибка: ' + d.error); })
+        .catch(() => { status.textContent = 'Ошибка сохранения'; });
+    };
+
+    function loadActionPlan() {
+        fetch(BASE_PATH + '/api/hcv/action-plan')
+            .then(r => r.json())
+            .then(d => {
+                apData = d;
+                const dl = document.getElementById('apDeadline');
+                if (dl) dl.value = d.deadline || '';
+                renderKpiAdmin(d.kpi || []);
+                renderGroupsAdmin(d.groups || []);
+            })
+            .catch(() => {});
+    }
+
+    document.addEventListener('DOMContentLoaded', loadActionPlan);
 })();
 </script>
 
