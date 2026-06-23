@@ -67,6 +67,7 @@
         }
         .tn-dd-disabled{cursor:default;opacity:.4;}
         .tn-dd-disabled:hover{background:transparent!important;color:rgba(255,255,255,.6)!important;}
+        .tn-link-disabled{cursor:default;opacity:.35;pointer-events:none;}
         .tn-badge{
             padding:5px 14px;border-radius:20px;font-size:.75rem;font-weight:700;
             background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);
@@ -305,7 +306,7 @@
         .rating-table td.num{text-align:center;color:rgba(255,255,255,.2);font-weight:600;}
         .rating-table td.val{text-align:right;font-weight:700;color:#818cf8;}
         .rating-table td.val.green{color:#4ade80;}
-        .rating-scroll{max-height:340px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;}
+        .rating-scroll{max-height:520px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;}
 
         /* ── EMPTY ── */
         .empty-card{
@@ -423,34 +424,24 @@
     <div class="tn-links">
         <a href="#kvc" class="tn-link active" onclick="navClick(this,'kvc')">КВЦ</a>
         <a href="#kpi" class="tn-link" onclick="navClick(this,'kpi')">Показатели</a>
+        <a href="#pathway" class="tn-link" onclick="navClick(this,'pathway')">Путь пациента</a>
+        <span class="tn-link tn-link-disabled">План действий</span>
         <div class="tn-dropdown">
-            <a href="#pathway" class="tn-link tn-dropdown-toggle" onclick="navClick(this,'pathway')">Путь пациента <span class="tn-caret">▾</span></a>
+            <span class="tn-link tn-dropdown-toggle tn-link-disabled">Лекарства <span class="tn-caret">▾</span></span>
             <div class="tn-dropdown-menu">
                 <div class="tn-dropdown-menu-inner">
-                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">1</span>Охват скринингом</span>
-                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">2</span><s>Амбулаторное лечение</s></span>
-                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">3</span><s>Дневной стационар</s></span>
-                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">4</span><s>УВО</s></span>
-                </div>
-            </div>
-        </div>
-        <a href="/plan-deystviy.html" class="tn-link" target="_blank">План действий</a>
-        <div class="tn-dropdown">
-            <a href="#drugs" class="tn-link tn-dropdown-toggle" onclick="navClick(this,'drugs')">Лекарства <span class="tn-caret">▾</span></a>
-            <div class="tn-dropdown-menu">
-                <div class="tn-dropdown-menu-inner">
-                    <a href="#drugs" class="tn-dd-item" onclick="navScrollTo('drugs')"><span class="tn-dd-num">1</span>Амбулаторно</a>
-                    <a href="#drugs" class="tn-dd-item" onclick="navScrollTo('drugs')"><span class="tn-dd-num">2</span>Дневной стационар</a>
+                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">1</span>Амбулаторно</span>
+                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">2</span>Дневной стационар</span>
                 </div>
             </div>
         </div>
         <div class="tn-dropdown">
-            <a href="#rating" class="tn-link tn-dropdown-toggle" onclick="navClick(this,'rating')">Рейтинг МО <span class="tn-caret">▾</span></a>
+            <span class="tn-link tn-dropdown-toggle tn-link-disabled">Рейтинг МО <span class="tn-caret">▾</span></span>
             <div class="tn-dropdown-menu">
                 <div class="tn-dropdown-menu-inner">
-                    <a href="#rating" class="tn-dd-item" onclick="navScrollTo('rating')"><span class="tn-dd-num">1</span>Скрининг</a>
-                    <a href="#rating" class="tn-dd-item" onclick="navScrollTo('rating')"><span class="tn-dd-num">2</span>Амбулаторно</a>
-                    <a href="#rating" class="tn-dd-item" onclick="navScrollTo('rating')"><span class="tn-dd-num">3</span>Дневной стационар</a>
+                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">1</span>Скрининг</span>
+                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">2</span>Амбулаторно</span>
+                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">3</span>Дневной стационар</span>
                 </div>
             </div>
         </div>
@@ -481,63 +472,26 @@
         </div>
 
         <div class="kvc-grid">
-
-            <!-- КВЦ 1 -->
-            <div class="kvc-card blue">
+            <div class="kvc-card blue" id="kvc1-card">
                 <div class="kvc-label blue">КВЦ 1</div>
-                <div class="kvc-title">Лечение гепатита С и достижение УВО</div>
-                <div class="kvc-goal blue">Цель: Вылечено: 5 163 пациента / год (план 2026)</div>
-
+                <div class="kvc-title" id="kvc1-title">Лечение гепатита С и достижение УВО</div>
+                <div class="kvc-goal blue" id="kvc1-goal">Цель: Вылечено: 5 163 пациента / год (план 2026)</div>
                 <hr class="kvc-divider">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
                     <div>
                         <div class="tab-hd">
-                            <div class="tab-pill lead"><div class="tab-dot"></div>↑ Опережающие показатели</div>
+                            <div class="tab-pill lead">↑ Опережающие показатели</div>
                         </div>
-                        <div class="kvc-item">
-                            <div class="kvc-dot blue"></div>
-                            <div>
-                                <div class="kvc-item-title">Направлены на амбулаторное лечение</div>
-                                <div class="kvc-item-sub">1 416 пациентов / год (план 2026)</div>
-                            </div>
-                        </div>
-                        <div class="kvc-item">
-                            <div class="kvc-dot blue"></div>
-                            <div>
-                                <div class="kvc-item-title">Направлены в дневной стационар</div>
-                                <div class="kvc-item-sub">4 105 пациентов / год (план 2026)</div>
-                            </div>
-                        </div>
+                        <div id="kvc1-leading"></div>
                     </div>
                     <div>
                         <div class="tab-hd">
-                            <div class="tab-pill lag"><div class="tab-dot"></div>↓ Запаздывающие показатели</div>
+                            <div class="tab-pill lag">↓ Запаздывающие показатели</div>
                         </div>
-                        <div class="kvc-item">
-                            <div class="kvc-dot blue"></div>
-                            <div>
-                                <div class="kvc-item-title">Завершили лечение амбулаторно</div>
-                                <div class="kvc-item-sub">1 416 пациентов</div>
-                            </div>
-                        </div>
-                        <div class="kvc-item">
-                            <div class="kvc-dot blue"></div>
-                            <div>
-                                <div class="kvc-item-title">Завершили лечение в дневном стационаре</div>
-                                <div class="kvc-item-sub">4 105 пациентов</div>
-                            </div>
-                        </div>
-                        <div class="kvc-item">
-                            <div class="kvc-dot blue"></div>
-                            <div>
-                                <div class="kvc-item-title">Устойчивый вирусологический ответ (УВО)</div>
-                                <div class="kvc-item-sub">Вылечено: 5 163 пациента / год (план 2026)</div>
-                            </div>
-                        </div>
+                        <div id="kvc1-lagging"></div>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -564,22 +518,22 @@
                 <div class="kpi-desc">план пациентов на 2026 год</div>
                 <div class="kpi-prog">
                     <div class="kpi-prog-wrap">
-                        <div class="kpi-prog-bar red" style="width:28%"></div>
+                        <div class="kpi-prog-bar red" id="kpi-amb-progress" style="width:28%"></div>
                     </div>
                 </div>
                 <div class="kpi-sub" style="display:flex;flex-direction:column;gap:6px;">
                     <div>
                         <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.25);margin-bottom:2px;">↑ Опережающий</div>
                         <div style="display:flex;align-items:baseline;gap:6px;">
-                            <span class="kpi-sub-val">392</span>
-                            <span class="kpi-sub-desc">выдано рецептов</span>
+                            <span class="kpi-sub-val" id="kpi-amb-lead-val">392</span>
+                            <span class="kpi-sub-desc" id="kpi-amb-lead-desc">выдано рецептов</span>
                         </div>
                     </div>
                     <div>
                         <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.25);margin-bottom:2px;">↓ Запаздывающий</div>
                         <div style="display:flex;align-items:baseline;gap:6px;">
-                            <span class="kpi-sub-val">0</span>
-                            <span class="kpi-sub-desc">завершили лечение</span>
+                            <span class="kpi-sub-val" id="kpi-amb-lag-val">0</span>
+                            <span class="kpi-sub-desc" id="kpi-amb-lag-desc">завершили лечение</span>
                         </div>
                     </div>
                 </div>
@@ -597,22 +551,22 @@
                 <div class="kpi-desc">полный курс терапии в ОМС</div>
                 <div class="kpi-prog">
                     <div class="kpi-prog-wrap">
-                        <div class="kpi-prog-bar red" style="width:23%"></div>
+                        <div class="kpi-prog-bar red" id="kpi-stat-progress" style="width:23%"></div>
                     </div>
                 </div>
                 <div class="kpi-sub" style="display:flex;flex-direction:column;gap:6px;">
                     <div>
                         <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.25);margin-bottom:2px;">↑ Опережающий</div>
                         <div style="display:flex;align-items:baseline;gap:6px;">
-                            <span class="kpi-sub-val">1 741</span>
-                            <span class="kpi-sub-desc">направлены на лечение</span>
+                            <span class="kpi-sub-val" id="kpi-stat-lead-val">1 741</span>
+                            <span class="kpi-sub-desc" id="kpi-stat-lead-desc">направлены на лечение</span>
                         </div>
                     </div>
                     <div>
                         <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.25);margin-bottom:2px;">↓ Запаздывающий</div>
                         <div style="display:flex;align-items:baseline;gap:6px;">
-                            <span class="kpi-sub-val">977</span>
-                            <span class="kpi-sub-desc">закончили лечение</span>
+                            <span class="kpi-sub-val" id="kpi-stat-lag-val">977</span>
+                            <span class="kpi-sub-desc" id="kpi-stat-lag-desc">закончили лечение</span>
                         </div>
                     </div>
                 </div>
@@ -649,27 +603,7 @@
                 <i class="ti ti-alert-triangle" style="font-size:16px;color:#f87171" aria-hidden="true"></i>
                 Риски проекта
             </div>
-            <div class="risk-card">
-                <div class="risk-num red">1</div>
-                <div class="risk-body">
-                    <span class="risk-tag red">Критичный</span>
-                    <div class="risk-text">Недоступность ТМК в ГБУЗ МО МОНИКИ к врачу-гепатологу</div>
-                </div>
-            </div>
-            <div class="risk-card">
-                <div class="risk-num red">2</div>
-                <div class="risk-body">
-                    <span class="risk-tag red">Критичный</span>
-                    <div class="risk-text">Нет технической возможности направить в Центр СПИД на ТМК и на очный приём. В соответствии с проектом приказа об организации оказания медицинской помощи взрослому населению с хроническими вирусными гепатитами в Московской области (согл-314738753-19)</div>
-                </div>
-            </div>
-            <div class="risk-card">
-                <div class="risk-num red">3</div>
-                <div class="risk-body">
-                    <span class="risk-tag red">Критичный</span>
-                    <div class="risk-text">Дубна — контракт в стадии заключения, самые ранние возможные поставки препаратов ожидаются в конце августа 2026 (около 465 пациентов)</div>
-                </div>
-            </div>
+            <div id="risksContainer"></div>
         </div>
     </div>
 
@@ -1288,54 +1222,10 @@
         <div class="sec-hd">
             <div class="section-title">План мероприятий</div>
         </div>
-        <div class="section-subtitle">2 944 пациента не отработаны · Дедлайн: 10.07.2026 · Осталось 23 дня</div>
-
-        <!-- KPI строка -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;">
-            <div style="background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px 20px;">
-                <div style="font-size:2rem;font-weight:800;color:#02C39A;margin-bottom:4px;">2 944</div>
-                <div style="font-size:.75rem;color:rgba(255,255,255,.4);">пациентов не отработаны МО из еженедельного отчета</div>
-            </div>
-            <div style="background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px 20px;">
-                <div style="font-size:2rem;font-weight:800;color:#f59e0b;margin-bottom:4px;">915</div>
-                <div style="font-size:.75rem;color:rgba(255,255,255,.4);">уже есть заключение МОНИКИ</div>
-            </div>
-            <div style="background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px 20px;">
-                <div style="font-size:2rem;font-weight:800;color:#ef4444;margin-bottom:4px;">2 029</div>
-                <div style="font-size:.75rem;color:rgba(255,255,255,.4);">нужно направить на консультацию</div>
-            </div>
-        </div>
-
-        <!-- Две группы пациентов -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
-            <div style="background:#111827;border:1px solid rgba(34,197,94,.2);border-radius:12px;padding:22px;">
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-                    <div style="width:34px;height:34px;border-radius:50%;background:rgba(34,197,94,.12);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;">✅</div>
-                    <div style="font-size:14px;font-weight:600;color:#22c55e;">Уже готовы к лечению — 1 166 чел.</div>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:7px;">
-                    <div style="display:flex;gap:9px;font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;"><div style="width:5px;height:5px;border-radius:50%;background:#22c55e;flex-shrink:0;margin-top:7px;"></div>ПЦР-положительный результат подтверждён</div>
-                    <div style="display:flex;gap:9px;font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;"><div style="width:5px;height:5px;border-radius:50%;background:#22c55e;flex-shrink:0;margin-top:7px;"></div>Заключение МОНИКИ / Центра СПИД получено</div>
-                </div>
-            </div>
-            <div style="background:#111827;border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:22px;">
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-                    <div style="width:34px;height:34px;border-radius:50%;background:rgba(245,158,11,.12);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;">⏳</div>
-                    <div style="font-size:14px;font-weight:600;color:#f59e0b;">Нужна консультация МОНИКИ — 3 096 чел.</div>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:7px;">
-                    <div style="display:flex;gap:9px;font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;"><div style="width:5px;height:5px;border-radius:50%;background:#f59e0b;flex-shrink:0;margin-top:7px;"></div>ПЦР-положительный результат есть</div>
-                    <div style="display:flex;gap:9px;font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;"><div style="width:5px;height:5px;border-radius:50%;background:#f59e0b;flex-shrink:0;margin-top:7px;"></div>Заключение МОНИКИ / Центра СПИД отсутствует</div>
-                    <div style="display:flex;gap:9px;font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;"><div style="width:5px;height:5px;border-radius:50%;background:#f59e0b;flex-shrink:0;margin-top:7px;"></div>Требуется срочное направление на консультацию</div>
-                    <div style="display:flex;gap:9px;font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;"><div style="width:5px;height:5px;border-radius:50%;background:#f59e0b;flex-shrink:0;margin-top:7px;"></div>Открыть дополнительные ячейки для записи</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Цель -->
-        <div style="background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(129,140,248,.08));border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:13px 20px;text-align:center;font-size:14px;font-weight:600;color:#fff;margin-bottom:28px;">
-            🎯 Цель: все 2944 пациента должны быть отработаны и начать лечение до 10.07.2026
-        </div>
+        <div class="section-subtitle" id="apSubtitle"></div>
+        <div id="apKpi" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;"></div>
+        <div id="apGroups" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;"></div>
+        <div id="apGoal" style="background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(129,140,248,.08));border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:13px 20px;text-align:center;font-size:14px;font-weight:600;color:#fff;margin-bottom:28px;"></div>
 
         <!-- Понедельный план отработки МО -->
         <div style="background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:24px;margin-bottom:24px;">
@@ -1908,7 +1798,134 @@ drsRenderAll();
 })();
 </script>
 
-<script>
+<script th:inline="javascript">
+/* ── План мероприятий ── */
+(function () {
+    const BASE_PATH = /*[[${basePath}]]*/ '';
+    const GROUP_COLORS = {
+        green: { border: 'rgba(34,197,94,.2)', text: '#22c55e', dot: '#22c55e', bg: 'rgba(34,197,94,.12)' },
+        amber: { border: 'rgba(245,158,11,.2)', text: '#f59e0b', dot: '#f59e0b', bg: 'rgba(245,158,11,.12)' }
+    };
+
+    fetch(BASE_PATH + '/api/hcv/action-plan')
+        .then(r => r.json())
+        .then(d => {
+            const firstVal = (d.kpi && d.kpi[0]) ? d.kpi[0].value : '';
+            const deadline = d.deadline || '';
+            const daysLeft = deadline ? Math.max(0, Math.ceil((new Date(deadline.split('.').reverse().join('-')) - new Date()) / 86400000)) : '';
+            const sub = document.getElementById('apSubtitle');
+            if (sub) sub.textContent = `${firstVal} пациента не отработаны · Дедлайн: ${deadline} · Осталось ${daysLeft} дней`;
+
+            const kpiEl = document.getElementById('apKpi');
+            if (kpiEl && d.kpi) {
+                kpiEl.innerHTML = d.kpi.map(k => `
+                    <div style="background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px 20px;">
+                        <div style="font-size:2rem;font-weight:800;color:${k.color};margin-bottom:4px;">${k.value}</div>
+                        <div style="font-size:.75rem;color:rgba(255,255,255,.4);">${k.desc}</div>
+                    </div>`).join('');
+            }
+
+            const grEl = document.getElementById('apGroups');
+            if (grEl && d.groups) {
+                grEl.innerHTML = d.groups.map(g => {
+                    const c = GROUP_COLORS[g.color] || GROUP_COLORS.amber;
+                    const items = (g.items || []).map(item => `
+                        <div style="display:flex;gap:9px;font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;">
+                            <div style="width:5px;height:5px;border-radius:50%;background:${c.dot};flex-shrink:0;margin-top:7px;"></div>${item}
+                        </div>`).join('');
+                    return `<div style="background:#111827;border:1px solid ${c.border};border-radius:12px;padding:22px;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                            <div style="width:34px;height:34px;border-radius:50%;background:${c.bg};display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;">${g.icon}</div>
+                            <div style="font-size:14px;font-weight:600;color:${c.text};">${g.title}</div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:7px;">${items}</div>
+                    </div>`;
+                }).join('');
+            }
+
+            const goalEl = document.getElementById('apGoal');
+            if (goalEl) goalEl.textContent = `🎯 Цель: все ${firstVal} пациента должны быть отработаны и начать лечение до ${deadline}`;
+        })
+        .catch(() => {});
+})();
+
+/* ── Риски проекта ── */
+(function () {
+    const BASE_PATH = /*[[${basePath}]]*/ '';
+    const LEVEL_COLOR = { 'Критичный': 'red', 'Высокий': 'red', 'Средний': 'amber' };
+
+    fetch(BASE_PATH + '/api/hcv/risks')
+        .then(r => r.json())
+        .then(risks => {
+            const c = document.getElementById('risksContainer');
+            if (!c) return;
+            c.innerHTML = risks.map((r, i) => {
+                const color = LEVEL_COLOR[r.level] || 'amber';
+                return `<div class="risk-card">
+                    <div class="risk-num ${color}">${i + 1}</div>
+                    <div class="risk-body">
+                        <span class="risk-tag ${color}">${r.level || ''}</span>
+                        <div class="risk-text">${r.text || ''}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        })
+        .catch(() => {});
+})();
+
+/* ── Ключевые показатели 2026 ── */
+(function () {
+    const BASE_PATH = /*[[${basePath}]]*/ '';
+    fetch(BASE_PATH + '/api/hcv/kpi')
+        .then(r => r.json())
+        .then(d => {
+            const s = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
+            s('kpi-amb-lead-val',   d.ambLeadVal);
+            s('kpi-amb-lead-desc',  d.ambLeadDesc);
+            s('kpi-amb-lag-val',    d.ambLagVal);
+            s('kpi-amb-lag-desc',   d.ambLagDesc);
+            s('kpi-stat-lead-val',  d.statLeadVal);
+            s('kpi-stat-lead-desc', d.statLeadDesc);
+            s('kpi-stat-lag-val',   d.statLagVal);
+            s('kpi-stat-lag-desc',  d.statLagDesc);
+            const ambProg  = document.getElementById('kpi-amb-progress');
+            const statProg = document.getElementById('kpi-stat-progress');
+            if (ambProg  && d.ambProgress)  ambProg.style.width  = d.ambProgress  + '%';
+            if (statProg && d.statProgress) statProg.style.width = d.statProgress + '%';
+        })
+        .catch(() => {});
+})();
+
+/* ── КВЦ (Критически важные цели) ── */
+(function () {
+    const BASE_PATH = /*[[${basePath}]]*/ '';
+
+    function renderItems(containerId, items) {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        if (!items || !items.length) { el.innerHTML = ''; return; }
+        el.innerHTML = items.map(r => `
+            <div class="kvc-item">
+                <div>
+                    <div class="kvc-item-title">${r.title || ''}</div>
+                    ${r.subtitle ? `<div class="kvc-item-sub">${r.subtitle}</div>` : ''}
+                </div>
+            </div>`).join('');
+    }
+
+    fetch(BASE_PATH + '/api/hcv/kvc')
+        .then(r => r.json())
+        .then(d => {
+            const t = document.getElementById('kvc1-title');
+            const g = document.getElementById('kvc1-goal');
+            if (t && d.title) t.textContent = d.title;
+            if (g && d.goal)  g.textContent = 'Цель: ' + d.goal;
+            renderItems('kvc1-leading', d.leading);
+            renderItems('kvc1-lagging', d.lagging);
+        })
+        .catch(() => {});
+})();
+
 /* ── Понедельный план отработки МО (дашборд) ── */
 (function () {
     const BASE_PATH = /*[[${basePath}]]*/ '';

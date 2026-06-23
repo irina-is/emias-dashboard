@@ -5,9 +5,10 @@ import com.emias.dashboard.model.DashboardSnapshot;
 import com.emias.dashboard.model.FacilityRating;
 import com.emias.dashboard.model.PatientRecord;
 import com.emias.dashboard.model.ScreeningStats;
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Прогревает кэш дашборда при старте приложения в фоновом потоке,
+ * Прогревает кэш дашборда после полного старта приложения в фоновом потоке,
  * чтобы первое открытие страницы было мгновенным.
  */
 @Service
@@ -45,7 +46,7 @@ public class DashboardWarmupService {
         this.dashboardCache         = dashboardCache;
     }
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     @Async
     public void warmUp() {
         try {
