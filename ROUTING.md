@@ -7,16 +7,67 @@
 
 ## Как работает `/spec` префикс
 
-`app.base-path=/spec` — переменная, которая инжектируется во все Thymeleaf-шаблоны
-через `GlobalModelAttributes.java`. Она используется для формирования ссылок и редиректов.
+### Прод (onko-search.emias.mosreg.ru)
 
-На **локальной** разработке (профиль `local`) также задан `server.servlet.context-path=/spec`
-в `application-local.properties`. Благодаря ему Spring Boot принимает URL `/spec/dashboard`
-и передаёт контроллеру путь `/dashboard`.
+На сервере стоит Nginx. Конфиг (`/etc/nginx/sites-enabled/`):
 
-На **проде** `server.servlet.context-path` не установлен. Как именно работает маршрутизация
-на проде — зависит от конфигурации сервера (Nginx и т.д.), которая не хранится в репозитории.
-**Не меняй настройки маршрутизации без понимания продовой конфигурации.**
+```nginx
+server {
+    server_name onko-search.emias.mosreg.ru;
+    listen 80;
+
+    # Python-приложение (uvicorn, порт 8000)
+    location / {
+        include proxy_params;
+        proxy_pass http://127.0.0.1:8000;
+    }
+
+    # Java-приложение (Spring Boot, порт 8081)
+    location /spec/ {
+        include proxy_params;
+        proxy_pass http://127.0.0.1:8081/;   # trailing slash — стрипит /spec/
+    }
+}
+```
+
+Цепочка запроса:
+```
+Браузер → https://onko-search.emias.mosreg.ru/spec/dashboard
+                          ↓
+                       Nginx  (стрипит /spec/)
+                          ↓
+             Spring Boot :8081 → /dashboard → PageController
+```
+
+Именно поэтому:
+- `app.base-path=/spec` — шаблоны генерируют ссылки `/spec/xxx`
+- Nginx получает `/spec/xxx`, стрипит префикс, передаёт Spring Boot `/xxx`
+- Контроллеры маппятся **без** `/spec` (`@GetMapping("/dashboard")`)
+- `server.servlet.context-path` на проде **не нужен** — роль префикса выполняет Nginx
+
+### Локальная разработка (профиль `local`)
+
+Nginx нет. Роль стрипинга выполняет `server.servlet.context-path=/spec`
+из `application-local.properties`:
+
+```
+Браузер → http://localhost:8081/spec/dashboard
+                          ↓
+             Spring Boot (context-path=/spec) → /dashboard → PageController
+```
+
+**Не добавлять** `server.servlet.context-path` в бандловый `application.properties` —
+только в `application-local.properties`. Иначе на проде появится двойной `/spec/spec/`.
+
+### Добавление нового сервиса на прод
+
+Новый сервис на порту `808X` — добавить `location` в Nginx:
+```nginx
+location /новый-путь/ {
+    include proxy_params;
+    proxy_pass http://127.0.0.1:808X/;
+}
+```
 
 ---
 
@@ -120,19 +171,18 @@ fetch('/spec/api/hcv/weekly-plan')      // захардкоженный /spec
 
 | Параметр | Прод | Локально (профиль `local`) |
 |---|---|---|
+| URL | `https://onko-search.emias.mosreg.ru/spec/` | `http://localhost:8081/spec/` |
 | `server.port` | 8081 | 8081 |
 | `server.servlet.context-path` | **не установлен** | `/spec` |
 | `app.base-path` | `/spec` | `/spec` |
+| Nginx | есть, `location /spec/` → `:8081` | нет |
 | БД | H2 file `/opt/emias-dashboard/data/emias_db` | H2 file `./data/emias_db` |
 | Uploads dir | `/opt/emias-uploads` | `./uploads` |
 | H2 Console | выключена | включена |
 
-Прод-конфиг лежит на сервере, **не в репозитории**.
+Прод-конфиг лежит на сервере в `/opt/emias-dashboard/application.properties`, **не в репозитории**.
 Файл `application.properties` в JAR — дефолты для локальной разработки.
 Прод-файл переопределяет только отличия.
-
-**Никогда не добавлять** `server.servlet.context-path` в бандловый `application.properties` —
-только в `application-local.properties`. Иначе сломается прод.
 
 ---
 
