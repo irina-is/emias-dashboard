@@ -7,7 +7,7 @@
 
 ## Как работает `/spec` префикс
 
-### Прод (onko-search.emias.mosreg.ru)
+### Прод (onko-search.emias.mosreg.ru) — деплой только по согласованию
 
 На сервере стоит Nginx. Конфиг (`/etc/nginx/sites-enabled/`):
 
@@ -171,6 +171,7 @@ fetch('/spec/api/hcv/weekly-plan')      // захардкоженный /spec
 
 | Параметр | Прод | Локально (профиль `local`) |
 |---|---|---|
+| Среда | Прод (`onko-search.emias.mosreg.ru`) | Локально |
 | URL | `https://onko-search.emias.mosreg.ru/spec/` | `http://localhost:8081/spec/` |
 | `server.port` | 8081 | 8081 |
 | `server.servlet.context-path` | **не установлен** | `/spec` |

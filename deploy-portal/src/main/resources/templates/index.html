@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Deploy Portal</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #1f2328;
+            background: #f6f8fa;
+        }
+        .gh-header {
+            background: #24292f;
+            padding: 0 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .gh-header .brand { color: #fff; font-weight: 600; font-size: 15px; }
+        .gh-header .brand span { color: #8b949e; font-weight: 400; margin-left: 8px; font-size: 13px; }
+
+        /* Status indicator */
+        .service-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-dot {
+            width: 9px; height: 9px; border-radius: 50%;
+            background: #6e7681;
+            flex-shrink: 0;
+            transition: background .3s, box-shadow .3s;
+        }
+        .status-dot.active   { background: #3fb950; box-shadow: 0 0 0 3px rgba(63,185,80,.25); }
+        .status-dot.inactive { background: #f85149; box-shadow: 0 0 0 3px rgba(248,81,73,.25); }
+        .status-dot.failed   { background: #f85149; box-shadow: 0 0 0 3px rgba(248,81,73,.25); }
+        .status-text {
+            display: flex; flex-direction: column; align-items: flex-end; gap: 0;
+        }
+        .status-name { color: #8b949e; font-size: 11px; line-height: 1.2; }
+        .status-label { color: #cdd9e5; font-size: 13px; font-weight: 500; line-height: 1.2; }
+
+        /* Restart button */
+        .btn-restart {
+            display: inline-flex; align-items: center; gap: 5px;
+            height: 28px; padding: 0 12px;
+            font-size: 12px; font-weight: 500; cursor: pointer;
+            border: 1px solid #6e7681; border-radius: 6px;
+            color: #cdd9e5; background: transparent;
+            transition: background .15s, border-color .15s;
+            white-space: nowrap;
+        }
+        .btn-restart:hover { background: rgba(255,255,255,.1); border-color: #cdd9e5; }
+
+        /* Restart popover */
+        .restart-popover {
+            display: none;
+            position: fixed; top: 54px; right: 24px;
+            background: #2d333b; border: 1px solid #444c56;
+            border-radius: 6px; padding: 14px;
+            box-shadow: 0 8px 24px rgba(1,4,9,.4);
+            z-index: 200; min-width: 240px;
+        }
+        .restart-popover.open { display: block; }
+        .restart-popover label { display: block; font-size: 12px; color: #8b949e; margin-bottom: 6px; }
+        .restart-popover input {
+            width: 100%; padding: 5px 10px; height: 30px;
+            font-size: 13px; border: 1px solid #444c56;
+            border-radius: 6px; outline: none; color: #cdd9e5;
+            background: #22272e; margin-bottom: 8px;
+        }
+        .restart-popover input:focus { border-color: #0969da; }
+        .restart-popover .pop-btn {
+            width: 100%; height: 30px; font-size: 13px; font-weight: 500;
+            cursor: pointer; border: none; border-radius: 6px;
+            color: #fff; background: #1f883d;
+        }
+        .restart-popover .pop-btn:hover { background: #1a7f37; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 28px 16px; }
+
+        /* Tabs */
+        .tabs { display: flex; border-bottom: 1px solid #d0d7de; margin-bottom: 20px; }
+        .tab {
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #57606a;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            margin-bottom: -1px;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tab:hover { color: #1f2328; }
+        .tab.active { color: #1f2328; background: #fff; border-color: #d0d7de; border-bottom-color: #fff; }
+        .tab-count { font-size: 11px; font-weight: 500; background: #e6edf3; color: #57606a; border-radius: 20px; padding: 0 6px; line-height: 18px; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* Flash */
+        .flash { border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; }
+        .flash b { font-weight: 600; display: block; margin-bottom: 2px; }
+        .flash-success { background: #dafbe1; border: 1px solid #aceebb; color: #116329; }
+        .flash-error   { background: #ffebe9; border: 1px solid #f1998e; color: #82071e; }
+        .flash-warning { background: #fff8c5; border: 1px solid #d4a72c66; color: #633c01; }
+
+        /* Card */
+        .card { background: #fff; border: 1px solid #d0d7de; border-radius: 6px; }
+        .card-header {
+            padding: 10px 16px;
+            background: #f6f8fa;
+            border-bottom: 1px solid #d0d7de;
+            border-radius: 6px 6px 0 0;
+            font-size: 12px;
+            color: #57606a;
+        }
+        .card-header code { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 12px; }
+        .card-body { padding: 20px; }
+
+        /* Drop zone */
+        .drop-zone {
+            border: 2px dashed #d0d7de;
+            border-radius: 6px;
+            padding: 28px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color .15s, background .15s;
+            background: #f6f8fa;
+            margin-bottom: 14px;
+        }
+        .drop-zone:hover, .drop-zone.dragover { border-color: #0969da; background: #ddf4ff; }
+        .drop-zone input[type=file] { display: none; }
+        .drop-zone .dz-icon { margin-bottom: 8px; opacity: .45; }
+        .drop-zone .dz-icon svg { width: 28px; height: 28px; fill: #57606a; }
+        .drop-zone .dz-text { color: #57606a; }
+        .drop-zone .dz-text strong { color: #0969da; }
+        .drop-zone .dz-hint { font-size: 12px; color: #8c959f; margin-top: 3px; }
+        .dz-selected-name { display: none; margin-top: 8px; font-size: 13px; font-weight: 600; color: #1f2328; }
+
+        .form-row { display: flex; gap: 8px; align-items: flex-end; }
+        .form-group { flex: 1; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; color: #57606a; margin-bottom: 5px; }
+        input[type=password] {
+            width: 100%; padding: 5px 12px; font-size: 14px; height: 32px;
+            border: 1px solid #d0d7de; border-radius: 6px; outline: none; color: #1f2328;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        input[type=password]:focus { border-color: #0969da; box-shadow: 0 0 0 3px rgba(9,105,218,.3); }
+
+        .btn-green {
+            display: inline-flex; align-items: center; height: 32px; padding: 0 16px;
+            font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer;
+            border: 1px solid rgba(31,35,40,.15); border-radius: 6px;
+            color: #fff; background: #1f883d; transition: background .15s; flex-shrink: 0;
+        }
+        .btn-green:hover { background: #1a7f37; }
+        .btn-green:disabled { background: #94d3a2; cursor: not-allowed; }
+
+        /* Section divider */
+        .section-divider {
+            font-size: 12px; font-weight: 600; color: #57606a;
+            text-transform: uppercase; letter-spacing: .04em;
+            margin: 20px 0 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-divider::after { content: ''; flex: 1; height: 1px; background: #d0d7de; }
+
+        /* History table */
+        .history-card { background: #fff; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; }
+        .history-empty { padding: 32px; text-align: center; color: #57606a; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { background: #f6f8fa; }
+        th { padding: 8px 16px; text-align: left; font-size: 12px; font-weight: 600; color: #57606a; border-bottom: 1px solid #d0d7de; white-space: nowrap; }
+        td { padding: 10px 16px; font-size: 13px; border-bottom: 1px solid #f6f8fa; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f6f8fa; }
+        td.mono { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 12px; color: #57606a; }
+
+        .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; border-radius: 20px; padding: 2px 10px; }
+        .badge-success { background: #dafbe1; color: #116329; border: 1px solid #aceebb; }
+        .badge-error   { background: #ffebe9; color: #82071e; border: 1px solid #f1998e; }
+        .badge-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .badge-success .badge-dot { background: #1a7f37; }
+        .badge-error   .badge-dot { background: #cf222e; }
+
+        /* Rollback card */
+        .rollback-card {
+            background: #fffbeb;
+            border: 1px solid #d4a72c66;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .rollback-info { font-size: 13px; color: #633c01; }
+        .rollback-info b { font-weight: 600; }
+        .rollback-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .rollback-right input[type=password] {
+            width: 180px; height: 30px; padding: 4px 10px;
+            font-size: 13px; border: 1px solid #d4a72c66;
+            border-radius: 6px; outline: none; color: #1f2328;
+            background: #fff;
+        }
+        .rollback-right input[type=password]:focus { border-color: #d4a72c; box-shadow: 0 0 0 3px rgba(212,167,44,.2); }
+        .btn-rollback {
+            display: inline-flex; align-items: center; gap: 5px;
+            height: 30px; padding: 0 12px;
+            font-size: 13px; font-weight: 500; cursor: pointer;
+            border: 1px solid #d4a72c; border-radius: 6px;
+            color: #633c01; background: #fff3cd;
+            transition: background .15s;
+            white-space: nowrap;
+        }
+        .btn-rollback:hover { background: #ffe69c; }
+        .rollback-hint { font-size: 12px; color: #8c959f; margin-top: 8px; }
+
+        /* Badge rollback in history */
+        .badge-rollback { background: #fff8c5; color: #633c01; border: 1px solid #d4a72c66; }
+
+        /* Error button */
+        .btn-error {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 12px; font-weight: 500; cursor: pointer;
+            padding: 2px 10px; border-radius: 20px;
+            background: #ffebe9; color: #82071e; border: 1px solid #f1998e;
+            transition: background .15s;
+        }
+        .btn-error:hover { background: #ffd7d3; }
+
+        /* Sub-tabs */
+        .sub-tabs { display: flex; gap: 0; margin-bottom: 14px; border-bottom: 1px solid #d0d7de; }
+        .sub-tab {
+            padding: 6px 14px; font-size: 13px; font-weight: 500; color: #57606a;
+            cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+            user-select: none;
+        }
+        .sub-tab:hover { color: #1f2328; }
+        .sub-tab.active { color: #1f2328; border-bottom-color: #fd8c73; }
+        .sub-panel { display: none; }
+        .sub-panel.active { display: block; }
+
+        /* App logs tab */
+        .log-card { background: #fff; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; }
+        .log-card-header {
+            background: #f6f8fa; border-bottom: 1px solid #d0d7de;
+            padding: 8px 16px; font-size: 12px; font-weight: 600; color: #57606a;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .log-card-header .refresh-btn {
+            font-size: 12px; font-weight: 500; color: #0969da;
+            cursor: pointer; text-decoration: none; background: none; border: none;
+        }
+        .log-card-header .refresh-btn:hover { text-decoration: underline; }
+        .log-body {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+            font-size: 12px; line-height: 20px; overflow-x: auto;
+            max-height: 600px; overflow-y: auto;
+        }
+        .log-line { display: flex; min-height: 20px; }
+        .log-line:hover { background: #f6f8fa; }
+        .log-line .ln { min-width: 48px; padding: 0 12px; color: #8c959f; text-align: right; user-select: none; border-right: 1px solid #eaeef2; flex-shrink: 0; }
+        .log-line .txt { padding: 0 16px; color: #1f2328; white-space: pre; flex: 1; }
+        .log-line.log-err .txt  { color: #cf222e; background: #fff5f5; }
+        .log-line.log-warn .txt { color: #9a6700; background: #fffbeb; }
+        .log-line.log-comment .txt { color: #8c959f; }
+        .log-line.log-keyword .txt { color: #0969da; font-weight: 600; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(1,4,9,.5); z-index: 100;
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: #fff; border: 1px solid #d0d7de; border-radius: 6px;
+            width: 90%; max-width: 700px; max-height: 80vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 8px 24px rgba(1,4,9,.15);
+            overflow: hidden;
+            min-height: 0;
+        }
+        .modal-header {
+            padding: 12px 16px; border-bottom: 1px solid #d0d7de;
+            display: flex; align-items: center; justify-content: space-between;
+            background: #f6f8fa; border-radius: 6px 6px 0 0;
+        }
+        .modal-title { font-weight: 600; font-size: 14px; }
+        .modal-close {
+            background: none; border: none; cursor: pointer;
+            color: #57606a; font-size: 18px; line-height: 1; padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .modal-close:hover { background: #f6f8fa; color: #1f2328; }
+        .modal-meta { padding: 10px 16px; border-bottom: 1px solid #f6f8fa; font-size: 12px; color: #57606a; }
+        .modal-body { overflow-y: auto; flex: 1; min-height: 0; }
+        .modal-body .log-body { max-height: none; padding-bottom: 12px; }
+    </style>
+</head>
+<body>
+<header class="gh-header">
+    <span class="brand">Deploy Portal <span th:text="${serviceName}"></span></span>
+    <div class="service-status">
+        <span class="status-dot" id="statusDot"></span>
+        <div class="status-text">
+            <span class="status-name" th:text="${serviceName}">emias-dashboard</span>
+            <span class="status-label" id="statusLabel">...</span>
+        </div>
+        <button class="btn-restart" onclick="toggleRestartPopover(event)">Перезапустить</button>
+    </div>
+
+    <!-- Restart popover -->
+    <div class="restart-popover" id="restartPopover">
+        <form method="post" action="/restart" id="restartForm">
+            <label>Пароль для перезапуска</label>
+            <input type="password" name="password" id="restartPassword" placeholder="Введите пароль" autocomplete="off">
+            <button type="submit" class="pop-btn">Перезапустить сервис</button>
+        </form>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- Flash -->
+    <div th:if="${accessError}" class="flash flash-error">
+        <b>Неверный пароль</b>
+        <span th:if="${accessError > 0}">Осталось попыток: <b th:text="${accessError}"></b></span>
+    </div>
+    <div th:if="${blockedError}" class="flash flash-error">
+        <b>Слишком много неверных попыток</b>
+        Вход заблокирован до <b th:text="${blockedError}"></b>
+    </div>
+    <div th:if="${formError}" class="flash flash-warning" th:text="${formError}"></div>
+    <div th:if="${deploySuccess}" class="flash flash-success"><b>Деплой выполнен успешно</b>Сервис перезапущен и работает.</div>
+    <div th:if="${rollbackSuccess}" class="flash flash-success"><b>Откат выполнен успешно</b>Предыдущая версия восстановлена и запущена.</div>
+    <div th:if="${restartSuccess}" class="flash flash-success"><b>Сервис перезапущен</b></div>
+    <div th:if="${deployError}" class="flash flash-error"><b>Ошибка</b><span th:text="${deployError}"></span></div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <div class="tab active" id="tab-btn-deploy" onclick="showTab('deploy')">
+            Деплой
+            <span class="tab-count" th:text="${history.size()}">0</span>
+        </div>
+        <div class="tab" id="tab-btn-logs" onclick="showTab('logs')">
+            Логи приложения
+        </div>
+    </div>
+
+    <!-- TAB: Deploy + History -->
+    <div class="tab-panel active" id="tab-deploy">
+
+        <div class="card">
+            <div class="card-header">JAR: <code th:text="${jarPath}"></code></div>
+            <div class="card-body">
+                <form method="post" action="/deploy" enctype="multipart/form-data" id="deployForm">
+                    <div class="drop-zone" id="dropZone" onclick="document.getElementById('jarFile').click()">
+                        <input type="file" name="jar" id="jarFile" accept=".jar" required>
+                        <div class="dz-icon">
+                            <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"/>
+                                <path d="M11.78 4.72a.75.75 0 0 1-1.06 1.06L8.75 3.81v6.44a.75.75 0 0 1-1.5 0V3.81L5.28 5.78a.75.75 0 0 1-1.06-1.06l3.25-3.25a.75.75 0 0 1 1.06 0l3.25 3.25Z"/>
+                            </svg>
+                        </div>
+                        <div class="dz-text"><strong>Выберите файл</strong> или перетащите сюда</div>
+                        <div class="dz-hint">.jar до 200 МБ</div>
+                        <div class="dz-selected-name" id="selectedName"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="password">Пароль для деплоя</label>
+                            <input type="password" name="password" id="password" placeholder="Введите пароль" required autocomplete="off">
+                        </div>
+                        <button type="submit" class="btn-green" id="submitBtn" disabled>Задеплоить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Rollback -->
+        <div th:if="${hasBackup}" class="rollback-card">
+            <div class="rollback-info">
+                <b>↩ Резервная копия доступна</b><br>
+                Можно откатить сервис на последнюю рабочую версию
+            </div>
+            <form method="post" action="/rollback" id="rollbackForm" class="rollback-right">
+                <input type="password" name="password" id="rollbackPassword"
+                       placeholder="Пароль" autocomplete="off" required>
+                <button type="submit" class="btn-rollback" id="rollbackBtn">↩ Откатить</button>
+            </form>
+        </div>
+        <div th:unless="${hasBackup}" class="rollback-hint">
+            Резервная копия появится после первого успешного деплоя
+        </div>
+
+        <div class="section-divider">История деплоев</div>
+
+        <div class="history-card">
+            <div th:if="${history.empty}" class="history-empty">Деплоев ещё не было</div>
+            <table th:if="${!history.empty}">
+                <thead>
+                    <tr>
+                        <th>Дата и время</th>
+                        <th>Файл</th>
+                        <th>Размер</th>
+                        <th>Статус</th>
+                        <th>Время</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r : ${history}"
+                        th:style="${r.type != null and r.type.name() == 'ROLLBACK'} ? 'background:#fffbeb' : ''">
+                        <td class="mono" th:text="${#temporals.format(r.time, 'dd.MM.yyyy HH:mm:ss')}"></td>
+                        <td th:text="${r.filename}"
+                            th:style="${r.type != null and r.type.name() == 'ROLLBACK'} ? 'color:#633c01' : ''"></td>
+                        <td class="mono" th:text="${r.sizeMb}"></td>
+                        <td>
+                            <!-- ROLLBACK success -->
+                            <span th:if="${r.type != null and r.type.name() == 'ROLLBACK' and r.status.name() == 'SUCCESS'}"
+                                  class="badge badge-rollback">↩ откат</span>
+                            <!-- DEPLOY success -->
+                            <span th:if="${(r.type == null or r.type.name() == 'DEPLOY') and r.status.name() == 'SUCCESS'}"
+                                  class="badge badge-success"><span class="badge-dot"></span>success</span>
+                            <!-- Any FAILED -->
+                            <button th:if="${r.status.name() == 'FAILED'}"
+                                    class="btn-error"
+                                    th:onclick="'openModal(\'' + ${r.id} + '\')'">
+                                <span class="badge-dot" style="background:#cf222e"></span>Ошибка
+                            </button>
+                        </td>
+                        <td class="mono" th:text="${r.durationSeconds} + 'с'"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB: App logs + Config -->
+    <div class="tab-panel" id="tab-logs">
+        <div class="sub-tabs">
+            <div class="sub-tab active" id="sub-btn-journal" onclick="showSubTab('journal')">Журнал</div>
+            <div class="sub-tab" id="sub-btn-config" onclick="showSubTab('config')">Конфигурация</div>
+        </div>
+
+        <div class="sub-panel active" id="sub-journal">
+            <div class="log-card">
+                <div class="log-card-header">
+                    <span>Последние 300 строк · <span th:text="${serviceName}"></span></span>
+                    <a href="/" onclick="showTab('logs'); return false;" class="refresh-btn">Обновить</a>
+                </div>
+                <div class="log-body" id="appLogBody">
+                    <div th:if="${appLogs.empty}" style="padding:16px;color:#57606a">Логи недоступны</div>
+                    <div th:each="line, s : ${appLogs}"
+                         th:classappend="${line.contains('ERROR') or line.contains('FATAL')} ? 'log-err' : (${line.contains('WARN')} ? 'log-warn' : '')"
+                         class="log-line">
+                        <span class="ln" th:text="${s.index + 1}"></span>
+                        <span class="txt" th:text="${line}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sub-panel" id="sub-config">
+            <div th:each="file : ${nginxConfig}" style="margin-bottom: 16px;">
+                <div class="log-card">
+                    <div class="log-card-header" th:if="${!file['path'].isEmpty()}">
+                        <span th:text="${file['path']}"></span>
+                    </div>
+                    <div class="log-body" style="max-height: 500px; overflow-y: auto;">
+                        <div th:each="line, s : ${#strings.arraySplit(file['content'], '\n')}"
+                             th:classappend="${#strings.startsWith(#strings.trim(line), '#')} ? 'log-comment' : (${#strings.startsWith(#strings.trim(line), 'server')} or ${#strings.startsWith(#strings.trim(line), 'location')} ? 'log-keyword' : '')"
+                             class="log-line">
+                            <span class="ln" th:text="${s.index + 1}"></span>
+                            <span class="txt" th:text="${line}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal overlay -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title" id="modalTitle">Лог деплоя</span>
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-meta" id="modalMeta"></div>
+        <div class="modal-body">
+            <div class="log-body" id="modalLogBody"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Deploy log data (hidden, for modal) -->
+<div style="display:none" th:each="r : ${history}" th:if="${r.status.name() == 'FAILED'}">
+    <div th:id="'deploy-meta-' + ${r.id}"
+         th:data-file="${r.filename}"
+         th:data-time="${#temporals.format(r.time, 'dd.MM.yyyy HH:mm:ss')}"
+         th:data-size="${r.sizeMb}"
+         th:data-dur="${r.durationSeconds} + 'с'"></div>
+    <div th:id="'deploy-logs-' + ${r.id}">
+        <span th:each="line, s : ${r.logs}"
+              th:attr="data-ln=${s.index + 1}, data-txt=${line}"
+              th:classappend="${line.contains('✓')} ? 'ok' : (${line.startsWith('ОШИБКА')} ? 'err' : '')"></span>
+    </div>
+</div>
+
+<script>
+    // Restart popover
+    function toggleRestartPopover(e) {
+        e.stopPropagation();
+        document.getElementById('restartPopover').classList.toggle('open');
+        document.getElementById('restartPassword').focus();
+    }
+    document.addEventListener('click', e => {
+        const pop = document.getElementById('restartPopover');
+        if (!pop.contains(e.target)) pop.classList.remove('open');
+    });
+    document.getElementById('restartForm').addEventListener('submit', function(e) {
+        const btn = this.querySelector('.pop-btn');
+        btn.disabled = true;
+        btn.textContent = 'Перезапуск...';
+    });
+
+    // Service status polling
+    const statusDot   = document.getElementById('statusDot');
+    const statusLabel = document.getElementById('statusLabel');
+
+    function fetchStatus() {
+        fetch('/api/status')
+            .then(r => r.json())
+            .then(data => {
+                statusDot.className = 'status-dot ' + data.status;
+                statusLabel.textContent = data.active ? 'Запущено' : (data.status === 'failed' ? 'Упало' : 'Не запущено');
+            })
+            .catch(() => {
+                statusDot.className = 'status-dot';
+                statusLabel.textContent = 'Недоступно';
+            });
+    }
+    fetchStatus();
+    setInterval(fetchStatus, 10000);
+
+    // Rollback form
+    const rollbackForm = document.getElementById('rollbackForm');
+    const rollbackBtn  = document.getElementById('rollbackBtn');
+    if (rollbackForm) {
+        rollbackForm.addEventListener('submit', e => {
+            const pwd = document.getElementById('rollbackPassword').value;
+            if (!pwd) { e.preventDefault(); return; }
+            if (!confirm('Откатить на предыдущую версию? Сервис будет перезапущен.')) { e.preventDefault(); return; }
+            rollbackBtn.disabled = true;
+            rollbackBtn.textContent = 'Откат...';
+        });
+    }
+
+    function showTab(name) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('tab-btn-' + name).classList.add('active');
+        document.getElementById('tab-' + name).classList.add('active');
+        if (name === 'logs') {
+            const body = document.getElementById('appLogBody');
+            if (body) body.scrollTop = body.scrollHeight;
+        }
+    }
+
+    function showSubTab(name) {
+        document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('sub-btn-' + name).classList.add('active');
+        document.getElementById('sub-' + name).classList.add('active');
+        if (name === 'journal') {
+            const body = document.getElementById('appLogBody');
+            if (body) body.scrollTop = body.scrollHeight;
+        }
+    }
+
+    function openModal(id) {
+        const metaEl = document.getElementById('deploy-meta-' + id);
+        const logsEl = document.getElementById('deploy-logs-' + id);
+        if (!metaEl || !logsEl) return;
+
+        document.getElementById('modalTitle').textContent = metaEl.dataset.file;
+        document.getElementById('modalMeta').textContent =
+            metaEl.dataset.time + '  ·  ' + metaEl.dataset.size + '  ·  ' + metaEl.dataset.dur;
+
+        const body = document.getElementById('modalLogBody');
+        body.innerHTML = '';
+        logsEl.querySelectorAll('span').forEach((span, i) => {
+            const line = document.createElement('div');
+            line.className = 'log-line' +
+                (span.classList.contains('ok') ? ' ok' : '') +
+                (span.classList.contains('err') ? ' err' : '');
+            line.innerHTML =
+                `<span class="ln">${span.dataset.ln}</span>` +
+                `<span class="txt">${escHtml(span.dataset.txt)}</span>`;
+            body.appendChild(line);
+        });
+
+        document.getElementById('modalOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    function escHtml(s) {
+        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    // Upload form
+    const input = document.getElementById('jarFile');
+    const dropZone = document.getElementById('dropZone');
+    const selectedName = document.getElementById('selectedName');
+    const submitBtn = document.getElementById('submitBtn');
+    const password = document.getElementById('password');
+
+    function updateBtn() { submitBtn.disabled = !(input.files.length > 0 && password.value.length > 0); }
+    input.addEventListener('change', () => {
+        if (input.files[0]) {
+            selectedName.textContent = input.files[0].name + ' (' + (input.files[0].size/1024/1024).toFixed(1) + ' МБ)';
+            selectedName.style.display = 'block';
+        }
+        updateBtn();
+    });
+    password.addEventListener('input', updateBtn);
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault(); dropZone.classList.remove('dragover');
+        const dt = new DataTransfer(); dt.items.add(e.dataTransfer.files[0]); input.files = dt.files;
+        input.dispatchEvent(new Event('change'));
+    });
+    document.getElementById('deployForm').addEventListener('submit', () => {
+        submitBtn.disabled = true; submitBtn.textContent = 'Загрузка...';
+    });
+</script>
+</body>
+</html>
