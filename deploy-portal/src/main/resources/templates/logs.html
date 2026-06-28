@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Deploy Portal — логи</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #1f2328;
+            background: #f6f8fa;
+        }
+        .gh-header {
+            background: #24292f;
+            padding: 0 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+        .gh-header .brand { color: #ffffff; font-weight: 600; font-size: 15px; }
+        .gh-header .brand span { color: #8b949e; font-weight: 400; margin-left: 8px; font-size: 13px; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 28px 16px; }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #57606a;
+            margin-bottom: 16px;
+        }
+        .breadcrumb a { color: #0969da; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb .sep { color: #d0d7de; }
+
+        /* Meta card */
+        .meta-card {
+            background: #ffffff;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .meta-left { display: flex; flex-direction: column; gap: 4px; }
+        .meta-filename { font-weight: 600; font-size: 15px; color: #1f2328; }
+        .meta-details { font-size: 12px; color: #57606a; }
+        .meta-details span { margin-right: 16px; }
+        .meta-details code {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+            font-size: 11px;
+            background: #f6f8fa;
+            border: 1px solid #d0d7de;
+            border-radius: 4px;
+            padding: 1px 5px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 20px;
+            padding: 4px 12px;
+        }
+        .badge-success { background: #dafbe1; color: #116329; border: 1px solid #aceebb; }
+        .badge-error   { background: #ffebe9; color: #82071e; border: 1px solid #f1998e; }
+        .badge-dot { width: 7px; height: 7px; border-radius: 50%; }
+        .badge-success .badge-dot { background: #1a7f37; }
+        .badge-error   .badge-dot { background: #cf222e; }
+
+        /* Log card */
+        .log-card {
+            background: #ffffff;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        .log-card-header {
+            background: #f6f8fa;
+            border-bottom: 1px solid #d0d7de;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #57606a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .log-lines-count { font-weight: 400; }
+
+        .log-body {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+            font-size: 12px;
+            line-height: 20px;
+            overflow-x: auto;
+        }
+        .log-line {
+            display: flex;
+            min-height: 20px;
+        }
+        .log-line:hover { background: #f6f8fa; }
+        .log-line .ln {
+            min-width: 48px;
+            padding: 0 12px;
+            color: #8c959f;
+            text-align: right;
+            user-select: none;
+            border-right: 1px solid #f6f8fa;
+            flex-shrink: 0;
+        }
+        .log-line .txt {
+            padding: 0 16px;
+            color: #1f2328;
+            white-space: pre;
+            flex: 1;
+        }
+        .log-line.ok  { background: #f0fff4; }
+        .log-line.ok .txt  { color: #116329; }
+        .log-line.err { background: #fff5f5; }
+        .log-line.err .txt { color: #cf222e; }
+        .log-line.ok .ln, .log-line.err .ln { border-right-color: rgba(0,0,0,.06); }
+
+        /* Back button */
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 16px;
+            height: 32px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            color: #1f2328;
+            background: #f6f8fa;
+            text-decoration: none;
+            transition: background .15s;
+        }
+        .btn-back:hover { background: #f3f4f6; border-color: #afb8c1; }
+    </style>
+</head>
+<body>
+<header class="gh-header">
+    <span class="brand">Deploy Portal <span th:text="${serviceName}"></span></span>
+</header>
+
+<div class="container">
+
+    <div class="breadcrumb">
+        <a href="/">Deploy Portal</a>
+        <span class="sep">/</span>
+        <a href="/#history" onclick="sessionStorage.setItem('openTab','history')">История</a>
+        <span class="sep">/</span>
+        <span>Логи деплоя</span>
+    </div>
+
+    <div class="meta-card">
+        <div class="meta-left">
+            <div class="meta-filename" th:text="${record.filename}"></div>
+            <div class="meta-details">
+                <span th:text="${#temporals.format(record.time, 'dd.MM.yyyy HH:mm:ss')}"></span>
+                <span th:text="${record.sizeMb}"></span>
+                <span th:text="${record.durationSeconds} + 'с'"></span>
+            </div>
+        </div>
+        <span th:if="${record.status.name() == 'SUCCESS'}" class="badge badge-success">
+            <span class="badge-dot"></span> success
+        </span>
+        <span th:if="${record.status.name() == 'FAILED'}" class="badge badge-error">
+            <span class="badge-dot"></span> failed
+        </span>
+    </div>
+
+    <div class="log-card">
+        <div class="log-card-header">
+            <span>Лог выполнения</span>
+            <span class="log-lines-count" th:text="${record.logs.size()} + ' строк'"></span>
+        </div>
+        <div class="log-body">
+            <div th:each="line, s : ${record.logs}"
+                 th:classappend="${line.contains('✓') ? 'ok' : (line.startsWith('ОШИБКА') ? 'err' : '')}"
+                 class="log-line">
+                <span class="ln" th:text="${s.index + 1}"></span>
+                <span class="txt" th:text="${line}"></span>
+            </div>
+        </div>
+    </div>
+
+    <a href="/" class="btn-back">← Назад</a>
+
+</div>
+
+<script>
+    // Restore history tab if came from there
+    if (sessionStorage.getItem('openTab') === 'history') {
+        sessionStorage.removeItem('openTab');
+    }
+</script>
+</body>
+</html>

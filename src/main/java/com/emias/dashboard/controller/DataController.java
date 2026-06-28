@@ -15,6 +15,10 @@ import com.emias.dashboard.service.HcvService;
 import com.emias.dashboard.service.HcvRegistryService;
 import com.emias.dashboard.service.FacilityPlanService;
 import com.emias.dashboard.service.FileValidationException;
+import com.emias.dashboard.service.ActionPlanService;
+import com.emias.dashboard.service.KpiService;
+import com.emias.dashboard.service.KvcService;
+import com.emias.dashboard.service.RisksService;
 import com.emias.dashboard.service.MoWorkPlanService;
 import com.emias.dashboard.service.ReportService;
 import com.emias.dashboard.service.SettingsService;
@@ -38,6 +42,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -78,6 +84,11 @@ public class DataController {
     private final HcvRegistryService     hcvRegistryService;
     private final MoTaskRepository       moTaskRepository;
     private final MoWorkPlanService      moWorkPlanService;
+    private final KvcService             kvcService;
+    private final KpiService             kpiService;
+    private final RisksService           risksService;
+    private final ActionPlanService      actionPlanService;
+    private final ObjectMapper           objectMapper;
 
     public DataController(ReportService reportService,
                           ScreeningRepository screeningRepository,
@@ -88,7 +99,12 @@ public class DataController {
                           HcvService hcvService,
                           HcvRegistryService hcvRegistryService,
                           MoTaskRepository moTaskRepository,
-                          MoWorkPlanService moWorkPlanService) {
+                          MoWorkPlanService moWorkPlanService,
+                          KvcService kvcService,
+                          KpiService kpiService,
+                          RisksService risksService,
+                          ActionPlanService actionPlanService,
+                          ObjectMapper objectMapper) {
         this.reportService          = reportService;
         this.screeningRepository    = screeningRepository;
         this.settingsService        = settingsService;
@@ -99,6 +115,11 @@ public class DataController {
         this.hcvRegistryService     = hcvRegistryService;
         this.moTaskRepository       = moTaskRepository;
         this.moWorkPlanService      = moWorkPlanService;
+        this.kvcService             = kvcService;
+        this.kpiService             = kpiService;
+        this.risksService           = risksService;
+        this.actionPlanService      = actionPlanService;
+        this.objectMapper           = objectMapper;
     }
 
     /* ── Поручения МО ── */
@@ -859,5 +880,77 @@ public class DataController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"mo_work_plan_template.xlsx\"")
                 .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(bytes);
+    }
+
+    /* ── КВЦ (Критически важные цели) ── */
+
+    @GetMapping("/hcv/kvc")
+    public ResponseEntity<?> getKvc() {
+        return ResponseEntity.ok(kvcService.get());
+    }
+
+    @PostMapping("/hcv/kvc")
+    public ResponseEntity<?> saveKvc(@RequestBody Map<String, Object> body) {
+        try {
+            String title   = (String) body.get("title");
+            String goal    = (String) body.get("goal");
+            List<Map<String, String>> leading = objectMapper.convertValue(body.get("leading"), new TypeReference<>() {});
+            List<Map<String, String>> lagging = objectMapper.convertValue(body.get("lagging"), new TypeReference<>() {});
+            kvcService.save(title, goal, leading, lagging);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /* ── План мероприятий ── */
+
+    @GetMapping("/hcv/action-plan")
+    public ResponseEntity<?> getActionPlan() {
+        return ResponseEntity.ok(actionPlanService.get());
+    }
+
+    @PostMapping("/hcv/action-plan")
+    public ResponseEntity<?> saveActionPlan(@RequestBody Map<String, Object> body) {
+        try {
+            actionPlanService.save(body);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /* ── Риски проекта ── */
+
+    @GetMapping("/hcv/risks")
+    public ResponseEntity<?> getRisks() {
+        return ResponseEntity.ok(risksService.get());
+    }
+
+    @PostMapping("/hcv/risks")
+    public ResponseEntity<?> saveRisks(@RequestBody List<Map<String, String>> body) {
+        try {
+            risksService.save(body);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /* ── Ключевые показатели 2026 ── */
+
+    @GetMapping("/hcv/kpi")
+    public ResponseEntity<?> getKpi() {
+        return ResponseEntity.ok(kpiService.get());
+    }
+
+    @PostMapping("/hcv/kpi")
+    public ResponseEntity<?> saveKpi(@RequestBody Map<String, String> body) {
+        try {
+            kpiService.save(body);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 }

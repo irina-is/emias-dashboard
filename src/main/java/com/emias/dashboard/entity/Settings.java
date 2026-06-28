@@ -13,7 +13,7 @@ public class Settings {
     @Column(name = "setting_key")
     private String key;
 
-    @Column(name = "setting_value")
+    @Column(name = "setting_value", columnDefinition = "TEXT")
     private String value;
 
     public Settings() {}

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Deploy Portal — результат</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #1f2328;
+            background: #f6f8fa;
+        }
+        .gh-header {
+            background: #24292f;
+            padding: 0 16px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .gh-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        .gh-header .brand svg { fill: #ffffff; width: 20px; height: 20px; }
+        .gh-header .nav form button {
+            background: none;
+            border: 1px solid #6e7681;
+            border-radius: 6px;
+            color: #cdd9e5;
+            font-size: 13px;
+            padding: 4px 10px;
+            cursor: pointer;
+        }
+        .gh-header .nav form button:hover { background: rgba(255,255,255,.1); border-color: #cdd9e5; }
+
+        .container { max-width: 768px; margin: 0 auto; padding: 24px 16px; }
+
+        .breadcrumb {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .breadcrumb svg { fill: #57606a; width: 16px; height: 16px; }
+
+        /* Status banner */
+        .banner {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            border-radius: 6px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .banner-success { background: #dafbe1; border: 1px solid #aceebb; color: #116329; }
+        .banner-error   { background: #ffebe9; border: 1px solid #f1998e; color: #82071e; }
+        .banner svg { flex-shrink: 0; margin-top: 1px; }
+        .banner-success svg { fill: #1a7f37; }
+        .banner-error svg   { fill: #cf222e; }
+        .banner-title { font-weight: 600; font-size: 15px; }
+        .banner-sub   { font-size: 13px; margin-top: 2px; opacity: .85; }
+
+        /* Log card */
+        .card { background: #ffffff; border: 1px solid #d0d7de; border-radius: 6px; margin-bottom: 16px; }
+        .card-header {
+            padding: 10px 16px;
+            border-bottom: 1px solid #d0d7de;
+            background: #f6f8fa;
+            border-radius: 6px 6px 0 0;
+            font-weight: 600;
+            font-size: 13px;
+            color: #57606a;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .card-header svg { fill: #57606a; }
+        .log {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, "Courier New", monospace;
+            font-size: 12px;
+            line-height: 20px;
+            color: #1f2328;
+            padding: 0;
+            overflow-x: auto;
+        }
+        .log-line {
+            display: flex;
+            padding: 2px 16px;
+            border-bottom: 1px solid #f6f8fa;
+        }
+        .log-line:last-child { border-bottom: none; }
+        .log-line .ln {
+            color: #8c959f;
+            min-width: 32px;
+            user-select: none;
+            margin-right: 16px;
+            text-align: right;
+        }
+        .log-line .text { color: #1f2328; white-space: pre-wrap; word-break: break-all; }
+        .log-line.ok .text   { color: #1a7f37; }
+        .log-line.err .text  { color: #cf222e; }
+
+        /* Back button */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 20px;
+            cursor: pointer;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            color: #1f2328;
+            background: #f6f8fa;
+            text-decoration: none;
+            transition: background .15s;
+        }
+        .btn:hover { background: #f3f4f6; border-color: #afb8c1; }
+        .btn svg { fill: #57606a; }
+    </style>
+</head>
+<body>
+<header class="gh-header">
+    <a class="brand" href="/">
+        <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+                     0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+                     -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
+                     .07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
+                     -.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27
+                     .68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12
+                     .51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48
+                     0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        Deploy Portal
+    </a>
+    <nav class="nav">
+        <form th:action="@{/logout}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit">Выйти</button>
+        </form>
+    </nav>
+</header>
+
+<div class="container">
+    <div class="breadcrumb">
+        <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm4.879-2.773 4.264 2.559a.25.25 0 0 1 0 .428l-4.264 2.559A.25.25 0 0 1 6 10.559V5.442a.25.25 0 0 1 .379-.215Z"/>
+        </svg>
+        Результат деплоя
+    </div>
+
+    <div th:if="${success}" class="banner banner-success">
+        <svg viewBox="0 0 16 16" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm10.28-1.72-4.5 4.5a.75.75 0 0 1-1.06 0l-2-2a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l1.47 1.47 3.97-3.97a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042Z"/>
+        </svg>
+        <div>
+            <div class="banner-title">Деплой выполнен успешно</div>
+            <div class="banner-sub">Сервис перезапущен и работает</div>
+        </div>
+    </div>
+
+    <div th:if="${error}" class="banner banner-error">
+        <svg viewBox="0 0 16 16" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4.47.22A.749.749 0 0 1 5 0h6c.199 0 .389.079.53.22l4.25 4.25c.141.14.22.331.22.53v6a.749.749 0 0 1-.22.53l-4.25 4.25A.749.749 0 0 1 11 16H5a.749.749 0 0 1-.53-.22L.22 11.53A.749.749 0 0 1 0 11V5c0-.199.079-.389.22-.53Zm.84 1.28L1.5 5.31v5.38l3.81 3.81h5.38l3.81-3.81V5.31L10.69 1.5ZM8 4a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
+        </svg>
+        <div>
+            <div class="banner-title">Ошибка деплоя</div>
+            <div class="banner-sub" th:text="${error}"></div>
+        </div>
+    </div>
+
+    <div th:if="${logs}" class="card">
+        <div class="card-header">
+            <svg viewBox="0 0 16 16" width="14" height="14" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Z"/>
+            </svg>
+            Лог выполнения
+        </div>
+        <div class="log">
+            <div th:each="line, stat : ${logs}"
+                 th:classappend="${line.contains('✓') or line.contains('Готово') ? 'ok' : (line.contains('Ошибка') or line.contains('завершилась с кодом') ? 'err' : '')}"
+                 class="log-line">
+                <span class="ln" th:text="${stat.index + 1}"></span>
+                <span class="text" th:text="${line}"></span>
+            </div>
+        </div>
+    </div>
+
+    <a href="/" class="btn">
+        <svg viewBox="0 0 16 16" width="14" height="14" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7.78 12.53a.75.75 0 0 1-1.06 0L2.47 8.28a.75.75 0 0 1 0-1.06l4.25-4.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L4.81 7h7.44a.75.75 0 0 1 0 1.5H4.81l2.97 2.97a.75.75 0 0 1 0 1.06Z"/>
+        </svg>
+        Назад
+    </a>
+</div>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "deploy-portal",
+      "runtimeExecutable": "mvn",
+      "runtimeArgs": ["-f", "deploy-portal/pom.xml", "spring-boot:run", "-Dspring-boot.run.arguments=--server.port=8082"],
+      "port": 8082
+    }
+  ]
+}
