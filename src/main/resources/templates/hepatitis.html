@@ -29,10 +29,10 @@
         }
         .tn-logo-text{font-size:.95rem;font-weight:800;color:#fff;letter-spacing:-.01em;}
         .tn-logo-year{font-size:.75rem;font-weight:600;color:#6366f1;margin-left:4px;}
-        .tn-links{display:flex;align-items:center;gap:2px;flex:1;overflow:visible;}
+        .tn-links{display:flex;align-items:center;gap:1px;flex:1;overflow:visible;flex-wrap:nowrap;}
         .tn-link{
-            padding:6px 13px;border-radius:6px;
-            font-size:.78rem;font-weight:500;color:rgba(255,255,255,.5);
+            padding:5px 9px;border-radius:6px;
+            font-size:.75rem;font-weight:500;color:rgba(255,255,255,.5);
             white-space:nowrap;transition:all .15s;cursor:pointer;
         }
         .tn-link:hover{color:#fff;background:rgba(255,255,255,.07);}
@@ -424,6 +424,8 @@
     <div class="tn-links">
         <a href="#kvc" class="tn-link active" onclick="navClick(this,'kvc')">КВЦ</a>
         <a href="#kpi" class="tn-link" onclick="navClick(this,'kpi')">Показатели</a>
+        <a href="#contracts-section" class="tn-link" onclick="navClick(this,'contracts-section')">Контракты</a>
+        <a href="#tfoms-section" class="tn-link" onclick="navClick(this,'tfoms-section')">ТФОМС ДС</a>
         <a href="#pathway" class="tn-link" onclick="navClick(this,'pathway')">Путь пациента</a>
         <span class="tn-link tn-link-disabled">План действий</span>
         <div class="tn-dropdown">
@@ -748,7 +750,672 @@
         </div>
     </div>
 
+    <!-- ══ МОНИТОРИНГ КОНТРАКТОВ ════════════════════════════════ -->
+    <div class="section-block" id="contracts-section">
+        <div class="section-num">03</div>
+        <div class="sec-hd">
+            <div class="section-title">Мониторинг исполнения контрактов</div>
+        </div>
+
+        <!-- Шапка со статистикой -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;" id="contracts-stats-grid">
+            <div class="kpi-card" style="padding:18px 20px;">
+                <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);margin-bottom:6px;">Всего контрактов</div>
+                <div style="font-size:1.9rem;font-weight:800;color:#e2e8f0;line-height:1;" id="ctr-total">—</div>
+                <div style="font-size:.72rem;color:rgba(255,255,255,.35);margin-top:4px;" id="ctr-total-sub"></div>
+            </div>
+            <div class="kpi-card" style="padding:18px 20px;">
+                <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);margin-bottom:6px;">Общее исполнение</div>
+                <div style="font-size:1.9rem;font-weight:800;color:#fcd34d;line-height:1;" id="ctr-pct">—</div>
+                <div style="font-size:.72rem;color:rgba(255,255,255,.35);margin-top:4px;" id="ctr-amounts"></div>
+            </div>
+            <div class="kpi-card" style="padding:18px 20px;">
+                <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);margin-bottom:6px;">Полностью исполнен</div>
+                <div style="font-size:1.9rem;font-weight:800;color:#4ade80;line-height:1;" id="ctr-executed">—</div>
+                <div style="font-size:.72rem;color:rgba(255,255,255,.35);margin-top:4px;" id="ctr-executed-sub"></div>
+            </div>
+            <div class="kpi-card" style="padding:18px 20px;">
+                <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);margin-bottom:6px;">Без заявок</div>
+                <div style="font-size:1.9rem;font-weight:800;color:#f87171;line-height:1;" id="ctr-no-orders">—</div>
+                <div style="font-size:.72rem;color:rgba(255,255,255,.35);margin-top:4px;">контрактов не начато</div>
+            </div>
+        </div>
+
+        <!-- Вкладки -->
+        <div style="display:flex;gap:8px;margin-bottom:20px;" id="ctr-tabs">
+            <button onclick="ctrSetTab('all')" id="ctr-tab-all"
+                    style="background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.4);color:#a5b4fc;border-radius:8px;padding:7px 18px;font-size:.78rem;font-weight:600;cursor:pointer;">По контрактам</button>
+            <button onclick="ctrSetTab('mo')" id="ctr-tab-mo"
+                    style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:8px;padding:7px 18px;font-size:.78rem;font-weight:600;cursor:pointer;">По МО</button>
+            <button onclick="ctrSetTab('none')" id="ctr-tab-none"
+                    style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:8px;padding:7px 18px;font-size:.78rem;font-weight:600;cursor:pointer;">Без заявок</button>
+        </div>
+
+        <!-- Фильтры -->
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;">
+            <div style="flex:1;min-width:200px;">
+                <div style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">МО:</div>
+                <select id="ctr-filter-mo" onchange="ctrRender()"
+                        style="width:100%;background:#1e2638;border:1px solid rgba(255,255,255,.1);color:#e2e8f0;border-radius:8px;padding:8px 12px;font-size:.82rem;">
+                    <option value="">Все</option>
+                </select>
+            </div>
+            <div style="flex:1;min-width:200px;">
+                <div style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Препарат:</div>
+                <select id="ctr-filter-drug" onchange="ctrRender()"
+                        style="width:100%;background:#1e2638;border:1px solid rgba(255,255,255,.1);color:#e2e8f0;border-radius:8px;padding:8px 12px;font-size:.82rem;">
+                    <option value="">Все</option>
+                </select>
+            </div>
+            <div style="flex:1;min-width:200px;">
+                <div style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Статус:</div>
+                <select id="ctr-filter-status" onchange="ctrRender()"
+                        style="width:100%;background:#1e2638;border:1px solid rgba(255,255,255,.1);color:#e2e8f0;border-radius:8px;padding:8px 12px;font-size:.82rem;">
+                    <option value="">Все</option>
+                    <option value="исполнен">Полностью исполнен</option>
+                    <option value="частично">Частично исполнен</option>
+                    <option value="без_заявок">Без заявок</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Таблица контрактов (вкладки all / none) -->
+        <div id="ctr-view-all" class="rating-card" style="padding:0;overflow:hidden;">
+            <div class="rating-scroll" style="max-height:520px;">
+                <table class="rating-table" style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">МО</th>
+                            <th style="text-align:left;">Препарат</th>
+                            <th style="text-align:left;">№ ГК</th>
+                            <th style="text-align:right;">Сумма ₽</th>
+                            <th style="text-align:right;">Исполнено ₽</th>
+                            <th id="ctr-th-pct" onclick="ctrToggleSort('pct')" style="text-align:right;cursor:pointer;user-select:none;">% <span id="ctr-sort-pct"></span></th>
+                            <th id="ctr-th-status" onclick="ctrToggleSort('status')" style="text-align:center;cursor:pointer;user-select:none;">Статус <span id="ctr-sort-status"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="ctr-tbody-all"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Сводная таблица по МО -->
+        <div id="ctr-view-mo" style="display:none;padding:0;overflow:hidden;" class="rating-card">
+            <div class="rating-scroll" style="max-height:520px;">
+                <table class="rating-table" style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">МО</th>
+                            <th style="text-align:right;">Контрактов</th>
+                            <th style="text-align:right;">Сумма ₽</th>
+                            <th style="text-align:right;">Исполнено ₽</th>
+                            <th style="text-align:right;">%</th>
+                            <th style="text-align:center;">Исполнено</th>
+                            <th style="text-align:center;">Без заявок</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ctr-tbody-mo"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="ctr-empty" style="display:none;text-align:center;padding:40px;color:rgba(255,255,255,.3);font-size:.85rem;">
+            Данные о контрактах не загружены
+        </div>
+    </div>
+
+    <!-- ══ ТФОМС ДС — ЛЕЧЕНИЕ ══════════════════════════════════ -->
+    <div class="section-block" id="tfoms-section">
+        <div class="section-num">03</div>
+        <div class="sec-hd">
+            <div class="section-title">Дневной стационар — пролеченные пациенты</div>
+        </div>
+
+        <!-- KPI панель -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
+            <div class="kpi-card" style="padding:18px 20px;border-left:3px solid rgba(255,255,255,.2);">
+                <div style="font-size:1.85rem;font-weight:800;color:#e2e8f0;line-height:1;" id="tfoms-total-records">—</div>
+                <div style="font-size:.72rem;color:rgba(255,255,255,.4);margin-top:6px;">всего записей</div>
+            </div>
+            <div class="kpi-card" style="padding:18px 20px;border-left:3px solid #2A78D6;">
+                <div style="font-size:1.85rem;font-weight:800;color:#2A78D6;line-height:1;" id="tfoms-course1">—</div>
+                <div style="font-size:.72rem;color:rgba(255,255,255,.4);margin-top:6px;">прошли 1 курс</div>
+            </div>
+            <div class="kpi-card" style="padding:18px 20px;border-left:3px solid #EDA100;">
+                <div style="font-size:1.85rem;font-weight:800;color:#EDA100;line-height:1;" id="tfoms-course2">—</div>
+                <div style="font-size:.72rem;color:rgba(255,255,255,.4);margin-top:6px;">прошли 2 курса</div>
+            </div>
+            <div class="kpi-card" style="padding:18px 20px;border-left:3px solid #E34948;">
+                <div style="font-size:1.85rem;font-weight:800;color:#E34948;line-height:1;" id="tfoms-course3">—</div>
+                <div style="font-size:.72rem;color:rgba(255,255,255,.4);margin-top:6px;">прошли 3+ курса</div>
+            </div>
+        </div>
+
+        <!-- Вкладки -->
+        <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:0;">
+            <button class="tfoms-tab active" data-tab="mo" onclick="switchTfomsTab('mo',this)"
+                style="padding:8px 18px;font-size:.82rem;font-weight:600;background:none;border:none;border-bottom:2px solid #2A78D6;color:#2A78D6;cursor:pointer;margin-bottom:-1px;">
+                По МО
+            </button>
+            <button class="tfoms-tab" data-tab="dynamics" onclick="switchTfomsTab('dynamics',this)"
+                style="padding:8px 18px;font-size:.82rem;font-weight:600;background:none;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,.45);cursor:pointer;margin-bottom:-1px;">
+                Динамика по месяцам
+            </button>
+            <button class="tfoms-tab" data-tab="schemes" onclick="switchTfomsTab('schemes',this)"
+                style="padding:8px 18px;font-size:.82rem;font-weight:600;background:none;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,.45);cursor:pointer;margin-bottom:-1px;">
+                Схемы лечения
+            </button>
+        </div>
+
+        <!-- Tab: По МО -->
+        <div id="tfoms-tab-mo">
+            <div style="font-size:.75rem;color:rgba(255,255,255,.35);margin-bottom:14px;">
+                Нажмите на название МО для просмотра пациентов&nbsp;&nbsp;
+                <span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#2A78D6;"></span>1 курс</span>
+                <span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#EDA100;"></span>2 курса</span>
+                <span style="display:inline-flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#E34948;"></span>3+ курса</span>
+            </div>
+            <div id="tfoms-mo-list" class="rating-card" style="padding:16px 20px;">
+                <div id="tfoms-empty" style="text-align:center;padding:40px;color:rgba(255,255,255,.3);font-size:.85rem;">Данные ТФОМС ДС не загружены</div>
+            </div>
+        </div>
+
+        <!-- Tab: Динамика -->
+        <div id="tfoms-tab-dynamics" style="display:none;">
+            <div class="rating-card" style="padding:20px;">
+                <canvas id="tfomsDynamicsChart" height="220"></canvas>
+                <div style="margin-top:20px;overflow-x:auto;">
+                    <table style="width:100%;border-collapse:collapse;font-size:.82rem;color:rgba(255,255,255,.75);">
+                        <thead>
+                            <tr style="background:rgba(255,255,255,.04);">
+                                <th style="padding:8px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);">Месяц</th>
+                                <th style="padding:8px 12px;text-align:right;border-bottom:1px solid rgba(255,255,255,.08);">Начато курсов</th>
+                                <th style="padding:8px 12px;text-align:right;border-bottom:1px solid rgba(255,255,255,.08);">Доля от итого</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tfomsDynamicsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Схемы лечения -->
+        <div id="tfoms-tab-schemes" style="display:none;">
+            <div class="rating-card" style="padding:20px;display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start;">
+                <div style="display:flex;justify-content:center;">
+                    <canvas id="tfomsSchemeChart" width="260" height="260"></canvas>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table style="width:100%;border-collapse:collapse;font-size:.82rem;color:rgba(255,255,255,.75);">
+                        <thead>
+                            <tr style="background:rgba(255,255,255,.04);">
+                                <th style="padding:8px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);">Код схемы</th>
+                                <th style="padding:8px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);">Препарат</th>
+                                <th style="padding:8px 12px;text-align:right;border-bottom:1px solid rgba(255,255,255,.08);">Курсов</th>
+                                <th style="padding:8px 12px;text-align:right;border-bottom:1px solid rgba(255,255,255,.08);">%</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tfomsSchemeBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно: пациенты МО -->
+    <div id="tfomsPatientsModal" style="display:none;position:fixed;inset:0;z-index:9100;background:rgba(0,0,0,.75);overflow-y:auto;">
+        <div style="max-width:680px;margin:50px auto;background:#111827;border-radius:16px;border:1px solid rgba(255,255,255,.1);padding:28px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
+                <div>
+                    <div id="tfomsPatientsModalTitle" style="font-size:1rem;font-weight:700;color:#fff;"></div>
+                    <div id="tfomsPatientsModalSub" style="font-size:.75rem;color:rgba(255,255,255,.4);margin-top:4px;"></div>
+                </div>
+                <button onclick="closeTfomsPatientsModal()"
+                        style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:#e2e8f0;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:.82rem;flex-shrink:0;margin-left:16px;">
+                    ✕
+                </button>
+            </div>
+            <div style="margin:14px 0 12px;">
+                <select id="tfomsCourseFilter" onchange="filterTfomsPatients()"
+                    style="background:#1f2937;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:8px;padding:6px 12px;font-size:.82rem;cursor:pointer;">
+                    <option value="0">Все курсы</option>
+                    <option value="1">1 курс</option>
+                    <option value="2">2 курса</option>
+                    <option value="3">3+ курса</option>
+                </select>
+            </div>
+            <div style="max-height:440px;overflow-y:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:.82rem;color:rgba(255,255,255,.75);">
+                    <thead>
+                        <tr style="background:rgba(255,255,255,.04);position:sticky;top:0;">
+                            <th style="padding:8px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);">Фамилия</th>
+                            <th style="padding:8px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.08);">Курсов всего</th>
+                            <th style="padding:8px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);">Дата начала</th>
+                            <th style="padding:8px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);">Схема</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tfomsPatientsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <script th:inline="javascript">
+    (function() {
+        const C1 = '#2A78D6', C2 = '#EDA100', C3 = '#E34948';
+
+        function fmtMln(n) { return n ? (n / 1_000_000).toFixed(1) + ' млн ₽' : '0'; }
+        function courseBadge(c) {
+            const col = c === 1 ? C1 : c === 2 ? C2 : C3;
+            const lbl = c === 1 ? '1 курс' : c === 2 ? '2 курса' : c + ' курса';
+            return `<span style="display:inline-block;padding:2px 8px;border-radius:4px;background:${col}33;color:${col};font-size:.72rem;font-weight:700;">${lbl}</span>`;
+        }
+
+        const TFOMS_BASE = /*[[${basePath}]]*/ '';
+        let _tfomsPatients = [];
+        let _dynamicsChart = null, _schemeChart = null;
+        let _dynamicsLoaded = false, _schemesLoaded = false;
+
+        function loadTfomsDashboard() {
+            fetch(TFOMS_BASE + '/api/tfoms-ds/dashboard')
+                .then(r => r.ok ? r.json() : null)
+                .then(data => {
+                    if (!data || !data.rows || !data.rows.length) return;
+
+                    document.getElementById('tfoms-total-records').textContent = (data.totalRecords || 0).toLocaleString('ru-RU');
+                    document.getElementById('tfoms-course1').textContent = (data.globalCourse1 || 0).toLocaleString('ru-RU');
+                    document.getElementById('tfoms-course2').textContent = (data.globalCourse2 || 0).toLocaleString('ru-RU');
+                    document.getElementById('tfoms-course3').textContent = (data.globalCourse3 || 0).toLocaleString('ru-RU');
+
+                    const maxRec = Math.max(...data.rows.map(r => r.totalRecords || 0));
+                    const container = document.getElementById('tfoms-mo-list');
+                    document.getElementById('tfoms-empty').style.display = 'none';
+
+                    data.rows.forEach(mo => {
+                        const total = mo.totalRecords || 0;
+                        const c1 = mo.course1 || 0;
+                        const c2 = mo.course2 || 0;
+                        const c3 = mo.course3plus || 0;
+                        const bw1 = maxRec > 0 ? (c1 / maxRec * 100).toFixed(1) : 0;
+                        const bw2 = maxRec > 0 ? (c2 / maxRec * 100).toFixed(1) : 0;
+                        const bw3 = maxRec > 0 ? (c3 / maxRec * 100).toFixed(1) : 0;
+
+                        const row = document.createElement('div');
+                        row.style.cssText = 'display:grid;grid-template-columns:160px 1fr auto;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);';
+
+                        const nameEl = document.createElement('div');
+                        nameEl.style.cssText = 'text-align:right;font-size:.82rem;font-weight:600;color:#60a5fa;cursor:pointer;';
+                        nameEl.textContent = mo.moShort;
+                        nameEl.title = mo.moFull || mo.moShort;
+                        nameEl.onclick = () => openTfomsPatientsModal(mo.moShort, mo.moFull, mo);
+                        row.appendChild(nameEl);
+
+                        const barWrap = document.createElement('div');
+                        barWrap.style.cssText = 'display:flex;height:24px;border-radius:4px;overflow:hidden;gap:1px;';
+                        const segs = [{cnt:c1,w:bw1,col:C1},{cnt:c2,w:bw2,col:C2},{cnt:c3,w:bw3,col:C3}];
+                        segs.forEach(({cnt, w, col}) => {
+                            if (!cnt) return;
+                            const seg = document.createElement('div');
+                            seg.style.cssText = `width:${w}%;background:${col};display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;min-width:20px;`;
+                            seg.textContent = cnt >= 4 ? cnt : '';
+                            barWrap.appendChild(seg);
+                        });
+                        row.appendChild(barWrap);
+
+                        const info = document.createElement('div');
+                        info.style.cssText = 'font-size:.72rem;white-space:nowrap;text-align:right;line-height:1.7;';
+                        const parts = [];
+                        if (c1) parts.push(`<span style="color:${C1};">${c1} — 1 курс</span>`);
+                        if (c2) parts.push(`<span style="color:${C2};">${c2} — 2 курса</span>`);
+                        if (c3) parts.push(`<span style="color:${C3};">${c3} — 3+ курса</span>`);
+                        info.innerHTML = parts.join('&nbsp; ') + `<br><span style="color:rgba(255,255,255,.3);">${fmtMln(mo.totalCost)}</span>`;
+                        row.appendChild(info);
+                        container.appendChild(row);
+                    });
+                })
+                .catch(() => {});
+        }
+
+        window.switchTfomsTab = function(tab, btn) {
+            document.querySelectorAll('.tfoms-tab').forEach(b => {
+                b.style.borderBottomColor = 'transparent';
+                b.style.color = 'rgba(255,255,255,.45)';
+            });
+            btn.style.borderBottomColor = '#2A78D6';
+            btn.style.color = '#2A78D6';
+            document.getElementById('tfoms-tab-mo').style.display = tab === 'mo' ? '' : 'none';
+            document.getElementById('tfoms-tab-dynamics').style.display = tab === 'dynamics' ? '' : 'none';
+            document.getElementById('tfoms-tab-schemes').style.display = tab === 'schemes' ? '' : 'none';
+            if (tab === 'dynamics' && !_dynamicsLoaded) loadTfomsDynamics();
+            if (tab === 'schemes' && !_schemesLoaded) loadTfomsSchemes();
+        };
+
+        function loadTfomsDynamics() {
+            _dynamicsLoaded = true;
+            fetch(TFOMS_BASE + '/api/tfoms-ds/dynamics')
+                .then(r => r.ok ? r.json() : [])
+                .then(rows => {
+                    const labels = rows.map(r => r.month);
+                    const counts = rows.map(r => r.count);
+                    const ctx = document.getElementById('tfomsDynamicsChart').getContext('2d');
+                    if (_dynamicsChart) _dynamicsChart.destroy();
+                    _dynamicsChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: { labels, datasets: [{ data: counts, backgroundColor: C1, borderRadius: 4, label: 'Курсов' }] },
+                        options: { responsive:true, plugins: { legend:{display:false} }, scales: {
+                            x: { ticks:{color:'rgba(255,255,255,.5)',font:{size:11}}, grid:{color:'rgba(255,255,255,.05)'} },
+                            y: { ticks:{color:'rgba(255,255,255,.5)',font:{size:11}}, grid:{color:'rgba(255,255,255,.05)'} }
+                        }}
+                    });
+                    const total = counts.reduce((s, v) => s + v, 0);
+                    document.getElementById('tfomsDynamicsBody').innerHTML = rows.map((r, i) =>
+                        `<tr style="border-bottom:1px solid rgba(255,255,255,.04);background:${i%2?'rgba(255,255,255,.02)':''}">
+                            <td style="padding:7px 12px;">${r.month}</td>
+                            <td style="padding:7px 12px;text-align:right;color:#60a5fa;font-weight:600;">${r.count}</td>
+                            <td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.45);">${r.pct}%</td>
+                        </tr>`).join('');
+                })
+                .catch(() => {});
+        }
+
+        const SCHEME_COLORS = ['#2A78D6','#EDA100','#E34948','#22c55e','#a855f7','#06b6d4','#f97316','#8b5cf6'];
+
+        function loadTfomsSchemes() {
+            _schemesLoaded = true;
+            fetch(TFOMS_BASE + '/api/tfoms-ds/schemes')
+                .then(r => r.ok ? r.json() : [])
+                .then(rows => {
+                    const labels = rows.map(r => r.display);
+                    const counts = rows.map(r => r.count);
+                    const colors = rows.map((_, i) => SCHEME_COLORS[i % SCHEME_COLORS.length]);
+                    const ctx = document.getElementById('tfomsSchemeChart').getContext('2d');
+                    if (_schemeChart) _schemeChart.destroy();
+                    _schemeChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: { labels, datasets: [{ data: counts, backgroundColor: colors, borderWidth: 2, borderColor: '#111827' }] },
+                        options: { responsive:false, plugins: {
+                            legend:{ position:'bottom', labels:{ color:'rgba(255,255,255,.6)', font:{size:11}, padding:10 } }
+                        }}
+                    });
+                    document.getElementById('tfomsSchemeBody').innerHTML = rows.map((r, i) =>
+                        `<tr style="border-bottom:1px solid rgba(255,255,255,.04);background:${i%2?'rgba(255,255,255,.02)':''}">
+                            <td style="padding:7px 12px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${colors[i]};margin-right:6px;"></span>${r.code || '—'}</td>
+                            <td style="padding:7px 12px;">${r.display}</td>
+                            <td style="padding:7px 12px;text-align:right;font-weight:600;color:#60a5fa;">${r.count}</td>
+                            <td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.45);">${r.pct}%</td>
+                        </tr>`).join('');
+                })
+                .catch(() => {});
+        }
+
+        window.openTfomsPatientsModal = function(moShort, moFull, mo) {
+            _tfomsPatients = [];
+            document.getElementById('tfomsCourseFilter').value = '0';
+            const modal = document.getElementById('tfomsPatientsModal');
+            document.getElementById('tfomsPatientsModalTitle').textContent = moFull || moShort;
+            const tbody = document.getElementById('tfomsPatientsBody');
+            tbody.innerHTML = '<tr><td colspan="4" style="padding:16px;text-align:center;color:rgba(255,255,255,.3);">Загрузка...</td></tr>';
+            modal.style.display = 'block';
+
+            const sub = mo ? `${mo.unique || 0} пациентов · ${mo.course1 || 0} прошли 1 курс · ${mo.course2 || 0} прошли 2 курса` : '';
+            document.getElementById('tfomsPatientsModalSub').textContent = sub;
+
+            fetch(TFOMS_BASE + '/api/tfoms-ds/patients/' + encodeURIComponent(moShort))
+                .then(r => r.ok ? r.json() : [])
+                .then(patients => {
+                    _tfomsPatients = patients;
+                    renderTfomsPatients();
+                })
+                .catch(() => { tbody.innerHTML = '<tr><td colspan="4" style="padding:16px;text-align:center;color:#f87171;">Ошибка загрузки</td></tr>'; });
+        };
+
+        window.filterTfomsPatients = function() { renderTfomsPatients(); };
+
+        function renderTfomsPatients() {
+            const filter = parseInt(document.getElementById('tfomsCourseFilter').value, 10);
+            const list = filter === 0 ? _tfomsPatients : _tfomsPatients.filter(p => {
+                const c = p.courses || 1;
+                return filter === 3 ? c >= 3 : c === filter;
+            });
+            const tbody = document.getElementById('tfomsPatientsBody');
+            if (!list.length) {
+                tbody.innerHTML = '<tr><td colspan="4" style="padding:16px;text-align:center;color:rgba(255,255,255,.3);">Нет данных</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map((p, i) => {
+                const c = p.courses || 1;
+                const ds = p.dateStart ? p.dateStart.split('-').reverse().join('.') : '—';
+                return `<tr style="border-bottom:1px solid rgba(255,255,255,.05);background:${i%2?'rgba(255,255,255,.02)':''}">
+                    <td style="padding:7px 10px;">${p.lastName || '—'}</td>
+                    <td style="padding:7px 10px;text-align:center;">${courseBadge(c)}</td>
+                    <td style="padding:7px 10px;color:rgba(255,255,255,.55);">${ds}</td>
+                    <td style="padding:7px 10px;color:rgba(255,255,255,.55);">${p.scheme || '—'}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        window.closeTfomsPatientsModal = function() {
+            document.getElementById('tfomsPatientsModal').style.display = 'none';
+        };
+
+        document.getElementById('tfomsPatientsModal').addEventListener('click', function(e) {
+            if (e.target === this) closeTfomsPatientsModal();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeTfomsPatientsModal();
+        });
+
+        loadTfomsDashboard();
+    })();
+
+    (function() {
+        let _allContracts = [];
+        let _ctrTab = 'all';
+        let _ctrSort = { field: null, dir: 1 }; // dir: 1=asc, -1=desc
+
+        const STATUS_ORDER = { 'без_заявок': 0, 'частично': 1, 'исполнен': 2 };
+
+        window.ctrToggleSort = function(field) {
+            if (_ctrSort.field === field) {
+                _ctrSort.dir = -_ctrSort.dir;
+            } else {
+                _ctrSort.field = field;
+                _ctrSort.dir = field === 'pct' ? -1 : 1; // % — сначала убыв., статус — сначала возр.
+            }
+            ['pct','status'].forEach(f => {
+                const el = document.getElementById('ctr-sort-' + f);
+                const th = document.getElementById('ctr-th-' + f);
+                if (!el || !th) return;
+                if (f === _ctrSort.field) {
+                    el.textContent = _ctrSort.dir === -1 ? '▼' : '▲';
+                    th.style.color = '#a5b4fc';
+                } else {
+                    el.textContent = '';
+                    th.style.color = '';
+                }
+            });
+            ctrRender();
+        };
+
+        function fmt(n) {
+            if (n == null) return '—';
+            return n.toLocaleString('ru-RU');
+        }
+        function pct(exec, total) {
+            if (!total) return null;
+            return Math.round(exec / total * 1000) / 10;
+        }
+        function statusDot(s) {
+            if (s === 'исполнен')   return '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#4ade80;"></span>';
+            if (s === 'частично')   return '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#fcd34d;"></span>';
+            return '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f87171;"></span>';
+        }
+        function pctColor(p) {
+            if (p == null) return 'rgba(255,255,255,.3)';
+            if (p >= 100) return '#4ade80';
+            if (p >= 50)  return '#fcd34d';
+            return '#f87171';
+        }
+
+        window.ctrSetTab = function(tab) {
+            _ctrTab = tab;
+            ['all','mo','none'].forEach(t => {
+                const btn = document.getElementById('ctr-tab-' + t);
+                if (!btn) return;
+                const active = t === tab;
+                btn.style.background = active ? 'rgba(99,102,241,.2)' : 'rgba(255,255,255,.05)';
+                btn.style.border     = active ? '1px solid rgba(99,102,241,.4)' : '1px solid rgba(255,255,255,.1)';
+                btn.style.color      = active ? '#a5b4fc' : 'rgba(255,255,255,.5)';
+            });
+            ctrRender();
+        };
+
+        window.ctrRender = function() {
+            const filterMo     = (document.getElementById('ctr-filter-mo')?.value     || '').trim();
+            const filterDrug   = (document.getElementById('ctr-filter-drug')?.value   || '').trim();
+            const filterStatus = (document.getElementById('ctr-filter-status')?.value || '').trim();
+
+            let rows = _allContracts.filter(c => {
+                if (filterMo     && c.orgName !== filterMo)         return false;
+                if (filterDrug   && c.drugName !== filterDrug)       return false;
+                if (filterStatus && c.status   !== filterStatus)     return false;
+                if (_ctrTab === 'none' && c.status !== 'без_заявок') return false;
+                return true;
+            });
+
+            const viewAll  = document.getElementById('ctr-view-all');
+            const viewMo   = document.getElementById('ctr-view-mo');
+            const empty    = document.getElementById('ctr-empty');
+
+            if (_allContracts.length === 0) {
+                viewAll.style.display = 'none';
+                viewMo.style.display  = 'none';
+                empty.style.display   = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+
+            if (_ctrTab === 'mo') {
+                viewAll.style.display = 'none';
+                viewMo.style.display  = 'block';
+                renderMoTable(rows);
+            } else {
+                viewAll.style.display = 'block';
+                viewMo.style.display  = 'none';
+                renderAllTable(rows);
+            }
+        };
+
+        function renderAllTable(rows) {
+            const tbody = document.getElementById('ctr-tbody-all');
+            if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:rgba(255,255,255,.3);padding:24px;">Нет данных</td></tr>'; return; }
+            if (_ctrSort.field) {
+                rows = [...rows].sort((a, b) => {
+                    let av, bv;
+                    if (_ctrSort.field === 'pct') {
+                        av = pct(a.executedAmount, a.totalAmount) ?? -1;
+                        bv = pct(b.executedAmount, b.totalAmount) ?? -1;
+                    } else {
+                        av = STATUS_ORDER[a.status] ?? 0;
+                        bv = STATUS_ORDER[b.status] ?? 0;
+                    }
+                    return (av - bv) * _ctrSort.dir;
+                });
+            }
+            tbody.innerHTML = rows.map(c => {
+                const p = pct(c.executedAmount, c.totalAmount);
+                const pStr = p != null ? p + '%' : '—';
+                return `<tr>
+                    <td style="text-align:left;">${c.orgName || '—'}</td>
+                    <td style="text-align:left;">${c.drugName || '—'}</td>
+                    <td style="text-align:left;font-size:.75rem;color:rgba(255,255,255,.45);">${c.contractNumber || '—'}</td>
+                    <td style="text-align:right;">${fmt(c.totalAmount)}</td>
+                    <td style="text-align:right;">${fmt(c.executedAmount)}</td>
+                    <td style="text-align:right;color:${pctColor(p)};">${pStr}</td>
+                    <td style="text-align:center;">${statusDot(c.status)}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderMoTable(rows) {
+            const byMo = {};
+            rows.forEach(c => {
+                if (!byMo[c.orgName]) byMo[c.orgName] = { count:0, total:0, exec:0, done:0, none:0 };
+                const g = byMo[c.orgName];
+                g.count++;
+                g.total += c.totalAmount || 0;
+                g.exec  += c.executedAmount || 0;
+                if (c.status === 'исполнен')   g.done++;
+                if (c.status === 'без_заявок') g.none++;
+            });
+            const tbody = document.getElementById('ctr-tbody-mo');
+            const entries = Object.entries(byMo).sort((a,b) => {
+                const pa = pct(a[1].exec, a[1].total) || 0;
+                const pb = pct(b[1].exec, b[1].total) || 0;
+                return pb - pa;
+            });
+            tbody.innerHTML = entries.map(([mo, g]) => {
+                const p = pct(g.exec, g.total);
+                return `<tr>
+                    <td style="text-align:left;">${mo}</td>
+                    <td style="text-align:right;">${g.count}</td>
+                    <td style="text-align:right;">${fmt(g.total)}</td>
+                    <td style="text-align:right;">${fmt(g.exec)}</td>
+                    <td style="text-align:right;color:${pctColor(p)};">${p != null ? p + '%' : '—'}</td>
+                    <td style="text-align:center;color:#4ade80;">${g.done}</td>
+                    <td style="text-align:center;color:#f87171;">${g.none}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function populateFilter(id, values) {
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            const cur = sel.value;
+            while (sel.options.length > 1) sel.remove(1);
+            values.forEach(v => {
+                const o = document.createElement('option');
+                o.value = v; o.textContent = v;
+                sel.appendChild(o);
+            });
+            if (values.includes(cur)) sel.value = cur;
+        }
+
+        function loadContracts() {
+            fetch(/*[[@{/api/contracts}]]*/ '/api/contracts')
+                .then(r => r.ok ? r.json() : [])
+                .then(data => {
+                    _allContracts = data;
+
+                    const moSet   = [...new Set(data.map(c => c.orgName).filter(Boolean))].sort();
+                    const drugSet = [...new Set(data.map(c => c.drugName).filter(Boolean))].sort();
+                    populateFilter('ctr-filter-mo',   moSet);
+                    populateFilter('ctr-filter-drug', drugSet);
+
+                    ctrRender();
+                })
+                .catch(() => {});
+
+            fetch(/*[[@{/api/contracts/stats}]]*/ '/api/contracts/stats')
+                .then(r => r.ok ? r.json() : null)
+                .then(s => {
+                    if (!s) return;
+                    const total = s.total || 0;
+                    document.getElementById('ctr-total').textContent    = total;
+                    document.getElementById('ctr-total-sub').textContent = total + ' строк данных';
+                    document.getElementById('ctr-pct').textContent      = (s.pct || 0) + '%';
+                    document.getElementById('ctr-amounts').textContent  =
+                        fmt(s.executedAmount) + ' / ' + fmt(s.totalAmount) + ' ₽';
+                    document.getElementById('ctr-executed').textContent = s.executed || 0;
+                    document.getElementById('ctr-executed-sub').textContent = 'из ' + total + ' контрактов';
+                    document.getElementById('ctr-no-orders').textContent = s.noOrders || 0;
+                })
+                .catch(() => {});
+        }
+
+        loadContracts();
+    })();
+
     (function() {
         const section = document.getElementById('weekly-rating');
         if (!section) return;
@@ -1497,7 +2164,7 @@
     }
 
     /* Автоактивация пункта при скролле */
-    const sections = ['kvc','kpi','pathway','drugs','rating','porucheniya'];
+    const sections = ['kvc','kpi','contracts-section','tfoms-section','pathway','drugs','rating','porucheniya'];
     window.addEventListener('scroll', () => {
         let cur = sections[0];
         sections.forEach(id => {

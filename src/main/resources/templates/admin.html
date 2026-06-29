@@ -741,6 +741,103 @@
                 </div>
             </div>
 
+            <!-- ДС ТФОМС СВОД -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="mb-1">
+                        <span class="badge bg-info text-dark me-2" style="font-size:.7rem;vertical-align:middle;">ДС</span>Загрузка ДС ТФОМС СВОД
+                    </h5>
+                    <p class="text-muted mb-3" style="font-size:0.85rem;">
+                        Файл <strong>ДС_ТФОМС_СВОД.xlsx</strong> — два листа:
+                        <strong>Сводная</strong> (итоги по МО) и <strong>Все МО</strong> (детальные записи по пациентам).
+                        Данные читаются с листа «Все МО», строка 1 — заголовок.
+                        При загрузке все старые записи заменяются.
+                    </p>
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <input type="file" id="tfomsDsFile" accept=".xlsx" class="form-control" style="max-width:360px;">
+                        <button class="btn btn-primary" onclick="uploadTfomsDs()">
+                            <i class="bi bi-upload me-1"></i>Загрузить
+                        </button>
+                        <a class="btn btn-outline-secondary" th:href="${basePath + '/api/tfoms-ds/template'}">
+                            <i class="bi bi-download me-1"></i>Скачать шаблон
+                        </a>
+                        <span id="tfomsDsStatus" class="text-muted" style="font-size:0.85rem;"></span>
+                    </div>
+
+                    <div id="tfomsDsPreview" style="display:none;">
+                        <hr class="my-3">
+                        <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                            <span class="fw-semibold" style="font-size:0.88rem;">Сводная по МО:</span>
+                            <span id="tfomsDsCount" class="text-muted ms-auto" style="font-size:0.82rem;"></span>
+                        </div>
+                        <div style="max-height:420px;overflow-y:auto;border-radius:8px;border:1px solid var(--emias-border,#E8ECF5);">
+                            <table class="table table-sm table-hover mb-0" style="font-size:0.8rem;">
+                                <thead style="position:sticky;top:0;z-index:1;" class="table-light">
+                                    <tr>
+                                        <th style="width:36px;">№</th>
+                                        <th>МО (краткое)</th>
+                                        <th>Наименование МО</th>
+                                        <th class="text-end">Всего записей</th>
+                                        <th class="text-end">Стоимость ₽</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tfomsDsPreviewBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Контракты — мониторинг исполнения -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="mb-1">
+                        <span class="badge bg-success me-2" style="font-size:.7rem;vertical-align:middle;">→03</span>Загрузка контрактов
+                    </h5>
+                    <p class="text-muted mb-3" style="font-size:0.85rem;">
+                        Файл <strong>ДК_Гепатит_С_2026_ДД.ММ.ГГГГ.xlsx</strong> — строка 1 заголовок, со строки 2 данные.
+                        Читаются столбцы: <strong>C</strong> — МО, <strong>D</strong> — МНН,
+                        <strong>V</strong> — № ГК ЕИС, <strong>W</strong> — Статус контракта,
+                        <strong>X</strong> — Сумма контракта, <strong>AA</strong> — Сумма исполненного.
+                        При загрузке все старые контракты заменяются.
+                    </p>
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <input type="file" id="contractsFile" accept=".xlsx" class="form-control" style="max-width:360px;">
+                        <button class="btn btn-primary" onclick="uploadContracts()">
+                            <i class="bi bi-upload me-1"></i>Загрузить контракты
+                        </button>
+                        <a class="btn btn-outline-secondary" th:href="${basePath + '/api/contracts/template'}">
+                            <i class="bi bi-download me-1"></i>Скачать шаблон
+                        </a>
+                        <span id="contractsStatus" class="text-muted" style="font-size:0.85rem;"></span>
+                    </div>
+
+                    <div id="contractsPreview" style="display:none;">
+                        <hr class="my-3">
+                        <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                            <span class="fw-semibold" style="font-size:0.88rem;">Загруженные контракты:</span>
+                            <span id="contractsCount" class="text-muted ms-auto" style="font-size:0.82rem;"></span>
+                        </div>
+                        <div style="max-height:420px;overflow-y:auto;border-radius:8px;border:1px solid var(--emias-border,#E8ECF5);">
+                            <table class="table table-sm table-hover mb-0" style="font-size:0.8rem;">
+                                <thead style="position:sticky;top:0;z-index:1;" class="table-light">
+                                    <tr>
+                                        <th style="width:36px;">№</th>
+                                        <th>МО</th>
+                                        <th>МНН</th>
+                                        <th>№ ГК ЕИС</th>
+                                        <th class="text-end">Сумма ₽</th>
+                                        <th class="text-end">Исполнено ₽</th>
+                                        <th class="text-center">Статус</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="contractsPreviewBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 05 План мероприятий -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body p-4">
@@ -1592,6 +1689,122 @@
 
     document.querySelector('[data-bs-target="#tab-hcv"]')
         .addEventListener('shown.bs.tab', () => loadHcvWeeklyPlanWeeks(null));
+
+    function uploadTfomsDs() {
+        const fileInput = document.getElementById('tfomsDsFile');
+        const status    = document.getElementById('tfomsDsStatus');
+        if (!fileInput.files.length) { status.textContent = 'Выберите файл'; return; }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        status.innerHTML = '<span class="text-primary">Загрузка...</span>';
+        fetch(BASE_PATH + '/api/tfoms-ds/upload', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    status.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>Загружено ' + data.count + ' записей</span>';
+                    loadTfomsDsPreview();
+                } else {
+                    status.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle me-1"></i>' + (data.error || 'Ошибка') + '</span>';
+                }
+            })
+            .catch(() => { status.innerHTML = '<span class="text-danger">Ошибка соединения</span>'; });
+    }
+
+    function loadTfomsDsPreview() {
+        fetch(BASE_PATH + '/api/tfoms-ds/count')
+            .then(r => r.json())
+            .then(data => {
+                const cnt = document.getElementById('tfomsDsCount');
+                if (cnt) cnt.textContent = 'В базе: ' + (data.count || 0).toLocaleString('ru-RU') + ' записей';
+            }).catch(() => {});
+
+        fetch(BASE_PATH + '/api/tfoms-ds/summary')
+            .then(r => r.json())
+            .then(rows => {
+                const preview = document.getElementById('tfomsDsPreview');
+                const tbody   = document.getElementById('tfomsDsPreviewBody');
+                if (!rows.length) { if (preview) preview.style.display = 'none'; return; }
+                if (preview) preview.style.display = 'block';
+
+                const fmt = n => n != null ? Number(n).toLocaleString('ru-RU') : '—';
+                let total = 0, totalCost = 0;
+                tbody.innerHTML = rows.map((r, i) => {
+                    total     += Number(r.totalRecords || 0);
+                    totalCost += Number(r.totalCost    || 0);
+                    return `<tr>
+                        <td>${i + 1}</td>
+                        <td>${r.moShort || '—'}</td>
+                        <td>${r.moFull  || '—'}</td>
+                        <td class="text-end">${fmt(r.totalRecords)}</td>
+                        <td class="text-end">${fmt(r.totalCost)}</td>
+                    </tr>`;
+                }).join('') + `<tr class="table-secondary fw-bold">
+                    <td></td><td>ИТОГО</td><td></td>
+                    <td class="text-end">${fmt(total)}</td>
+                    <td class="text-end">${fmt(totalCost)}</td>
+                </tr>`;
+            }).catch(() => {});
+    }
+
+    function uploadContracts() {
+        const fileInput = document.getElementById('contractsFile');
+        const status    = document.getElementById('contractsStatus');
+        if (!fileInput.files.length) { status.textContent = 'Выберите файл'; return; }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        status.innerHTML = '<span class="text-primary">Загрузка...</span>';
+        fetch(BASE_PATH + '/api/contracts/upload', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    status.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>Загружено ' + data.count + ' контрактов</span>';
+                    loadContractsPreview();
+                } else {
+                    status.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle me-1"></i>' + (data.error || 'Ошибка') + '</span>';
+                }
+            })
+            .catch(() => { status.innerHTML = '<span class="text-danger">Ошибка соединения</span>'; });
+    }
+
+    function loadContractsPreview() {
+        fetch(BASE_PATH + '/api/contracts')
+            .then(r => r.json())
+            .then(data => {
+                const preview = document.getElementById('contractsPreview');
+                const cnt     = document.getElementById('contractsCount');
+                const tbody   = document.getElementById('contractsPreviewBody');
+                if (!data.length) { if (preview) preview.style.display = 'none'; return; }
+
+                if (cnt) cnt.textContent = 'В базе: ' + data.length + ' контрактов';
+                if (preview) preview.style.display = 'block';
+
+                const statusLabel = { 'исполнен': '<span class="badge bg-success">Исполнен</span>',
+                                      'частично':  '<span class="badge bg-warning text-dark">Исполнение</span>',
+                                      'без_заявок':'<span class="badge bg-danger">Без заявок</span>' };
+                const fmt = n => n != null ? Number(n).toLocaleString('ru-RU') : '—';
+
+                tbody.innerHTML = data.map((c, i) => `<tr>
+                    <td>${i + 1}</td>
+                    <td>${c.orgName || '—'}</td>
+                    <td>${c.drugName || '—'}</td>
+                    <td style="font-size:0.75rem;color:#6c757d;">${c.contractNumber || '—'}</td>
+                    <td class="text-end">${fmt(c.totalAmount)}</td>
+                    <td class="text-end">${fmt(c.executedAmount)}</td>
+                    <td class="text-center">${statusLabel[c.status] || c.status}</td>
+                </tr>`).join('');
+            })
+            .catch(() => {});
+    }
+
+    // Загружаем предпросмотры при открытии страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        loadTfomsDsPreview();
+        loadContractsPreview();
+    });
 
     function uploadHcvRegistry() {
         const fileInput = document.getElementById('hcvRegistryFile');
