@@ -19,6 +19,8 @@ import com.emias.dashboard.service.ActionPlanService;
 import com.emias.dashboard.service.KpiService;
 import com.emias.dashboard.service.KvcService;
 import com.emias.dashboard.service.RisksService;
+import com.emias.dashboard.service.ContractService;
+import com.emias.dashboard.service.TfomsDsService;
 import com.emias.dashboard.service.MoWorkPlanService;
 import com.emias.dashboard.service.ReportService;
 import com.emias.dashboard.service.SettingsService;
@@ -88,6 +90,8 @@ public class DataController {
     private final KpiService             kpiService;
     private final RisksService           risksService;
     private final ActionPlanService      actionPlanService;
+    private final ContractService        contractService;
+    private final TfomsDsService         tfomsDsService;
     private final ObjectMapper           objectMapper;
 
     public DataController(ReportService reportService,
@@ -104,6 +108,8 @@ public class DataController {
                           KpiService kpiService,
                           RisksService risksService,
                           ActionPlanService actionPlanService,
+                          ContractService contractService,
+                          TfomsDsService tfomsDsService,
                           ObjectMapper objectMapper) {
         this.reportService          = reportService;
         this.screeningRepository    = screeningRepository;
@@ -119,7 +125,110 @@ public class DataController {
         this.kpiService             = kpiService;
         this.risksService           = risksService;
         this.actionPlanService      = actionPlanService;
+        this.contractService        = contractService;
+        this.tfomsDsService         = tfomsDsService;
         this.objectMapper           = objectMapper;
+    }
+
+    /* ── Контракты ── */
+    @PostMapping("/contracts/upload")
+    public ResponseEntity<Map<String, Object>> uploadContracts(
+            @RequestParam("file") MultipartFile file) {
+        try {
+            int count = contractService.upload(file);
+            return ResponseEntity.ok(Map.of("status", "ok", "count", count));
+        } catch (FileValidationException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", String.join("; ", e.getErrors())));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/contracts")
+    public ResponseEntity<List<Map<String, Object>>> getContracts() {
+        var all = contractService.getAll();
+        var list = all.stream().map(c -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", c.getId());
+            m.put("orgName", c.getOrgName());
+            m.put("drugName", c.getDrugName());
+            m.put("contractNumber", c.getContractNumber());
+            m.put("totalAmount", c.getTotalAmount());
+            m.put("executedAmount", c.getExecutedAmount());
+            m.put("status", c.getStatus());
+            return m;
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/contracts/stats")
+    public ResponseEntity<Map<String, Object>> getContractStats() {
+        return ResponseEntity.ok(contractService.getStats());
+    }
+
+    /* ── ТФОМС ДС ── */
+    @PostMapping("/tfoms-ds/upload")
+    public ResponseEntity<Map<String, Object>> uploadTfomsDs(
+            @RequestParam("file") MultipartFile file) {
+        try {
+            int count = tfomsDsService.upload(file);
+            return ResponseEntity.ok(Map.of("status", "ok", "count", count));
+        } catch (FileValidationException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", String.join("; ", e.getErrors())));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/tfoms-ds/summary")
+    public ResponseEntity<List<Map<String, Object>>> getTfomsDsSummary() {
+        return ResponseEntity.ok(tfomsDsService.getSummaryByMo());
+    }
+
+    @GetMapping("/tfoms-ds/count")
+    public ResponseEntity<Map<String, Object>> getTfomsDsCount() {
+        return ResponseEntity.ok(Map.of("count", tfomsDsService.count()));
+    }
+
+    @GetMapping("/tfoms-ds/dashboard")
+    public ResponseEntity<Map<String, Object>> getTfomsDsDashboard() {
+        return ResponseEntity.ok(tfomsDsService.getDashboardData());
+    }
+
+    @GetMapping("/tfoms-ds/patients/{moShort}")
+    public ResponseEntity<List<Map<String, Object>>> getTfomsDsPatients(
+            @PathVariable String moShort) {
+        return ResponseEntity.ok(tfomsDsService.getPatientsByMo(moShort));
+    }
+
+    @GetMapping("/tfoms-ds/dynamics")
+    public ResponseEntity<List<Map<String, Object>>> getTfomsDsDynamics() {
+        return ResponseEntity.ok(tfomsDsService.getDynamics());
+    }
+
+    @GetMapping("/tfoms-ds/schemes")
+    public ResponseEntity<List<Map<String, Object>>> getTfomsDsSchemes() {
+        return ResponseEntity.ok(tfomsDsService.getSchemes());
+    }
+
+    @GetMapping("/tfoms-ds/template")
+    public ResponseEntity<byte[]> getTfomsDsTemplate() throws IOException {
+        byte[] bytes = tfomsDsService.generateTemplate();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"DS_TFOMS_template.xlsx\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(bytes);
+    }
+
+    @GetMapping("/contracts/template")
+    public ResponseEntity<byte[]> getContractsTemplate() throws IOException {
+        byte[] bytes = contractService.generateTemplate();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"contracts_template.xlsx\"")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(bytes);
     }
 
     /* ── Поручения МО ── */

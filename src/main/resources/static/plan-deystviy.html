@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>План действий — Гепатит С</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0A2342;--blue:#065A82;--teal:#1C7293;--mint:#02C39A;
+  --white:#FFFFFF;--light:#D6E8F5;--gray:#8FA8BB;
+  --red:#E05050;--amber:#E6A020;--card:#0D2E4A;
+}
+html{scroll-behavior:smooth}
+body{background:var(--navy);color:var(--white);font-family:system-ui,sans-serif;font-size:14px}
+
+/* ШАПКА */
+.header{background:var(--card);border-bottom:1px solid rgba(28,114,147,.3);padding:12px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header-logo{font-size:12px;color:var(--mint);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.header-nav{display:flex;gap:4px}
+.nav-btn{background:none;border:none;color:var(--gray);font-size:11px;cursor:pointer;padding:4px 10px;border-radius:4px}
+.nav-btn:hover{background:rgba(255,255,255,.06);color:var(--white)}
+.header-dead{font-size:12px;color:var(--red);font-weight:600}
+
+/* HERO */
+.hero{padding:80px 40px 64px;max-width:1100px;margin:0 auto;position:relative}
+.hero-bg{position:fixed;top:-200px;right:-200px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(6,90,130,.2) 0%,transparent 70%);pointer-events:none;z-index:0}
+.hero-inner{position:relative;z-index:1}
+.hero-title{font-size:44px;font-weight:700;line-height:1.2;margin-bottom:12px}
+.hero-line{width:64px;height:3px;background:var(--mint);border-radius:2px;margin-bottom:20px}
+.hero-meta{font-size:13px;color:var(--gray);margin-bottom:36px}
+.hero-meta b{color:var(--white)}
+.hero-meta .dead{color:var(--red);font-weight:600}
+.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:680px}
+.kpi{background:var(--card);border:1px solid rgba(28,114,147,.3);border-radius:12px;padding:16px 20px}
+.kpi-val{font-size:30px;font-weight:700;color:var(--mint);margin-bottom:4px}
+.kpi-lbl{font-size:12px;color:var(--gray);line-height:1.4}
+
+/* DIVIDER */
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(28,114,147,.35),transparent);margin:0 40px}
+
+/* СЕКЦИЯ */
+.sec{padding:56px 40px;max-width:1100px;margin:0 auto}
+.sec-tag{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mint);margin-bottom:8px}
+.sec-title{font-size:32px;font-weight:700;line-height:1.2;margin-bottom:6px}
+.sec-sub{font-size:14px;color:var(--gray);margin-bottom:28px}
+
+/* КАРТОЧКИ ПАЦИЕНТОВ */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.pcard{background:var(--card);border-radius:12px;padding:22px;border:1px solid transparent}
+.pcard.green{border-color:rgba(2,195,154,.25)}
+.pcard.amber{border-color:rgba(230,160,32,.25)}
+.pcard-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.pcard-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.pcard-icon.green{background:rgba(2,195,154,.15)}
+.pcard-icon.amber{background:rgba(230,160,32,.15)}
+.pcard-title{font-size:14px;font-weight:600}
+.pcard-title.green{color:var(--mint)}
+.pcard-title.amber{color:var(--amber)}
+.plist{display:flex;flex-direction:column;gap:7px}
+.plist-item{display:flex;gap:9px;font-size:13px;color:var(--light);line-height:1.5}
+.plist-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:7px}
+.plist-dot.green{background:var(--mint)}
+.plist-dot.amber{background:var(--amber)}
+.goal-banner{background:linear-gradient(135deg,rgba(6,90,130,.5),rgba(28,114,147,.3));border:1px solid rgba(28,114,147,.4);border-radius:10px;padding:13px 20px;text-align:center;font-size:14px;font-weight:600;color:var(--white)}
+
+/* ДИАГРАММА */
+.chart-wrap{background:var(--card);border-radius:14px;padding:24px}
+.chart-inner{position:relative;height:560px}
+
+/* CTA */
+.cta-wrap{background:var(--card);border-top:1px solid rgba(28,114,147,.3);padding:56px 40px}
+.cta-inner{max-width:1100px;margin:0 auto}
+.cta-title{font-size:32px;font-weight:700;margin-bottom:28px;line-height:1.3}
+.cta-title span{color:var(--mint)}
+.action-list{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.action{display:flex;gap:14px;align-items:flex-start}
+.action-num{width:30px;height:30px;border-radius:50%;background:var(--mint);color:var(--navy);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.action-text{font-size:14px;color:var(--light);line-height:1.6;padding-top:4px}
+.final-banner{background:linear-gradient(135deg,rgba(224,80,80,.18),rgba(230,160,32,.12));border:1px solid rgba(224,80,80,.35);border-radius:10px;padding:14px 22px;font-size:13px;color:var(--white);text-align:center;line-height:1.7}
+.final-banner b{color:var(--red)}
+
+.foot{text-align:center;font-size:11px;color:var(--gray);padding:16px;opacity:.5}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">Гепатит С · Московская область</div>
+  <nav class="header-nav">
+    <button class="nav-btn" onclick="document.getElementById('hero').scrollIntoView({behavior:'smooth'})">Обзор</button>
+    <button class="nav-btn" onclick="document.getElementById('who').scrollIntoView({behavior:'smooth'})">Пациенты</button>
+    <button class="nav-btn" onclick="document.getElementById('mo').scrollIntoView({behavior:'smooth'})">По МО</button>
+    <button class="nav-btn" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">Действия</button>
+  </nav>
+  <div class="header-dead">⚠ Дедлайн: 01.08.2026</div>
+</div>
+
+<!-- HERO -->
+<div id="hero" class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-inner">
+    <div class="hero-title">План действий по началу лечения<br>4 262 отобранных пациентов Московской области</div>
+    <div class="hero-line"></div>
+    <div class="hero-meta">Московская область &nbsp;·&nbsp; Июнь 2026 &nbsp;·&nbsp; Дедлайн: <span class="dead">01.08.2026</span> &nbsp;·&nbsp; Осталось: <b>51 день</b></div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-val">4 262</div><div class="kpi-lbl">пациентов отобрано для лечения</div></div>
+      <div class="kpi"><div class="kpi-val" style="color:var(--amber)">1 166</div><div class="kpi-lbl">уже есть заключение МОНИКИ</div></div>
+      <div class="kpi"><div class="kpi-val" style="color:var(--red)">3 096</div><div class="kpi-lbl">нужно направить на консультацию</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- КТО ПАЦИЕНТЫ -->
+<div id="who" class="sec">
+  <div class="sec-tag">01 — Кто эти пациенты</div>
+  <div class="sec-title">Две группы, два пути к лечению</div>
+  <div class="sec-sub">Все 4 262 пациента — ПЦР-положительные. Разница только в наличии заключения МОНИКИ</div>
+  <div class="two-col">
+    <div class="pcard green">
+      <div class="pcard-head">
+        <div class="pcard-icon green">✅</div>
+        <div class="pcard-title green">Уже готовы к лечению — 1 166 чел.</div>
+      </div>
+      <div class="plist">
+        <div class="plist-item"><div class="plist-dot green"></div>ПЦР-положительный результат подтверждён</div>
+        <div class="plist-item"><div class="plist-dot green"></div>Заключение МОНИКИ / Центра СПИД получено</div>
+        <div class="plist-item"><div class="plist-dot green"></div>Включены в свод проекта</div>
+        <div class="plist-item"><div class="plist-dot green"></div>Ждут назначения схемы ПВТ — действовать немедленно</div>
+      </div>
+    </div>
+    <div class="pcard amber">
+      <div class="pcard-head">
+        <div class="pcard-icon amber">⏳</div>
+        <div class="pcard-title amber">Нужна консультация МОНИКИ — 3 096 чел.</div>
+      </div>
+      <div class="plist">
+        <div class="plist-item"><div class="plist-dot amber"></div>ПЦР-положительный результат есть</div>
+        <div class="plist-item"><div class="plist-dot amber"></div>Заключение МОНИКИ / Центра СПИД отсутствует</div>
+        <div class="plist-item"><div class="plist-dot amber"></div>Требуется срочное направление на консультацию</div>
+        <div class="plist-item"><div class="plist-dot amber"></div>Открыть дополнительные ячейки для записи</div>
+      </div>
+    </div>
+  </div>
+  <div class="goal-banner">🎯 Цель: все 4 262 пациента должны начать лечение до 01.07.2026</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ДИАГРАММА -->
+<div id="mo" class="sec">
+  <div class="sec-tag">02 — Распределение по МО</div>
+  <div class="sec-title">Распределение пациентов, которых необходимо пролечить</div>
+  <div class="chart-wrap" style="margin-top:20px">
+    <div class="chart-inner"><canvas id="moChart"></canvas></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- CTA -->
+<div id="cta" class="cta-wrap">
+  <div class="cta-inner">
+    <div class="sec-tag">03 — Что нужно сделать сейчас</div>
+    <div class="cta-title">Каждый главный врач<br><span>подтверждает план</span></div>
+    <div class="action-list">
+      <div class="action"><div class="action-num">1</div><div class="action-text">Получить список своих пациентов от куратора и проверить актуальность данных</div></div>
+      <div class="action"><div class="action-num">2</div><div class="action-text">Назначить ответственного инфекциониста / специалиста за каждого пациента из списка</div></div>
+      <div class="action"><div class="action-num">3</div><div class="action-text">Оформить направления на консультацию МОНИКИ — не позднее <b>25.06.2026</b></div></div>
+      <div class="action"><div class="action-num">4</div><div class="action-text">Пациентам с уже имеющимся заключением — назначить схему лечения до <b>15.07.2026</b></div></div>
+      <div class="action"><div class="action-num">5</div><div class="action-text">Внести информацию в Битрикс</div></div>
+    </div>
+    <div class="final-banner">
+      Дедлайн: <b>01.08.2026</b> — 51 день &nbsp;·&nbsp;
+      Нужно охватить: <b>4 262 пациента</b> &nbsp;·&nbsp;
+      Текущий темп: ~22/нед &nbsp;→&nbsp; нужно: <b>194/нед</b>
+    </div>
+  </div>
+</div>
+
+<div class="foot">Федеральный проект «Гепатит С» · Московская область · 2026</div>
+
+<script>
+const moData = [
+  {n:"Центр профилактики и борьбы со СПИД",v:688},
+  {n:"Щелковская больница",v:447},
+  {n:"Подольская ОКБ",v:310},
+  {n:"Раменская больница",v:207},
+  {n:"Дмитровская больница",v:189},
+  {n:"Балашихинская ОБ",v:181},
+  {n:"Мытищинская ОКБ",v:179},
+  {n:"Одинцовская ОБ",v:169},
+  {n:"Домодедовская больница",v:155},
+  {n:"Сергиево-Посадская больница",v:137},
+  {n:"Видновская КБ",v:123},
+  {n:"Жуковская ОКБ",v:116},
+  {n:"Королевская больница",v:114},
+  {n:"Воскресенская больница",v:103},
+  {n:"Истринская КБ",v:92},
+  {n:"Электростальская больница",v:65},
+  {n:"Серпуховская больница",v:64},
+  {n:"Солнечногорская больница",v:62},
+  {n:"Павлово-Посадская больница",v:59},
+  {n:"Красногорская КБ",v:56},
+];
+
+new Chart(document.getElementById('moChart'),{
+  type:'bar',
+  data:{
+    labels:moData.map(d=>d.n),
+    datasets:[{
+      label:'Пациентов',
+      data:moData.map(d=>d.v),
+      backgroundColor:moData.map((_,i)=>i===0?'rgba(224,80,80,0.85)':i<3?'rgba(230,160,32,0.85)':'rgba(28,114,147,0.85)'),
+      borderRadius:4,
+      borderSkipped:false,
+    }]
+  },
+  options:{
+    indexAxis:'y',
+    responsive:true,
+    maintainAspectRatio:false,
+    layout:{padding:{right:55}},
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:c=>' '+c.raw+' пациентов'}},
+    },
+    scales:{
+      x:{ticks:{color:'#8FA8BB',font:{size:11}},grid:{color:'rgba(13,46,74,.8)'},border:{color:'transparent'}},
+      y:{ticks:{color:'#D6E8F5',font:{size:11.5}},grid:{display:false},border:{color:'transparent'}}
+    }
+  },
+  plugins:[{
+    id:'datalabels',
+    afterDatasetDraw(chart){
+      const {ctx,data}=chart;
+      const meta=chart.getDatasetMeta(0);
+      ctx.save();
+      ctx.font='600 12px system-ui,sans-serif';
+      ctx.fillStyle='#D6E8F5';
+      ctx.textAlign='left';
+      ctx.textBaseline='middle';
+      meta.data.forEach((bar,i)=>{
+        ctx.fillText(data.datasets[0].data[i], bar.x+7, bar.y);
+      });
+      ctx.restore();
+    }
+  }]
+});
+</script>
+</body>
+</html>

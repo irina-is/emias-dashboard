@@ -63,6 +63,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/hcv/kpi").permitAll()
                 .requestMatchers("/api/hcv/risks").permitAll()
                 .requestMatchers("/api/hcv/action-plan").permitAll()
+                .requestMatchers("/api/contracts", "/api/contracts/stats").permitAll()
+                .requestMatchers("/api/tfoms-ds/dashboard", "/api/tfoms-ds/patients/**", "/api/tfoms-ds/count", "/api/tfoms-ds/summary", "/api/tfoms-ds/dynamics", "/api/tfoms-ds/schemes").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
