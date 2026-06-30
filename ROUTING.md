@@ -137,6 +137,32 @@ fetch('/api/hcv/weekly-plan')           // нет BASE_PATH
 fetch('/spec/api/hcv/weekly-plan')      // захардкоженный /spec
 ```
 
+### IIFE-блоки (function() { ... })()
+
+Шаблоны используют IIFE для изоляции переменных. `BASE_PATH` объявленный снаружи **недоступен внутри** IIFE — каждый блок должен объявить его сам.
+
+```javascript
+// ✅ Правильно — BASE_PATH объявлен внутри IIFE
+(function() {
+    const BASE_PATH = /*[[${basePath}]]*/ '';
+
+    function loadData() {
+        fetch(BASE_PATH + '/api/contracts')
+    }
+    loadData();
+})();
+
+// ❌ Неправильно — BASE_PATH из другого блока сюда не виден
+(function() {
+    function loadData() {
+        fetch(BASE_PATH + '/api/contracts')  // ReferenceError: BASE_PATH is not defined
+    }
+    loadData();
+})();
+```
+
+**Правило:** добавляешь новый IIFE-блок с fetch — первой строкой объявляй `const BASE_PATH = /*[[${basePath}]]*/ '';`.
+
 ---
 
 ## Правила для Spring Security (SecurityConfig.java)
