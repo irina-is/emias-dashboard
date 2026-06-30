@@ -2181,6 +2181,7 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ── Риски проекта ── */
 (function () {
     const BASE_PATH = /*[[${basePath}]]*/ '';
+    const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     let riskIdx = 0;
 
     function rowHtml(idx, level, text) {
