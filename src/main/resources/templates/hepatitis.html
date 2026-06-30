@@ -1382,7 +1382,7 @@
         }
 
         function loadContracts() {
-            fetch(/*[[@{/api/contracts}]]*/ '/api/contracts')
+            fetch(BASE_PATH + '/api/contracts')
                 .then(r => r.ok ? r.json() : [])
                 .then(data => {
                     _allContracts = data;
@@ -1396,7 +1396,7 @@
                 })
                 .catch(() => {});
 
-            fetch(/*[[@{/api/contracts/stats}]]*/ '/api/contracts/stats')
+            fetch(BASE_PATH + '/api/contracts/stats')
                 .then(r => r.ok ? r.json() : null)
                 .then(s => {
                     if (!s) return;
