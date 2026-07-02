@@ -9,3 +9,4 @@ logs/
 *.iws
 *.ipr
 application-prod.properties
+.claude/settings.local.json
