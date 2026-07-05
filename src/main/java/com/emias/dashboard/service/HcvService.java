@@ -317,11 +317,19 @@ public class HcvService {
     /**
      * Загружает «Недельный план.xlsx» в таблицу hcv_weekly_plan для указанной недели.
      * Столбцы (0-based):
-     *   B(1) — МО
-     *   C(2) — план год амбулаторно
-     *   D(3) — план месяц амбулаторно
-     *   E(4) — план месяц стационар
-     *   H(7) — план год стационар
+     *   B(1)  — МО
+     *   C(2)  — план год (амб.)
+     *   D(3)  — факт 2026 (амб.)
+     *   E(4)  — % от плана (амб.)
+     *   F(5)  — недельный план (амб.)
+     *   G(6)  — недельный факт (амб.)
+     *   H(7)  — динамика (амб.)
+     *   I(8)  — план год (стац.)
+     *   J(9)  — направлены на лечение (стац.)
+     *   K(10) — % от плана (стац.)
+     *   L(11) — недельный план (стац.)
+     *   M(12) — недельный факт (стац.)
+     *   N(13) — динамика (стац.)
      * Первые 2 строки — заголовки, пропускаются.
      * Данные за ту же неделю перезаписываются, остальные недели не затрагиваются.
      */
@@ -344,7 +352,7 @@ public class HcvService {
                 if (orgName.isEmpty() || orgName.equalsIgnoreCase("итого")) continue;
 
                 Integer planYearAmb    = parseIntOrNull(fmt, evaluator, row.getCell(2));  // C
-                Integer waitingAmb     = parseIntOrNull(fmt, evaluator, row.getCell(3));  // D
+                Integer factYearAmb    = parseIntOrNull(fmt, evaluator, row.getCell(3));  // D
                 Integer pctAmb         = parseIntOrNull(fmt, evaluator, row.getCell(4));  // E
                 Integer weeklyPlanAmb  = parseIntOrNull(fmt, evaluator, row.getCell(5));  // F
                 Integer weeklyFactAmb  = parseIntOrNull(fmt, evaluator, row.getCell(6));  // G
@@ -357,7 +365,7 @@ public class HcvService {
                 Integer dynamicStat    = parseIntOrNull(fmt, evaluator, row.getCell(13)); // N
 
                 rows.add(new HcvWeeklyPlanRow(orgName,
-                        planYearAmb, waitingAmb, pctAmb, weeklyPlanAmb, weeklyFactAmb, dynamicAmb,
+                        planYearAmb, factYearAmb, pctAmb, weeklyPlanAmb, weeklyFactAmb, dynamicAmb,
                         planYearStat, referralsStat, pctStat, weeklyPlanStat, weeklyFactStat, dynamicStat,
                         reportWeek));
             }
@@ -406,7 +414,7 @@ public class HcvService {
             // Строка 2 — заголовки столбцов
             Row h = sheet.createRow(1);
             String[] cols = {"№", "МО",
-                "План 2026", "Ожидают лечение", "% плана", "Неделя план", "Неделя факт", "Динамика (амб.)",
+                "План 2026", "Факт 2026", "% от плана", "Неделя план", "Неделя факт", "Динамика (амб.)",
                 "План 2026", "Направлены на лечение", "% от плана", "Недельный план (стац.)", "Неделя факт", "Динамика (стац.)"};
             for (int i = 0; i < cols.length; i++) {
                 cell(h, i, cols[i], headerStyle);

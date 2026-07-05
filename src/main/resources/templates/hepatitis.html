@@ -323,6 +323,17 @@
         .sec-link{font-size:.8rem;color:#818cf8;font-weight:600;}
         .sec-link:hover{text-decoration:underline;}
 
+        /* ── WEEK SELECT ── */
+        .week-select{
+            background:#1e2638;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;
+            border-radius:8px;padding:5px 10px;font-size:.75rem;color-scheme:dark;
+        }
+        .week-select option{background:#1e2638;color:#e2e8f0;}
+        body.light .week-select{background:#fff;border-color:rgba(0,0,0,.15);color:#1e293b;color-scheme:light;}
+        body.light .week-select option{background:#fff;color:#1e293b;}
+        .week-label{font-size:.72rem;font-weight:600;color:rgba(255,255,255,.35);}
+        body.light .week-label{color:rgba(0,0,0,.35);}
+
         /* ── FOOTER ── */
         .foot{font-size:.72rem;color:rgba(255,255,255,.2);text-align:center;padding:16px 0 32px;}
         .foot a{color:#818cf8;}
@@ -810,7 +821,7 @@
         <div class="sec-hd">
             <div class="section-title">Рейтинг исполнения</div>
             <div style="display:flex;align-items:center;gap:10px;">
-                <span class="sec-link" id="weekly-rating-date"></span>
+                <select id="weekly-rating-week-select" class="week-select"></select>
                 <button onclick="openWeeklyPlanModal()"
                         style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#a5b4fc;border-radius:8px;padding:5px 14px;font-size:.75rem;font-weight:600;cursor:pointer;">
                     Все данные
@@ -820,8 +831,11 @@
 
         <!-- Амбулаторная помощь -->
         <div style="margin-bottom:36px;">
-            <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#818cf8;margin-bottom:14px;">
-                Амбулаторная помощь
+            <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px;">
+                <span style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#818cf8;">
+                    Амбулаторная помощь
+                </span>
+                <span id="amb-week-label" class="week-label"></span>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                 <div class="rating-card">
@@ -830,10 +844,11 @@
                     </div>
                     <div class="rating-scroll"><table class="rating-table">
                         <thead><tr>
+                            <th style="text-align:center;width:30px;white-space:nowrap;">№</th>
                             <th style="text-align:left;">МО</th>
                             <th style="text-align:right;">План 2026</th>
-                            <th style="text-align:right;">Ожид.</th>
-                            <th style="text-align:right;">%</th>
+                            <th style="text-align:right;">Факт 2026</th>
+                            <th style="text-align:right;">% от плана</th>
                             <th style="text-align:right;">Нед. план</th>
                             <th style="text-align:right;">Нед. факт</th>
                             <th style="text-align:right;">Динамика</th>
@@ -847,10 +862,11 @@
                     </div>
                     <div class="rating-scroll"><table class="rating-table">
                         <thead><tr>
+                            <th style="text-align:center;width:30px;white-space:nowrap;">№</th>
                             <th style="text-align:left;">МО</th>
                             <th style="text-align:right;">План 2026</th>
-                            <th style="text-align:right;">Ожид.</th>
-                            <th style="text-align:right;">%</th>
+                            <th style="text-align:right;">Факт 2026</th>
+                            <th style="text-align:right;">% от плана</th>
                             <th style="text-align:right;">Нед. план</th>
                             <th style="text-align:right;">Нед. факт</th>
                             <th style="text-align:right;">Динамика</th>
@@ -863,8 +879,11 @@
 
         <!-- Стационарная помощь -->
         <div>
-            <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#4ade80;margin-bottom:14px;">
-                Стационарная помощь
+            <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px;">
+                <span style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#4ade80;">
+                    Стационарная помощь
+                </span>
+                <span id="stat-week-label" class="week-label"></span>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                 <div class="rating-card">
@@ -919,14 +938,15 @@
                 <table style="width:100%;border-collapse:collapse;font-size:.78rem;color:rgba(255,255,255,.7);">
                     <thead>
                         <tr style="background:rgba(255,255,255,.04);">
+                            <th rowspan="2" style="padding:8px 12px;text-align:center;width:36px;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.3);font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;">№</th>
                             <th rowspan="2" style="padding:8px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.3);font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;">МО</th>
                             <th colspan="6" style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06);border-left:1px solid rgba(255,255,255,.08);color:#818cf8;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;">Амбулаторная помощь</th>
                             <th colspan="6" style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06);border-left:1px solid rgba(255,255,255,.08);color:#4ade80;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;">Стационарная помощь</th>
                         </tr>
                         <tr style="background:rgba(255,255,255,.02);">
                             <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);border-left:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.25);font-size:.6rem;">План 2026</th>
-                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Ожид.</th>
-                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">%</th>
+                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Факт 2026</th>
+                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">% от плана</th>
                             <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Нед. план</th>
                             <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Нед. факт</th>
                             <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Динамика</th>
@@ -1614,7 +1634,8 @@
     (function() {
         const section = document.getElementById('weekly-rating');
         if (!section) return;
-        const week = section.dataset.week;
+        const initialWeek = section.dataset.week;
+        const BASE_PATH = /*[[${basePath}]]*/ '';
 
         function pctColor(p) {
             if (p == null) return 'rgba(255,255,255,.2)';
@@ -1637,12 +1658,23 @@
             return f(d) + ' – ' + f(e);
         }
 
-        const dateEl = document.getElementById('weekly-rating-date');
-        if (dateEl && week) dateEl.textContent = 'Неделя ' + fmtDate(week);
-
         let ALL_ROWS = [];
+        let WEEKS = [];
+        let PREV_WEEK_FACT_AMB = {};
+        let PREV_WEEK_FACT_STAT = {};
 
-        function renderRating(tbodyId, rows, pctKey, actualKey, planKey, weekPlanKey, weekFactKey, dynKey, ascending) {
+        // Динамика = неделя факт − неделя план; в скобках — изменение недельного факта к прошлой неделе
+        function dynCellHtml(r, weekPlanKey, weekFactKey, prevMap) {
+            const wp = r[weekPlanKey], wf = r[weekFactKey];
+            const d = (wp == null || wf == null) ? null : wf - wp;
+            const prev = prevMap[r.orgName];
+            const delta = (wf == null || prev == null) ? null : wf - prev;
+            const deltaStr = delta == null ? '' : ` (${fmtDyn(delta)})`;
+            return `<td style="text-align:right;font-weight:600;color:${dynColor(d)};">${fmtDyn(d)}${deltaStr}</td>`;
+        }
+
+        function renderRating(tbodyId, rows, opts, ascending) {
+            const { pctKey, actualKey, planKey, weekPlanKey, weekFactKey, prevMap, rank } = opts;
             const sorted = rows
                 .filter(r => r.orgName)
                 .slice()
@@ -1650,53 +1682,112 @@
                     ? (a[pctKey] ?? 9999) - (b[pctKey] ?? 9999)
                     : (b[pctKey] ?? -1)   - (a[pctKey] ?? -1))
                 .slice(0, 10);
-            document.getElementById(tbodyId).innerHTML = sorted.map(r => {
+            document.getElementById(tbodyId).innerHTML = sorted.map((r, i) => {
                 const p = r[pctKey];
+                const rankCell = rank ? `<td style="text-align:center;white-space:nowrap;color:rgba(255,255,255,.3);">${i + 1}</td>` : '';
                 return `<tr>
+                    ${rankCell}
                     <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.orgName}">${shortName(r.orgName)}</td>
                     <td style="text-align:right;color:rgba(255,255,255,.3);">${r[planKey] ?? '—'}</td>
                     <td style="text-align:right;color:rgba(255,255,255,.5);">${r[actualKey] ?? '—'}</td>
                     <td style="text-align:right;font-weight:700;color:${pctColor(p)};">${p != null ? p + '%' : '—'}</td>
                     <td style="text-align:right;color:rgba(255,255,255,.3);">${r[weekPlanKey] ?? '—'}</td>
                     <td style="text-align:right;color:rgba(255,255,255,.5);">${r[weekFactKey] ?? '—'}</td>
-                    <td style="text-align:right;font-weight:600;color:${dynColor(r[dynKey])};">${fmtDyn(r[dynKey])}</td>
+                    ${dynCellHtml(r, weekPlanKey, weekFactKey, prevMap)}
                 </tr>`;
             }).join('');
         }
 
         function renderAll(rows) {
             ALL_ROWS = rows;
-            renderRating('amb-top-body',  rows, 'pctAmb',  'waitingAmb',    'planYearAmb',  'weeklyPlanAmb',  'weeklyFactAmb',  'dynamicAmb',  false);
-            renderRating('amb-bot-body',  rows, 'pctAmb',  'waitingAmb',    'planYearAmb',  'weeklyPlanAmb',  'weeklyFactAmb',  'dynamicAmb',  true);
-            renderRating('stat-top-body', rows, 'pctStat', 'referralsStat', 'planYearStat', 'weeklyPlanStat', 'weeklyFactStat', 'dynamicStat', false);
-            renderRating('stat-bot-body', rows, 'pctStat', 'referralsStat', 'planYearStat', 'weeklyPlanStat', 'weeklyFactStat', 'dynamicStat', true);
+            renderRating('amb-top-body',  rows, {pctKey:'pctAmb',  actualKey:'factYearAmb',   planKey:'planYearAmb',  weekPlanKey:'weeklyPlanAmb',  weekFactKey:'weeklyFactAmb',  prevMap:PREV_WEEK_FACT_AMB,  rank:true}, false);
+            renderRating('amb-bot-body',  rows, {pctKey:'pctAmb',  actualKey:'factYearAmb',   planKey:'planYearAmb',  weekPlanKey:'weeklyPlanAmb',  weekFactKey:'weeklyFactAmb',  prevMap:PREV_WEEK_FACT_AMB,  rank:true}, true);
+            renderRating('stat-top-body', rows, {pctKey:'pctStat', actualKey:'referralsStat', planKey:'planYearStat', weekPlanKey:'weeklyPlanStat', weekFactKey:'weeklyFactStat', prevMap:PREV_WEEK_FACT_STAT}, false);
+            renderRating('stat-bot-body', rows, {pctKey:'pctStat', actualKey:'referralsStat', planKey:'planYearStat', weekPlanKey:'weeklyPlanStat', weekFactKey:'weeklyFactStat', prevMap:PREV_WEEK_FACT_STAT}, true);
         }
 
-        const BASE_PATH = /*[[${basePath}]]*/ '';
-        fetch(BASE_PATH + '/api/hcv/weekly-plan?week=' + week)
+        function loadPrevWeekMap(week) {
+            const idx = WEEKS.indexOf(week);
+            const prevWeek = (idx >= 0 && idx + 1 < WEEKS.length) ? WEEKS[idx + 1] : null;
+            if (!prevWeek) { PREV_WEEK_FACT_AMB = {}; PREV_WEEK_FACT_STAT = {}; return Promise.resolve(); }
+            return fetch(BASE_PATH + '/api/hcv/weekly-plan?week=' + prevWeek)
+                .then(r => r.json())
+                .then(rows => {
+                    const ambMap = {}, statMap = {};
+                    rows.forEach(r => {
+                        if (!r.orgName) return;
+                        ambMap[r.orgName]  = r.weeklyFactAmb;
+                        statMap[r.orgName] = r.weeklyFactStat;
+                    });
+                    PREV_WEEK_FACT_AMB = ambMap;
+                    PREV_WEEK_FACT_STAT = statMap;
+                })
+                .catch(() => { PREV_WEEK_FACT_AMB = {}; PREV_WEEK_FACT_STAT = {}; });
+        }
+
+        function loadWeek(week) {
+            const label = 'Неделя ' + fmtDate(week);
+            const ambLabel = document.getElementById('amb-week-label');
+            const statLabel = document.getElementById('stat-week-label');
+            if (ambLabel) ambLabel.textContent = label;
+            if (statLabel) statLabel.textContent = label;
+
+            loadPrevWeekMap(week).then(() => {
+                fetch(BASE_PATH + '/api/hcv/weekly-plan?week=' + week)
+                    .then(r => r.json())
+                    .then(renderAll)
+                    .catch(console.error);
+            });
+        }
+
+        const weekSelect = document.getElementById('weekly-rating-week-select');
+        const weeksLoaded = fetch(BASE_PATH + '/api/hcv/weekly-plan/weeks')
             .then(r => r.json())
-            .then(renderAll)
-            .catch(console.error);
+            .then(weeks => {
+                if (!Array.isArray(weeks) || weeks.length === 0) return;
+                WEEKS = weeks;
+                if (weekSelect) {
+                    weekSelect.innerHTML = weeks.map(w =>
+                        `<option value="${w}"${w === initialWeek ? ' selected' : ''}>Неделя ${fmtDate(w)}</option>`
+                    ).join('');
+                }
+            })
+            .catch(() => {});
+
+        if (weekSelect) {
+            weekSelect.addEventListener('change', () => loadWeek(weekSelect.value));
+        }
+
+        weeksLoaded.then(() => { if (initialWeek) loadWeek(initialWeek); });
 
         window.openWeeklyPlanModal = function() {
             const sorted = [...ALL_ROWS].sort((a, b) => (a.orgName || '').localeCompare(b.orgName || '', 'ru'));
             const pctClr = p => p == null ? '' : p >= 80 ? 'color:#4ade80;font-weight:700;' : p >= 50 ? 'color:#fcd34d;font-weight:700;' : 'color:#f87171;font-weight:700;';
             const dynClr = v => v == null ? '' : v > 0 ? 'color:#4ade80;font-weight:600;' : v < 0 ? 'color:#f87171;font-weight:600;' : '';
-            document.getElementById('weeklyPlanModalBody').innerHTML = sorted.map(r => {
+            const modalDynCell = (r, weekPlanKey, weekFactKey, prevMap) => {
+                const wp = r[weekPlanKey], wf = r[weekFactKey];
+                const d = (wp == null || wf == null) ? null : wf - wp;
+                const prev = prevMap[r.orgName];
+                const delta = (wf == null || prev == null) ? null : wf - prev;
+                const deltaStr = delta == null ? '' : ` (${fmtDyn(delta)})`;
+                return `<td style="padding:6px 10px;text-align:right;${dynClr(d)}">${fmtDyn(d)}${deltaStr}</td>`;
+            };
+            document.getElementById('weeklyPlanModalBody').innerHTML = sorted.map((r, i) => {
                 return `<tr style="border-bottom:.5px solid rgba(255,255,255,.05);">
+                    <td style="padding:6px 12px;text-align:center;white-space:nowrap;color:rgba(255,255,255,.3);">${i + 1}</td>
                     <td style="padding:6px 12px;">${r.orgName}</td>
                     <td style="padding:6px 10px;text-align:right;border-left:1px solid rgba(255,255,255,.08);">${r.planYearAmb ?? '—'}</td>
-                    <td style="padding:6px 10px;text-align:right;">${r.waitingAmb ?? '—'}</td>
+                    <td style="padding:6px 10px;text-align:right;">${r.factYearAmb ?? '—'}</td>
                     <td style="padding:6px 10px;text-align:right;${pctClr(r.pctAmb)}">${r.pctAmb != null ? r.pctAmb + '%' : '—'}</td>
                     <td style="padding:6px 10px;text-align:right;">${r.weeklyPlanAmb ?? '—'}</td>
                     <td style="padding:6px 10px;text-align:right;">${r.weeklyFactAmb ?? '—'}</td>
-                    <td style="padding:6px 10px;text-align:right;${dynClr(r.dynamicAmb)}">${fmtDyn(r.dynamicAmb)}</td>
+                    ${modalDynCell(r, 'weeklyPlanAmb', 'weeklyFactAmb', PREV_WEEK_FACT_AMB)}
                     <td style="padding:6px 10px;text-align:right;border-left:1px solid rgba(255,255,255,.08);">${r.planYearStat ?? '—'}</td>
                     <td style="padding:6px 10px;text-align:right;">${r.referralsStat ?? '—'}</td>
                     <td style="padding:6px 10px;text-align:right;${pctClr(r.pctStat)}">${r.pctStat != null ? r.pctStat + '%' : '—'}</td>
                     <td style="padding:6px 10px;text-align:right;">${r.weeklyPlanStat ?? '—'}</td>
                     <td style="padding:6px 10px;text-align:right;">${r.weeklyFactStat ?? '—'}</td>
-                    <td style="padding:6px 10px;text-align:right;${dynClr(r.dynamicStat)}">${fmtDyn(r.dynamicStat)}</td>
+                    ${modalDynCell(r, 'weeklyPlanStat', 'weeklyFactStat', PREV_WEEK_FACT_STAT)}
                 </tr>`;
             }).join('');
             document.getElementById('weeklyPlanModal').style.display = 'block';

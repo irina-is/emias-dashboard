@@ -562,9 +562,14 @@
                     <h5 class="mb-1"><span class="badge bg-primary me-2" style="font-size:.7rem;vertical-align:middle;">03</span>Загрузка недельного плана</h5>
                     <p class="text-muted mb-3" style="font-size:0.85rem;">
                         Файл «Недельный план.xlsx» — один лист, первые 2 строки заголовки.
-                        <strong>B</strong> — МО, <strong>C</strong> — план год (амб.),
-                        <strong>D</strong> — план месяц (амб.), <strong>E</strong> — план месяц (ДС),
-                        <strong>H</strong> — план год (ДС). Строки «Итого» пропускаются автоматически.
+                        <strong>A</strong> — №, <strong>B</strong> — МО,
+                        <strong>C</strong> — план год (амб.), <strong>D</strong> — факт 2026 (амб.),
+                        <strong>E</strong> — % от плана (амб.), <strong>F</strong> — неделя план (амб.),
+                        <strong>G</strong> — неделя факт (амб.), <strong>H</strong> — динамика (амб.),
+                        <strong>I</strong> — план год (ДС), <strong>J</strong> — направлены на лечение (ДС),
+                        <strong>K</strong> — % от плана (ДС), <strong>L</strong> — неделя план (ДС),
+                        <strong>M</strong> — неделя факт (ДС), <strong>N</strong> — динамика (ДС).
+                        Строки «Итого» пропускаются автоматически.
                     </p>
                     <div class="d-flex align-items-center gap-3 flex-wrap mb-3">
                         <input type="file" id="hcvWeeklyPlanFile" accept=".xlsx" class="form-control" style="max-width:280px;">
@@ -605,8 +610,8 @@
                                         <th style="width:36px;">№</th>
                                         <th>Медицинская организация</th>
                                         <th class="text-end" style="border-left:2px solid #dee2e6;">План 2026</th>
-                                        <th class="text-end">Ожидают лечение</th>
-                                        <th class="text-end">% плана</th>
+                                        <th class="text-end">Факт 2026</th>
+                                        <th class="text-end">% от плана</th>
                                         <th class="text-end">Неделя план</th>
                                         <th class="text-end">Неделя факт</th>
                                         <th class="text-end">Динамика</th>
@@ -1635,7 +1640,7 @@
                         <td class="text-muted">${i + 1}</td>
                         <td>${safeEsc(r.orgName)}</td>
                         <td class="text-end" style="border-left:2px solid #dee2e6;">${r.planYearAmb ?? '—'}</td>
-                        <td class="text-end">${r.waitingAmb ?? '—'}</td>
+                        <td class="text-end">${r.factYearAmb ?? '—'}</td>
                         <td class="text-end">${r.pctAmb != null ? r.pctAmb + '%' : '—'}</td>
                         <td class="text-end">${r.weeklyPlanAmb ?? '—'}</td>
                         <td class="text-end">${r.weeklyFactAmb ?? '—'}</td>

@@ -18,11 +18,11 @@ public class HcvWeeklyPlanRow {
     @Column(name = "plan_year_amb")
     private Integer planYearAmb;
 
-    // D — ожидают лечение (амб.)
-    @Column(name = "plan_month_amb")
-    private Integer waitingAmb;
+    // D — факт 2026 (амб., с начала года)
+    @Column(name = "fact_year_amb")
+    private Integer factYearAmb;
 
-    // E — % плана (амб.) — из Excel
+    // E — % от плана (амб.) — из Excel
     @Column(name = "pct_amb")
     private Integer pctAmb;
 
@@ -68,14 +68,14 @@ public class HcvWeeklyPlanRow {
     public HcvWeeklyPlanRow() {}
 
     public HcvWeeklyPlanRow(String orgName,
-                             Integer planYearAmb, Integer waitingAmb, Integer pctAmb,
+                             Integer planYearAmb, Integer factYearAmb, Integer pctAmb,
                              Integer weeklyPlanAmb, Integer weeklyFactAmb, Integer dynamicAmb,
                              Integer planYearStat, Integer referralsStat, Integer pctStat,
                              Integer weeklyPlanStat, Integer weeklyFactStat, Integer dynamicStat,
                              LocalDate reportWeek) {
         this.orgName        = orgName;
         this.planYearAmb    = planYearAmb;
-        this.waitingAmb     = waitingAmb;
+        this.factYearAmb    = factYearAmb;
         this.pctAmb         = pctAmb;
         this.weeklyPlanAmb  = weeklyPlanAmb;
         this.weeklyFactAmb  = weeklyFactAmb;
@@ -92,7 +92,7 @@ public class HcvWeeklyPlanRow {
     public Long      getId()             { return id; }
     public String    getOrgName()        { return orgName; }
     public Integer   getPlanYearAmb()    { return planYearAmb; }
-    public Integer   getWaitingAmb()     { return waitingAmb; }
+    public Integer   getFactYearAmb()    { return factYearAmb; }
     public Integer   getPctAmb()         { return pctAmb; }
     public Integer   getWeeklyPlanAmb()  { return weeklyPlanAmb; }
     public Integer   getWeeklyFactAmb()  { return weeklyFactAmb; }

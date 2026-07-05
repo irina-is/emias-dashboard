@@ -820,7 +820,7 @@ public class DataController {
                 Map<String, Object> m = new LinkedHashMap<>();
                 m.put("orgName",        row.getOrgName());
                 m.put("planYearAmb",    row.getPlanYearAmb());
-                m.put("waitingAmb",     row.getWaitingAmb());
+                m.put("factYearAmb",    row.getFactYearAmb());
                 m.put("pctAmb",         row.getPctAmb());
                 m.put("weeklyPlanAmb",  row.getWeeklyPlanAmb());
                 m.put("weeklyFactAmb",  row.getWeeklyFactAmb());
