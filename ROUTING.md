@@ -137,6 +137,32 @@ fetch('/api/hcv/weekly-plan')           // нет BASE_PATH
 fetch('/spec/api/hcv/weekly-plan')      // захардкоженный /spec
 ```
 
+### IIFE-блоки (function() { ... })()
+
+Шаблоны используют IIFE для изоляции переменных. `BASE_PATH` объявленный снаружи **недоступен внутри** IIFE — каждый блок должен объявить его сам.
+
+```javascript
+// ✅ Правильно — BASE_PATH объявлен внутри IIFE
+(function() {
+    const BASE_PATH = /*[[${basePath}]]*/ '';
+
+    function loadData() {
+        fetch(BASE_PATH + '/api/contracts')
+    }
+    loadData();
+})();
+
+// ❌ Неправильно — BASE_PATH из другого блока сюда не виден
+(function() {
+    function loadData() {
+        fetch(BASE_PATH + '/api/contracts')  // ReferenceError: BASE_PATH is not defined
+    }
+    loadData();
+})();
+```
+
+**Правило:** добавляешь новый IIFE-блок с fetch — первой строкой объявляй `const BASE_PATH = /*[[${basePath}]]*/ '';`.
+
 ---
 
 ## Правила для Spring Security (SecurityConfig.java)
@@ -195,3 +221,76 @@ fetch('/spec/api/hcv/weekly-plan')      // захардкоженный /spec
 - [ ] SecurityConfig: публичная страница → добавить в `requestMatchers("/my-page").permitAll()`
 - [ ] SecurityConfig: публичный API → добавить в `requestMatchers("/api/my-endpoint").permitAll()`
 - [ ] Не трогать `server.servlet.context-path` в `application.properties`
+
+---
+
+## Типичные ошибки — прочти перед коммитом
+
+Все перечисленные ошибки уже случались в этом проекте и приводили к 404 или `ReferenceError` на проде.
+
+### 1. `@{/path}` в JS-инлайне вместо `BASE_PATH`
+
+```javascript
+// ❌ Так писать НЕЛЬЗЯ — на проде выдаст /api/contracts без /spec
+fetch(/*[[@{/api/contracts}]]*/ '/api/contracts')
+
+// ✅ Правильно
+fetch(BASE_PATH + '/api/contracts')
+```
+
+`@{/path}` корректно работает только в `th:href`, `th:action` и других Thymeleaf-атрибутах HTML.
+В JS-блоках `/*[[ ]]*/ 'fallback'` — только `${basePath}`, не `@{}`.
+
+### 2. Забытый `BASE_PATH` внутри IIFE
+
+Каждый `(function() { ... })()` — это изолированная область видимости.
+`BASE_PATH` из соседнего блока туда не проникает.
+
+```javascript
+// ❌ ReferenceError: BASE_PATH is not defined
+(function() {
+    fetch(BASE_PATH + '/api/something')  // упадёт, если BASE_PATH не объявлен здесь
+})();
+
+// ✅ Объявляй первой строкой
+(function() {
+    const BASE_PATH = /*[[${basePath}]]*/ '';
+    fetch(BASE_PATH + '/api/something')
+})();
+```
+
+То же касается вспомогательных функций вроде `esc`, `escHtml` — если используешь внутри IIFE, объявляй там же.
+
+### 3. `server.servlet.context-path` в `application.properties`
+
+Этот файл попадает в JAR и влияет на прод.
+На проде нет context-path — его роль выполняет Nginx.
+Если добавить `server.servlet.context-path=/spec` в `application.properties`, на проде получится двойной `/spec/spec/`.
+
+```
+# ✅ Только здесь (не попадает в JAR):
+src/main/resources/application-local.properties
+
+# ❌ Никогда не добавлять сюда:
+src/main/resources/application.properties
+```
+
+### 4. Новый HTML-файл в `static/` вместо `templates/`
+
+Если страница использует `${basePath}`, ссылки на API или Spring Security — она должна лежать в `templates/` и иметь контроллер.
+
+Файлы в `static/` отдаются как есть, Thymeleaf их не обрабатывает.
+
+```
+src/main/resources/templates/  ← страницы с th:, ${basePath}, Spring Security
+src/main/resources/static/     ← CSS, JS, изображения, standalone HTML без серверной логики
+```
+
+### 5. Новый API без `permitAll` в SecurityConfig
+
+Если добавил публичный эндпоинт, но не прописал его в SecurityConfig — неавторизованные пользователи получат редирект на логин вместо данных.
+
+После добавления нового `@GetMapping("/api/something")` в DataController — сразу добавить:
+```java
+.requestMatchers("/api/something").permitAll()
+```
