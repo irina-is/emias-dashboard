@@ -10,3 +10,4 @@ logs/
 *.ipr
 application-prod.properties
 .claude/settings.local.json
+deploy-novosibirsk.local.sh
