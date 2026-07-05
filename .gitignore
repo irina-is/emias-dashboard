@@ -11,3 +11,4 @@ logs/
 application-prod.properties
 .claude/settings.local.json
 deploy-novosibirsk.local.sh
+deploy-novosibirsk.local.ps1
