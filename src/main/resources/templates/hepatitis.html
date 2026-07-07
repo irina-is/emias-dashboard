@@ -306,6 +306,8 @@
         .rating-table td.num{text-align:center;color:rgba(255,255,255,.2);font-weight:600;}
         .rating-table td.val{text-align:right;font-weight:700;color:#818cf8;}
         .rating-table td.val.green{color:#4ade80;}
+        .rating-table tr.rating-total-row{background:rgba(255,255,255,.03);}
+        .rating-table tr.rating-total-row td{border-top:1px solid rgba(255,255,255,.12);border-bottom:none;font-weight:700;color:#e0e0e0;}
         .rating-scroll{max-height:520px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;}
 
         /* ── EMPTY ── */
@@ -498,6 +500,8 @@
         body.light .rating-table tbody tr:hover{background:rgba(0,0,0,.025);}
         body.light .rating-table td{color:rgba(0,0,0,.65);}
         body.light .rating-table td.num{color:rgba(0,0,0,.2);}
+        body.light .rating-table tr.rating-total-row{background:rgba(0,0,0,.02);}
+        body.light .rating-table tr.rating-total-row td{border-top-color:rgba(0,0,0,.12);color:#1e293b;}
         body.light .rating-scroll{scrollbar-color:rgba(0,0,0,.1) transparent;}
 
         body.light .empty-card{background:#fff;border-color:rgba(0,0,0,.08);}
@@ -1086,11 +1090,7 @@
         </div>
 
         <!-- KPI панель -->
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
-            <div class="kpi-card" style="padding:18px 20px;border-left:3px solid rgba(255,255,255,.2);">
-                <div style="font-size:1.85rem;font-weight:800;color:#e2e8f0;line-height:1;" id="tfoms-total-records">—</div>
-                <div style="font-size:.72rem;color:rgba(255,255,255,.4);margin-top:6px;">всего записей</div>
-            </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
             <div class="kpi-card" style="padding:18px 20px;border-left:3px solid #2A78D6;">
                 <div style="font-size:1.85rem;font-weight:800;color:#2A78D6;line-height:1;" id="tfoms-course1">—</div>
                 <div style="font-size:.72rem;color:rgba(255,255,255,.4);margin-top:6px;">прошли 1 курс</div>
@@ -1236,7 +1236,6 @@
                 .then(data => {
                     if (!data || !data.rows || !data.rows.length) return;
 
-                    document.getElementById('tfoms-total-records').textContent = (data.totalRecords || 0).toLocaleString('ru-RU');
                     document.getElementById('tfoms-course1').textContent = (data.globalCourse1 || 0).toLocaleString('ru-RU');
                     document.getElementById('tfoms-course2').textContent = (data.globalCourse2 || 0).toLocaleString('ru-RU');
                     document.getElementById('tfoms-course3').textContent = (data.globalCourse3 || 0).toLocaleString('ru-RU');
@@ -1674,15 +1673,15 @@
         }
 
         function renderRating(tbodyId, rows, opts, ascending) {
-            const { pctKey, actualKey, planKey, weekPlanKey, weekFactKey, prevMap, rank } = opts;
-            const sorted = rows
-                .filter(r => r.orgName)
+            const { pctKey, actualKey, planKey, weekPlanKey, weekFactKey, prevMap, rank, showTotal } = opts;
+            const all = rows.filter(r => r.orgName);
+            const sorted = all
                 .slice()
                 .sort((a, b) => ascending
                     ? (a[pctKey] ?? 9999) - (b[pctKey] ?? 9999)
                     : (b[pctKey] ?? -1)   - (a[pctKey] ?? -1))
                 .slice(0, 10);
-            document.getElementById(tbodyId).innerHTML = sorted.map((r, i) => {
+            let html = sorted.map((r, i) => {
                 const p = r[pctKey];
                 const rankCell = rank ? `<td style="text-align:center;white-space:nowrap;color:rgba(255,255,255,.3);">${i + 1}</td>` : '';
                 return `<tr>
@@ -1696,14 +1695,42 @@
                     ${dynCellHtml(r, weekPlanKey, weekFactKey, prevMap)}
                 </tr>`;
             }).join('');
+
+            if (showTotal) {
+                const sum = key => all.reduce((s, r) => s + (Number(r[key]) || 0), 0);
+                const hasActual     = all.some(r => r[actualKey] != null);
+                const totalPlan     = sum(planKey);
+                const totalActual   = hasActual ? sum(actualKey) : null;
+                const totalWeekPlan = sum(weekPlanKey);
+                const totalWeekFact = sum(weekFactKey);
+                const totalPct      = (hasActual && totalPlan > 0) ? Math.round(totalActual * 100 / totalPlan) : null;
+                const hasPrev       = all.some(r => prevMap[r.orgName] != null);
+                const totalPrev     = all.reduce((s, r) => s + (prevMap[r.orgName] != null ? Number(prevMap[r.orgName]) : 0), 0);
+                const d             = totalWeekFact - totalWeekPlan;
+                const delta         = hasPrev ? totalWeekFact - totalPrev : null;
+                const deltaStr      = delta == null ? '' : ` (${fmtDyn(delta)})`;
+                const rankCell      = rank ? '<td></td>' : '';
+                html += `<tr class="rating-total-row">
+                    ${rankCell}
+                    <td>Итого (${all.length} МО)</td>
+                    <td style="text-align:right;">${totalPlan}</td>
+                    <td style="text-align:right;">${totalActual ?? '—'}</td>
+                    <td style="text-align:right;color:${pctColor(totalPct)};">${totalPct != null ? totalPct + '%' : '—'}</td>
+                    <td style="text-align:right;">${totalWeekPlan}</td>
+                    <td style="text-align:right;">${totalWeekFact}</td>
+                    <td style="text-align:right;color:${dynColor(d)};">${fmtDyn(d)}${deltaStr}</td>
+                </tr>`;
+            }
+
+            document.getElementById(tbodyId).innerHTML = html;
         }
 
         function renderAll(rows) {
             ALL_ROWS = rows;
-            renderRating('amb-top-body',  rows, {pctKey:'pctAmb',  actualKey:'factYearAmb',   planKey:'planYearAmb',  weekPlanKey:'weeklyPlanAmb',  weekFactKey:'weeklyFactAmb',  prevMap:PREV_WEEK_FACT_AMB,  rank:true}, false);
-            renderRating('amb-bot-body',  rows, {pctKey:'pctAmb',  actualKey:'factYearAmb',   planKey:'planYearAmb',  weekPlanKey:'weeklyPlanAmb',  weekFactKey:'weeklyFactAmb',  prevMap:PREV_WEEK_FACT_AMB,  rank:true}, true);
-            renderRating('stat-top-body', rows, {pctKey:'pctStat', actualKey:'referralsStat', planKey:'planYearStat', weekPlanKey:'weeklyPlanStat', weekFactKey:'weeklyFactStat', prevMap:PREV_WEEK_FACT_STAT}, false);
-            renderRating('stat-bot-body', rows, {pctKey:'pctStat', actualKey:'referralsStat', planKey:'planYearStat', weekPlanKey:'weeklyPlanStat', weekFactKey:'weeklyFactStat', prevMap:PREV_WEEK_FACT_STAT}, true);
+            renderRating('amb-top-body',  rows, {pctKey:'pctAmb',  actualKey:'factYearAmb',   planKey:'planYearAmb',  weekPlanKey:'weeklyPlanAmb',  weekFactKey:'weeklyFactAmb',  prevMap:PREV_WEEK_FACT_AMB,  rank:true, showTotal:true}, false);
+            renderRating('amb-bot-body',  rows, {pctKey:'pctAmb',  actualKey:'factYearAmb',   planKey:'planYearAmb',  weekPlanKey:'weeklyPlanAmb',  weekFactKey:'weeklyFactAmb',  prevMap:PREV_WEEK_FACT_AMB,  rank:true, showTotal:true}, true);
+            renderRating('stat-top-body', rows, {pctKey:'pctStat', actualKey:'referralsStat', planKey:'planYearStat', weekPlanKey:'weeklyPlanStat', weekFactKey:'weeklyFactStat', prevMap:PREV_WEEK_FACT_STAT, showTotal:true}, false);
+            renderRating('stat-bot-body', rows, {pctKey:'pctStat', actualKey:'referralsStat', planKey:'planYearStat', weekPlanKey:'weeklyPlanStat', weekFactKey:'weeklyFactStat', prevMap:PREV_WEEK_FACT_STAT, showTotal:true}, true);
         }
 
         function loadPrevWeekMap(week) {
