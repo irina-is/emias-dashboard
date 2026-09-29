@@ -24,6 +24,8 @@ import com.emias.dashboard.service.TfomsDsService;
 import com.emias.dashboard.service.DsHospitalizationService;
 import com.emias.dashboard.service.DsChuzPlanService;
 import com.emias.dashboard.service.DsInpatientService;
+import com.emias.dashboard.service.DsHospPlanService;
+import com.emias.dashboard.service.AmbService;
 import com.emias.dashboard.service.MoWorkPlanService;
 import com.emias.dashboard.service.ReportService;
 import com.emias.dashboard.service.SettingsService;
@@ -99,6 +101,8 @@ public class DataController {
     private final DsHospitalizationService dsHospitalizationService;
     private final DsChuzPlanService      dsChuzPlanService;
     private final DsInpatientService     dsInpatientService;
+    private final DsHospPlanService      dsHospPlanService;
+    private final AmbService             ambService;
     private final ObjectMapper           objectMapper;
 
     public DataController(ReportService reportService,
@@ -120,6 +124,8 @@ public class DataController {
                           DsHospitalizationService dsHospitalizationService,
                           DsChuzPlanService dsChuzPlanService,
                           DsInpatientService dsInpatientService,
+                          DsHospPlanService dsHospPlanService,
+                          AmbService ambService,
                           ObjectMapper objectMapper) {
         this.reportService          = reportService;
         this.screeningRepository    = screeningRepository;
@@ -140,6 +146,8 @@ public class DataController {
         this.dsHospitalizationService = dsHospitalizationService;
         this.dsChuzPlanService      = dsChuzPlanService;
         this.dsInpatientService     = dsInpatientService;
+        this.dsHospPlanService      = dsHospPlanService;
+        this.ambService             = ambService;
         this.objectMapper           = objectMapper;
     }
 
@@ -301,6 +309,107 @@ public class DataController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
+    }
+
+    @GetMapping("/ds-hosp-lpu/dashboard")
+    public ResponseEntity<Map<String, Object>> getDsHospLpuDashboard(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        try {
+            return ResponseEntity.ok(dsInpatientService.getHospitalDashboard(from, to));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/ds-hosp-lpu/task")
+    public ResponseEntity<Map<String, Object>> saveDsHospLpuTask(@RequestBody Map<String, String> body) {
+        dsInpatientService.saveHospTask(body.get("task"), body.get("deadline"));
+        return ResponseEntity.ok(Map.of("status", "ok"));
+    }
+
+    /* ── Амбулаторное лечение: пофамильный план и выгрузка отпуска ── */
+    @PostMapping("/amb/plan/upload")
+    public ResponseEntity<Map<String, Object>> uploadAmbPlan(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "append", defaultValue = "false") boolean append) {
+        try {
+            Map<String, Object> res = new LinkedHashMap<>(ambService.uploadPlan(file, append));
+            res.put("status", "ok");
+            return ResponseEntity.ok(res);
+        } catch (FileValidationException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", String.join("; ", e.getErrors())));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", String.valueOf(e.getMessage())));
+        }
+    }
+
+    @PostMapping("/amb/fact/upload")
+    public ResponseEntity<Map<String, Object>> uploadAmbFact(@RequestParam("file") MultipartFile file) {
+        try {
+            int count = ambService.uploadDispenses(file);
+            return ResponseEntity.ok(Map.of("status", "ok", "count", count));
+        } catch (FileValidationException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", String.join("; ", e.getErrors())));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", String.valueOf(e.getMessage())));
+        }
+    }
+
+    @GetMapping("/amb/dashboard")
+    public ResponseEntity<Map<String, Object>> getAmbDashboard(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        try {
+            return ResponseEntity.ok(ambService.getDashboard(from, to));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /** Только для админки (требует входа): содержит ФИО пациентов, не найденных в выгрузке. */
+    @GetMapping("/amb/admin-summary")
+    public ResponseEntity<Map<String, Object>> getAmbAdminSummary() {
+        return ResponseEntity.ok(ambService.getAdminSummary());
+    }
+
+    @PostMapping("/amb/task")
+    public ResponseEntity<Map<String, Object>> saveAmbTask(@RequestBody Map<String, String> body) {
+        ambService.saveTask(body.get("task"), body.get("deadline"));
+        return ResponseEntity.ok(Map.of("status", "ok"));
+    }
+
+    /* ── План госпитализации по ЛПУ ── */
+    @PostMapping("/ds-hosp-plan/upload")
+    public ResponseEntity<Map<String, Object>> uploadDsHospPlan(
+            @RequestParam("file") MultipartFile file) {
+        try {
+            int count = dsHospPlanService.upload(file);
+            return ResponseEntity.ok(Map.of("status", "ok", "count", count));
+        } catch (FileValidationException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", String.join("; ", e.getErrors())));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", String.valueOf(e.getMessage())));
+        }
+    }
+
+    @GetMapping("/ds-hosp-plan")
+    public ResponseEntity<Map<String, Object>> getDsHospPlan() {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("uploadedAt", dsHospPlanService.lastUploadedAt());
+        m.put("rows", dsHospPlanService.getAll());
+        return ResponseEntity.ok(m);
+    }
+
+    @GetMapping("/ds-hosp-plan/template")
+    public ResponseEntity<byte[]> getDsHospPlanTemplate() throws IOException {
+        byte[] bytes = dsHospPlanService.generateTemplate();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"DS_hosp_plan_template.xlsx\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(bytes);
     }
 
     @PostMapping("/ds-inpatient/task")

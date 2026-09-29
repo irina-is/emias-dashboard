@@ -793,6 +793,78 @@
                 </div>
             </div>
 
+            <!-- Амбулаторное лечение: пофамильный план + выгрузка отпуска -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="mb-1">
+                        <span class="badge bg-warning text-dark me-2" style="font-size:.7rem;vertical-align:middle;">АП</span>Амбулаторное лечение — план и факт
+                    </h5>
+                    <p class="text-muted mb-3" style="font-size:0.85rem;">
+                        <strong>План</strong> — пофамильный список («Гроза_..._СВОД с заменами.xlsx» или месячный «Гроза_144_пациента_...xlsx»):
+                        нужны столбцы «Прикрепление» и «ФИО» / «ФИО (кто получает)»; если есть «Замена (кого заменили)» — заменённые исключаются из плана.
+                        <strong>Факт</strong> — выгрузка «МО_Гепатит_ДДММГГГГ.xlsx»: пациент из плана считается пролеченным, если найден в ней
+                        по СНИЛС или ФИО; динамика — по дате первого отпуска.
+                    </p>
+
+                    <div class="row g-3">
+                        <div class="col-lg-6">
+                            <div class="border rounded p-3 h-100">
+                                <div class="fw-semibold mb-2" style="font-size:0.88rem;">1. План — пофамильный список</div>
+                                <input type="file" id="ambPlanFile" accept=".xlsx" class="form-control form-control-sm mb-2">
+                                <div class="form-check mb-2" style="font-size:0.82rem;">
+                                    <input class="form-check-input" type="checkbox" id="ambPlanAppend">
+                                    <label class="form-check-label" for="ambPlanAppend">
+                                        Добавить к текущему плану (новый месяц); иначе план заменяется целиком
+                                    </label>
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="uploadAmbPlan()"><i class="bi bi-upload me-1"></i>Загрузить план</button>
+                                <div id="ambPlanStatus" class="mt-2" style="font-size:0.82rem;"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="border rounded p-3 h-100">
+                                <div class="fw-semibold mb-2" style="font-size:0.88rem;">2. Факт — выгрузка отпуска препаратов</div>
+                                <input type="file" id="ambFactFile" accept=".xlsx" class="form-control form-control-sm mb-2">
+                                <button class="btn btn-primary btn-sm" onclick="uploadAmbFact()"><i class="bi bi-upload me-1"></i>Загрузить выгрузку</button>
+                                <div id="ambFactStatus" class="mt-2" style="font-size:0.82rem;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="ambSummary" class="mt-3" style="font-size:0.82rem;"></div>
+                    <div id="ambNotFoundWrap" style="display:none;">
+                        <hr class="my-3">
+                        <div class="d-flex align-items-center gap-3 mb-2 flex-wrap">
+                            <span class="fw-semibold" style="font-size:0.88rem;">Пациенты из плана, не найденные в выгрузке:</span>
+                            <span id="ambNotFoundCount" class="text-muted ms-auto" style="font-size:0.82rem;"></span>
+                        </div>
+                        <div style="max-height:320px;overflow-y:auto;border-radius:8px;border:1px solid var(--emias-border,#E8ECF5);">
+                            <table class="table table-sm table-hover mb-0" style="font-size:0.8rem;">
+                                <thead style="position:sticky;top:0;z-index:1;" class="table-light">
+                                    <tr><th style="width:36px;">№</th><th>МО</th><th>ФИО</th><th>Дата рождения</th></tr>
+                                </thead>
+                                <tbody id="ambNotFoundBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+                    <div class="fw-semibold mb-2" style="font-size:0.88rem;">Поручение под таблицей «Амбулаторная помощь» на дашборде</div>
+                    <div class="d-flex align-items-end gap-3 flex-wrap">
+                        <div style="flex:1;min-width:260px;">
+                            <label class="form-label mb-1" style="font-size:0.8rem;color:var(--emias-muted);">Текст поручения</label>
+                            <textarea id="ambTask" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div>
+                            <label class="form-label mb-1" style="font-size:0.8rem;color:var(--emias-muted);">Срок</label>
+                            <input type="date" id="ambDeadline" class="form-control" style="max-width:180px;">
+                        </div>
+                        <button class="btn btn-primary" onclick="saveAmbTask()"><i class="bi bi-save me-1"></i>Сохранить</button>
+                        <span id="ambTaskStatus" class="text-muted" style="font-size:0.85rem;"></span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Госпитализировано в дневной стационар -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body p-4">
@@ -903,6 +975,64 @@
                         <span id="dsInpTaskStatus" class="text-muted" style="font-size:0.85rem;"></span>
                     </div>
                     <div id="dsInpUnmatched" class="mt-3" style="display:none;font-size:0.8rem;"></div>
+                </div>
+            </div>
+
+            <!-- План госпитализации по ЛПУ (где лечат) -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="mb-1">
+                        <span class="badge bg-info text-dark me-2" style="font-size:.7rem;vertical-align:middle;">ДС</span>План госпитализации по ЛПУ
+                    </h5>
+                    <p class="text-muted mb-3" style="font-size:0.85rem;">
+                        Файл <strong>«стационар по госпитализации.xlsx»</strong>: столбец A — <strong>МО</strong> (город больницы, где лечат,
+                        или «ЧУЗ»), столбец B — <strong>План 2026</strong>. Остальные столбцы и строка «ИТОГО» игнорируются.
+                        Факт на дашборде считается по столбцу «ЛПУ» из «Путь пациента», для строки ЧУЗ — из файла ЧУЗ.
+                    </p>
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <input type="file" id="dsHospPlanFile" accept=".xlsx" class="form-control" style="max-width:360px;">
+                        <button class="btn btn-primary" onclick="uploadDsHospPlan()">
+                            <i class="bi bi-upload me-1"></i>Загрузить
+                        </button>
+                        <a class="btn btn-outline-secondary" th:href="${basePath + '/api/ds-hosp-plan/template'}">
+                            <i class="bi bi-download me-1"></i>Скачать шаблон
+                        </a>
+                        <span id="dsHospPlanStatus" class="text-muted" style="font-size:0.85rem;"></span>
+                    </div>
+
+                    <div id="dsHospPlanPreview" style="display:none;">
+                        <hr class="my-3">
+                        <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                            <span class="fw-semibold" style="font-size:0.88rem;">План по ЛПУ:</span>
+                            <span id="dsHospPlanCount" class="text-muted ms-auto" style="font-size:0.82rem;"></span>
+                        </div>
+                        <div style="max-height:420px;overflow-y:auto;border-radius:8px;border:1px solid var(--emias-border,#E8ECF5);">
+                            <table class="table table-sm table-hover mb-0" style="font-size:0.8rem;">
+                                <thead style="position:sticky;top:0;z-index:1;" class="table-light">
+                                    <tr><th style="width:36px;">№</th><th>МО</th><th class="text-end">План 2026</th></tr>
+                                </thead>
+                                <tbody id="dsHospPlanBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+                    <div class="fw-semibold mb-2" style="font-size:0.88rem;">Поручение под таблицей «Госпитализация пациентов» на дашборде</div>
+                    <div class="d-flex align-items-end gap-3 flex-wrap">
+                        <div style="flex:1;min-width:260px;">
+                            <label class="form-label mb-1" style="font-size:0.8rem;color:var(--emias-muted);">Текст поручения</label>
+                            <textarea id="dsHospTask" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div>
+                            <label class="form-label mb-1" style="font-size:0.8rem;color:var(--emias-muted);">Срок</label>
+                            <input type="date" id="dsHospDeadline" class="form-control" style="max-width:180px;">
+                        </div>
+                        <button class="btn btn-primary" onclick="saveDsHospTask()">
+                            <i class="bi bi-save me-1"></i>Сохранить
+                        </button>
+                        <span id="dsHospTaskStatus" class="text-muted" style="font-size:0.85rem;"></span>
+                    </div>
+                    <div id="dsHospUnmatched" class="mt-3" style="display:none;font-size:0.8rem;"></div>
                 </div>
             </div>
 
@@ -2034,6 +2164,182 @@
             .catch(() => { status.innerHTML = '<span class="text-danger">Ошибка соединения</span>'; });
     }
 
+    function ambUpload(url, fileId, statusId, extra, okText) {
+        const fileInput = document.getElementById(fileId);
+        const status    = document.getElementById(statusId);
+        if (!fileInput.files.length) { status.textContent = 'Выберите файл'; return; }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        Object.entries(extra || {}).forEach(([k, v]) => formData.append(k, v));
+
+        status.innerHTML = '<span class="text-primary">Загрузка...</span>';
+        fetch(BASE_PATH + url, { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    status.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>' + okText(data) + '</span>';
+                    fileInput.value = '';
+                    loadAmbSummary();
+                } else {
+                    status.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle me-1"></i>Ошибка загрузки</span>';
+                    showErrors((data.error || 'Ошибка загрузки файла').split('; '));
+                }
+            })
+            .catch(() => {
+                status.innerHTML = '<span class="text-danger">Ошибка соединения</span>';
+                showErrors(['Ошибка соединения с сервером. Проверьте сеть и попробуйте снова.']);
+            });
+    }
+
+    function uploadAmbPlan() {
+        const append = document.getElementById('ambPlanAppend').checked;
+        ambUpload('/api/amb/plan/upload', 'ambPlanFile', 'ambPlanStatus', { append }, d =>
+            'Добавлено ' + d.added + ' пациентов'
+            + (d.skippedDuplicates ? ', пропущено дублей: ' + d.skippedDuplicates : '')
+            + (d.removedReplaced ? ', исключено по заменам: ' + d.removedReplaced : '')
+            + '. Всего в плане: ' + d.total);
+    }
+
+    function uploadAmbFact() {
+        ambUpload('/api/amb/fact/upload', 'ambFactFile', 'ambFactStatus', null, d =>
+            'Загружено ' + Number(d.count).toLocaleString('ru-RU') + ' строк отпуска');
+    }
+
+    function loadAmbSummary() {
+        fetch(BASE_PATH + '/api/amb/admin-summary')
+            .then(r => r.json())
+            .then(d => {
+                const dt = v => v ? new Date(v).toLocaleString('ru-RU', {
+                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+                const dmy = v => v ? v.split('-').reverse().join('.') : '—';
+                const src = Object.entries(d.planBySource || {}).map(([f, n]) => `${safeEsc(f)} — ${n}`).join('; ');
+                document.getElementById('ambSummary').innerHTML =
+                    `<div><b>План:</b> ${d.planCount} пациентов (загружен ${dt(d.planUploadedAt)})${src ? ' · ' + src : ''}</div>`
+                    + `<div><b>Выгрузка:</b> ${Number(d.dispenseCount).toLocaleString('ru-RU')} строк (загружена ${dt(d.dispenseUploadedAt)}, последний отпуск ${dmy(d.maxDispenseDate)})</div>`;
+
+                document.getElementById('ambTask').value = d.task || '';
+                document.getElementById('ambDeadline').value = d.deadline || '';
+
+                const nf = d.notFound || [];
+                const wrap = document.getElementById('ambNotFoundWrap');
+                if (!d.planCount || !d.dispenseCount || !nf.length) { wrap.style.display = 'none'; return; }
+                wrap.style.display = 'block';
+                document.getElementById('ambNotFoundCount').textContent = nf.length + ' из ' + d.planCount;
+                document.getElementById('ambNotFoundBody').innerHTML = nf.map((r, i) =>
+                    `<tr><td>${i + 1}</td><td>${safeEsc(r.mo || '—')}</td><td>${safeEsc(r.fio)}</td><td>${dmy(r.birthDate)}</td></tr>`).join('');
+            }).catch(() => {});
+    }
+
+    function saveAmbTask() {
+        const status = document.getElementById('ambTaskStatus');
+        fetch(BASE_PATH + '/api/amb/task', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                task: document.getElementById('ambTask').value,
+                deadline: document.getElementById('ambDeadline').value
+            })
+        })
+            .then(r => r.json())
+            .then(data => {
+                status.innerHTML = data.status === 'ok'
+                    ? '<span class="text-success"><i class="bi bi-check-circle me-1"></i>Сохранено</span>'
+                    : '<span class="text-danger">Ошибка сохранения</span>';
+            })
+            .catch(() => { status.innerHTML = '<span class="text-danger">Ошибка соединения</span>'; });
+    }
+
+    function uploadDsHospPlan() {
+        const fileInput = document.getElementById('dsHospPlanFile');
+        const status    = document.getElementById('dsHospPlanStatus');
+        if (!fileInput.files.length) { status.textContent = 'Выберите файл'; return; }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        status.innerHTML = '<span class="text-primary">Загрузка...</span>';
+        fetch(BASE_PATH + '/api/ds-hosp-plan/upload', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    status.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>Загружено '
+                        + data.count + ' строк</span>';
+                    fileInput.value = '';
+                    loadDsHospPlanPreview();
+                    loadDsHospTask();
+                } else {
+                    status.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle me-1"></i>Ошибка загрузки</span>';
+                    showErrors((data.error || 'Ошибка загрузки файла').split('; '));
+                }
+            })
+            .catch(() => {
+                status.innerHTML = '<span class="text-danger">Ошибка соединения</span>';
+                showErrors(['Ошибка соединения с сервером. Проверьте сеть и попробуйте снова.']);
+            });
+    }
+
+    function loadDsHospPlanPreview() {
+        fetch(BASE_PATH + '/api/ds-hosp-plan')
+            .then(r => r.json())
+            .then(data => {
+                const preview = document.getElementById('dsHospPlanPreview');
+                const rows = data.rows || [];
+                if (!rows.length) { preview.style.display = 'none'; return; }
+                preview.style.display = 'block';
+
+                const fmt = n => n != null ? Number(n).toLocaleString('ru-RU') : '—';
+                const when = data.uploadedAt
+                    ? ' · загружено ' + new Date(data.uploadedAt).toLocaleString('ru-RU', {
+                        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    : '';
+                document.getElementById('dsHospPlanCount').textContent = 'В базе: ' + rows.length + ' строк' + when;
+
+                let gbuz = 0, chuz = 0;
+                document.getElementById('dsHospPlanBody').innerHTML = rows.map((r, i) => {
+                    if (r.chuz) chuz += Number(r.plan || 0); else gbuz += Number(r.plan || 0);
+                    return `<tr><td>${i + 1}</td><td>${safeEsc(r.mo || '—')}</td><td class="text-end">${fmt(r.plan)}</td></tr>`;
+                }).join('') + `<tr class="table-secondary fw-bold"><td></td><td>ИТОГО ГБУЗ</td><td class="text-end">${fmt(gbuz)}</td></tr>`
+                    + (chuz ? `<tr class="table-secondary fw-bold"><td></td><td>ВСЕГО с ЧУЗ</td><td class="text-end">${fmt(gbuz + chuz)}</td></tr>` : '');
+            }).catch(() => {});
+    }
+
+    function loadDsHospTask() {
+        fetch(BASE_PATH + '/api/ds-hosp-lpu/dashboard')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('dsHospTask').value = data.task || '';
+                document.getElementById('dsHospDeadline').value = data.deadline || '';
+                // Больницы из «Путь пациента», которых нет в плане
+                const box = document.getElementById('dsHospUnmatched');
+                const entries = Object.entries(data.unmatched || {});
+                if (!data.hasData || !entries.length) { box.style.display = 'none'; return; }
+                const total = entries.reduce((s, [, n]) => s + n, 0);
+                box.style.display = 'block';
+                box.innerHTML = `<span class="text-muted">ЛПУ госпитализации вне плана (не учтены в факте): ${total} пациентов — </span>`
+                    + entries.map(([name, n]) => `${safeEsc(name)} (${n})`).join('; ');
+            }).catch(() => {});
+    }
+
+    function saveDsHospTask() {
+        const status = document.getElementById('dsHospTaskStatus');
+        fetch(BASE_PATH + '/api/ds-hosp-lpu/task', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                task: document.getElementById('dsHospTask').value,
+                deadline: document.getElementById('dsHospDeadline').value
+            })
+        })
+            .then(r => r.json())
+            .then(data => {
+                status.innerHTML = data.status === 'ok'
+                    ? '<span class="text-success"><i class="bi bi-check-circle me-1"></i>Сохранено</span>'
+                    : '<span class="text-danger">Ошибка сохранения</span>';
+            })
+            .catch(() => { status.innerHTML = '<span class="text-danger">Ошибка соединения</span>'; });
+    }
+
     function uploadContracts() {
         const fileInput = document.getElementById('contractsFile');
         const status    = document.getElementById('contractsStatus');
@@ -2092,6 +2398,9 @@
         loadDsHospPreview();
         loadDsChuzPreview();
         loadDsInpTask();
+        loadDsHospPlanPreview();
+        loadDsHospTask();
+        loadAmbSummary();
         loadContractsPreview();
     });
 

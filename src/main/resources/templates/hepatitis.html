@@ -134,6 +134,11 @@
             text-transform:uppercase;letter-spacing:.03em;padding:7px 8px;text-align:center;line-height:1.2;}
         .inp-table td{padding:6px 8px;border-top:1px solid rgba(255,255,255,.06);color:#e2e8f0;text-align:center;}
         .inp-table td.mo{text-align:left;font-weight:700;}
+        .inp-table th.inp-sortable{cursor:pointer;user-select:none;}
+        .inp-table th.inp-sortable:hover{color:#fff;}
+        .inp-table th.sorted{color:#a5b4fc;}
+        body.light .inp-table th.inp-sortable:hover{color:#0f172a;}
+        body.light .inp-table th.sorted{color:#4f46e5;}
         .inp-table td.num{color:rgba(255,255,255,.45);}
         .inp-table .pct{font-weight:800;}
         .inp-red,.inp-table td.inp-red{color:#ef4444;}
@@ -167,6 +172,15 @@
         body.light .inp-btn.active{color:#4f46e5;border-color:#6366f1;background:rgba(99,102,241,.08);}
         body.light .inp-btn-primary{background:#4f46e5;color:#fff;border-color:#4f46e5;}
         body.light .inp-period-err{color:#dc2626;}
+        .inp-kpi-sub{font-size:.62rem;color:rgba(255,255,255,.4);margin-top:1px;}
+        .hl-table td:first-child{text-align:left;font-weight:700;text-transform:uppercase;}
+        .hl-table tr.hl-chuz td{background:rgba(255,255,255,.03);}
+        .hl-table tr.hl-total td{background:#dc2626;color:#fff;font-weight:800;border-top:none;}
+        .hl-task-lbl{color:#ef4444;font-weight:800;}
+        body.light .inp-kpi-sub{color:rgba(0,0,0,.45);}
+        body.light .hl-table tr.hl-chuz td{background:rgba(0,0,0,.025);}
+        body.light .hl-table tr.hl-total td{background:#dc2626;color:#fff;}
+        body.light .hl-task-lbl{color:#dc2626;}
         @media (max-width:900px){ .inp-tables{grid-template-columns:1fr;} }
         body.light .inp-sub{color:rgba(0,0,0,.45);}
         body.light .inp-kpi{background:#fff;border-color:rgba(0,0,0,.1);}
@@ -618,17 +632,6 @@
         body.light .drug-rating-divider{background:rgba(0,0,0,.07);}
 
         /* ── LIGHT: инлайн-стили (модалы, поручения, план МО, контракты) ── */
-        body.light #weeklyPlanModal > div,
-        body.light #tfomsPatientsModal > div{background:#fff!important;border-color:rgba(0,0,0,.1)!important;}
-        body.light #weeklyPlanModal table,
-        body.light #tfomsPatientsModal table{color:rgba(0,0,0,.7)!important;}
-        body.light #weeklyPlanModal thead tr,
-        body.light #tfomsPatientsModal thead tr{background:rgba(0,0,0,.03)!important;}
-        body.light #weeklyPlanModal thead *,
-        body.light #tfomsPatientsModal thead *{border-bottom-color:rgba(0,0,0,.1)!important;}
-        body.light #weeklyPlanModal button,
-        body.light #tfomsPatientsModal button,
-        body.light #tfomsPatientsModal select{background:rgba(0,0,0,.05)!important;border-color:rgba(0,0,0,.1)!important;color:#1e293b!important;}
 
         body.light #contracts-section select{background:#fff!important;border-color:rgba(0,0,0,.1)!important;color:#1e293b!important;}
         body.light #contracts-section thead tr{background:rgba(0,0,0,.02)!important;}
@@ -636,14 +639,7 @@
         body.light #contracts-section tbody tr{border-bottom-color:rgba(0,0,0,.05)!important;}
         body.light #contracts-section tbody td{color:rgba(0,0,0,.65)!important;}
 
-        body.light #tfoms-section table{color:rgba(0,0,0,.7)!important;}
-        body.light #tfoms-section thead tr{background:rgba(0,0,0,.02)!important;}
-        body.light #tfoms-section thead *{color:rgba(0,0,0,.35)!important;border-bottom-color:rgba(0,0,0,.1)!important;}
 
-        body.light #moWorkPlanTableWrap{border-color:rgba(0,0,0,.08)!important;}
-        body.light #moWorkPlanTableWrap table{color:rgba(0,0,0,.7)!important;}
-        body.light #moWorkPlanTableWrap thead{background:#f1f5f9!important;}
-        body.light #moWorkPlanTableWrap thead th{border-bottom-color:rgba(0,0,0,.1)!important;}
 
         body.light [style*="background:#111827"]{background:#fff!important;}
         body.light [style*="background:#1a2235"]{background:#f1f5f9!important;}
@@ -662,7 +658,6 @@
         body.light [style*="border:1px solid rgba(255,255,255,.07)"]{border-color:rgba(0,0,0,.08)!important;}
         body.light [style*="border:1px solid rgba(255,255,255,.1)"]{border-color:rgba(0,0,0,.1)!important;}
         body.light [style*="border:1px solid rgba(255,255,255,.15)"]{border-color:rgba(0,0,0,.12)!important;}
-        body.light #moWorkPlanEmpty{color:rgba(0,0,0,.35)!important;}
 
         /* ── PRINT ── */
         @media print{
@@ -686,29 +681,10 @@
         <a href="#kvc" class="tn-link active" onclick="navClick(this,'kvc')">КВЦ</a>
         <a href="#kpi" class="tn-link" onclick="navClick(this,'kpi')">Показатели</a>
         <a href="#contracts-section" class="tn-link" onclick="navClick(this,'contracts-section')">Контракты</a>
+        <a href="#amb-section" class="tn-link" onclick="navClick(this,'amb-section')">Амбулаторно</a>
         <a href="#inpatient-section" class="tn-link" onclick="navClick(this,'inpatient-section')">Стационар</a>
-        <a href="#tfoms-section" class="tn-link" onclick="navClick(this,'tfoms-section')">ТФОМС ДС</a>
+        <a href="#hosp-lpu-section" class="tn-link" onclick="navClick(this,'hosp-lpu-section')">Госпитализация</a>
         <a href="#pathway" class="tn-link" onclick="navClick(this,'pathway')">Путь пациента</a>
-        <span class="tn-link tn-link-disabled">План действий</span>
-        <div class="tn-dropdown">
-            <span class="tn-link tn-dropdown-toggle tn-link-disabled">Лекарства <span class="tn-caret">▾</span></span>
-            <div class="tn-dropdown-menu">
-                <div class="tn-dropdown-menu-inner">
-                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">1</span>Амбулаторно</span>
-                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">2</span>Дневной стационар</span>
-                </div>
-            </div>
-        </div>
-        <div class="tn-dropdown">
-            <span class="tn-link tn-dropdown-toggle tn-link-disabled">Рейтинг МО <span class="tn-caret">▾</span></span>
-            <div class="tn-dropdown-menu">
-                <div class="tn-dropdown-menu-inner">
-                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">1</span>Скрининг</span>
-                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">2</span>Амбулаторно</span>
-                    <span class="tn-dd-item tn-dd-disabled"><span class="tn-dd-num">3</span>Дневной стационар</span>
-                </div>
-            </div>
-        </div>
         <a href="#porucheniya" class="tn-link" onclick="navClick(this,'porucheniya')">Поручения</a>
     </div>
     <div class="tn-right">
@@ -889,156 +865,6 @@
         </div>
     </div>
 
-    <!-- ══ РЕЙТИНГ НЕДЕЛЬНОГО ПЛАНА ════════════════════════ -->
-    <div class="section-block" id="weekly-rating"
-         th:attr="data-week=${weeklyPlanDate}">
-        <div class="section-num">03</div>
-        <div class="sec-hd">
-            <div class="section-title">Рейтинг исполнения</div>
-            <div style="display:flex;align-items:center;gap:10px;">
-                <select id="weekly-rating-week-select" class="week-select"></select>
-                <button onclick="openWeeklyPlanModal()"
-                        style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#a5b4fc;border-radius:8px;padding:5px 14px;font-size:.75rem;font-weight:600;cursor:pointer;">
-                    Все данные
-                </button>
-            </div>
-        </div>
-
-        <!-- Амбулаторная помощь -->
-        <div style="margin-bottom:36px;">
-            <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px;">
-                <span style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#818cf8;">
-                    Амбулаторная помощь
-                </span>
-                <span id="amb-week-label" class="week-label"></span>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                <div class="rating-card">
-                    <div class="rating-head">
-                        <span style="font-size:.9rem;font-weight:700;color:#4ade80;">▲ Топ-10 лучших</span>
-                    </div>
-                    <div class="rating-scroll"><table class="rating-table">
-                        <thead><tr>
-                            <th style="text-align:center;width:30px;white-space:nowrap;">№</th>
-                            <th style="text-align:left;">МО</th>
-                            <th style="text-align:right;">План 2026</th>
-                            <th style="text-align:right;">Факт 2026</th>
-                            <th style="text-align:right;">% от плана</th>
-                            <th style="text-align:right;">Нед. план</th>
-                            <th style="text-align:right;">Нед. факт</th>
-                            <th style="text-align:right;">Динамика</th>
-                        </tr></thead>
-                        <tbody id="amb-top-body"></tbody>
-                    </table></div>
-                </div>
-                <div class="rating-card">
-                    <div class="rating-head">
-                        <span style="font-size:.9rem;font-weight:700;color:#f87171;">▼ Топ-10 отстающих</span>
-                    </div>
-                    <div class="rating-scroll"><table class="rating-table">
-                        <thead><tr>
-                            <th style="text-align:center;width:30px;white-space:nowrap;">№</th>
-                            <th style="text-align:left;">МО</th>
-                            <th style="text-align:right;">План 2026</th>
-                            <th style="text-align:right;">Факт 2026</th>
-                            <th style="text-align:right;">% от плана</th>
-                            <th style="text-align:right;">Нед. план</th>
-                            <th style="text-align:right;">Нед. факт</th>
-                            <th style="text-align:right;">Динамика</th>
-                        </tr></thead>
-                        <tbody id="amb-bot-body"></tbody>
-                    </table></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Стационарная помощь -->
-        <div>
-            <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px;">
-                <span style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#4ade80;">
-                    Стационарная помощь
-                </span>
-                <span id="stat-week-label" class="week-label"></span>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                <div class="rating-card">
-                    <div class="rating-head">
-                        <span style="font-size:.9rem;font-weight:700;color:#4ade80;">▲ Топ-10 лучших</span>
-                    </div>
-                    <div class="rating-scroll"><table class="rating-table">
-                        <thead><tr>
-                            <th style="text-align:left;">МО</th>
-                            <th style="text-align:right;">План 2026</th>
-                            <th style="text-align:right;">Направл.</th>
-                            <th style="text-align:right;">%</th>
-                            <th style="text-align:right;">Нед. план</th>
-                            <th style="text-align:right;">Нед. факт</th>
-                            <th style="text-align:right;">Динамика</th>
-                        </tr></thead>
-                        <tbody id="stat-top-body"></tbody>
-                    </table></div>
-                </div>
-                <div class="rating-card">
-                    <div class="rating-head">
-                        <span style="font-size:.9rem;font-weight:700;color:#f87171;">▼ Топ-10 отстающих</span>
-                    </div>
-                    <div class="rating-scroll"><table class="rating-table">
-                        <thead><tr>
-                            <th style="text-align:left;">МО</th>
-                            <th style="text-align:right;">План 2026</th>
-                            <th style="text-align:right;">Направл.</th>
-                            <th style="text-align:right;">%</th>
-                            <th style="text-align:right;">Нед. план</th>
-                            <th style="text-align:right;">Нед. факт</th>
-                            <th style="text-align:right;">Динамика</th>
-                        </tr></thead>
-                        <tbody id="stat-bot-body"></tbody>
-                    </table></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Модальное окно: все данные -->
-    <div id="weeklyPlanModal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.75);overflow-y:auto;">
-        <div style="max-width:1100px;margin:40px auto;background:#111827;border-radius:16px;border:1px solid rgba(255,255,255,.1);padding:28px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-                <span style="font-size:1.05rem;font-weight:700;color:#fff;">Недельный план — все данные</span>
-                <button onclick="closeWeeklyPlanModal()"
-                        style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:#e2e8f0;border-radius:8px;padding:6px 16px;cursor:pointer;font-size:.85rem;">
-                    Закрыть ✕
-                </button>
-            </div>
-            <div style="overflow-x:auto;">
-                <table style="width:100%;border-collapse:collapse;font-size:.78rem;color:rgba(255,255,255,.7);">
-                    <thead>
-                        <tr style="background:rgba(255,255,255,.04);">
-                            <th rowspan="2" style="padding:8px 12px;text-align:center;width:36px;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.3);font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;">№</th>
-                            <th rowspan="2" style="padding:8px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.3);font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;">МО</th>
-                            <th colspan="6" style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06);border-left:1px solid rgba(255,255,255,.08);color:#818cf8;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;">Амбулаторная помощь</th>
-                            <th colspan="6" style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06);border-left:1px solid rgba(255,255,255,.08);color:#4ade80;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;">Стационарная помощь</th>
-                        </tr>
-                        <tr style="background:rgba(255,255,255,.02);">
-                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);border-left:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.25);font-size:.6rem;">План 2026</th>
-                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Факт 2026</th>
-                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">% от плана</th>
-                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Нед. план</th>
-                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Нед. факт</th>
-                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Динамика</th>
-                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);border-left:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.25);font-size:.6rem;">План 2026</th>
-                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Направл.</th>
-                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">%</th>
-                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Нед. план</th>
-                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Нед. факт</th>
-                            <th style="padding:5px 10px;text-align:right;border-bottom:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.25);font-size:.6rem;">Динамика</th>
-                        </tr>
-                    </thead>
-                    <tbody id="weeklyPlanModalBody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
     <!-- ══ МОНИТОРИНГ КОНТРАКТОВ ════════════════════════════════ -->
     <div class="section-block" id="contracts-section">
         <div class="section-num">03</div>
@@ -1153,9 +979,210 @@
         </div>
     </div>
 
+    <!-- ══ АМБУЛАТОРНАЯ ПОМОЩЬ — ПОФАМИЛЬНЫЙ ПЛАН / ОТПУСК ═════════ -->
+    <div class="section-block" id="amb-section">
+        <div class="section-num">04</div>
+        <div class="inp-head">
+            <div>
+                <div class="section-title">Амбулаторная помощь</div>
+                <div class="inp-sub" id="amb-sub">План — пофамильный список, факт — отпуск препарата по выгрузке</div>
+            </div>
+            <div class="inp-kpis">
+                <div class="inp-kpi"><div class="inp-kpi-lbl">План</div><div class="inp-kpi-val" id="amb-plan">—</div></div>
+                <div class="inp-kpi"><div class="inp-kpi-lbl">Факт</div><div class="inp-kpi-val" id="amb-fact">—</div></div>
+                <div class="inp-kpi"><div class="inp-kpi-lbl">% от плана</div><div class="inp-kpi-val" id="amb-pct">—</div></div>
+                <div class="inp-kpi"><div class="inp-kpi-lbl">Динамика</div><div class="inp-kpi-val inp-up" id="amb-week">—</div><div class="inp-kpi-sub" id="amb-week-sub"></div></div>
+            </div>
+        </div>
+
+        <div class="inp-period no-print" id="amb-period" style="display:none;">
+            <span class="inp-period-lbl">Период динамики:</span>
+            <label>с <input type="date" id="amb-from"></label>
+            <label>по <input type="date" id="amb-to"></label>
+            <button type="button" class="inp-btn inp-btn-primary" id="amb-apply">Показать</button>
+            <span class="inp-period-sep"></span>
+            <button type="button" class="inp-btn" data-preset="week">Прошлая неделя</button>
+            <button type="button" class="inp-btn" data-preset="month">Текущий месяц</button>
+            <button type="button" class="inp-btn" data-preset="year">С начала года</button>
+            <span class="inp-period-err" id="amb-period-err"></span>
+        </div>
+
+        <div id="amb-body" style="display:none;">
+            <div class="inp-tables" id="amb-tables"></div>
+            <div class="inp-done" id="amb-done"></div>
+            <div class="inp-task" id="amb-task-row">
+                <div class="inp-task-text"><span><span class="hl-task-lbl">Поручение:</span> <span id="amb-task"></span></span></div>
+                <div class="inp-deadline" id="amb-deadline-box">
+                    <div class="inp-deadline-lbl">Срок</div>
+                    <div class="inp-deadline-val" id="amb-deadline"></div>
+                </div>
+            </div>
+        </div>
+        <div id="amb-empty" class="rating-card" style="text-align:center;padding:40px;color:rgba(255,255,255,.3);font-size:.85rem;">
+            Данные не загружены — загрузите пофамильный план и выгрузку отпуска в карточке «Амбулаторное лечение» панели администратора
+        </div>
+    </div>
+    <script th:inline="javascript">
+    (function() {
+        const AMB_BASE = /*[[${basePath}]]*/ '';
+        const nf  = n => Number(n || 0).toLocaleString('ru-RU');
+        const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const dm  = iso => { const [y, m, d] = iso.split('-'); return d + '.' + m; };
+        const dmy = iso => { const [y, m, d] = iso.split('-'); return d + '.' + m + '.' + y; };
+        // Пороги цвета % плана — как на еженедельном слайде «Амбулаторная помощь»
+        const pctCls = p => p == null ? '' : p < 67 ? 'inp-red' : p < 88 ? 'inp-amber' : 'inp-green';
+
+        const fromEl = document.getElementById('amb-from');
+        const toEl   = document.getElementById('amb-to');
+        const errEl  = document.getElementById('amb-period-err');
+        let defaults = null, lastData = null, periodLbl = '';
+        let sortState = null;   // {key, dir}; null — по возрастанию % плана
+
+        function sortRows(rows) {
+            if (!sortState) return rows;
+            const { key, dir } = sortState;
+            return rows.slice().sort((a, b) => {
+                const x = a[key], y = b[key];
+                const c = key === 'mo' ? String(x).localeCompare(String(y), 'ru') : (x ?? -Infinity) - (y ?? -Infinity);
+                return c * dir || String(a.mo).localeCompare(String(b.mo), 'ru');
+            });
+        }
+
+        function th(key, label, style) {
+            const active = sortState && sortState.key === key;
+            const arrow = active ? (sortState.dir < 0 ? ' ▼' : ' ▲') : '';
+            return `<th class="inp-sortable${active ? ' sorted' : ''}" data-sort="${key}"${style ? ` style="${style}"` : ''}
+                        title="Сортировать">${label}${arrow}</th>`;
+        }
+
+        function table(rows, startNo) {
+            return `<table class="inp-table">
+                <thead><tr>
+                    <th>№</th>${th('mo', 'Мед. организация', 'text-align:left;')}
+                    ${th('plan', 'План')}${th('fact', 'Факт')}${th('pct', '% плана')}${th('week', 'Динамика<br>' + periodLbl)}
+                </tr></thead>
+                <tbody>${rows.map((r, i) => `<tr>
+                    <td class="num">${startNo + i}</td>
+                    <td class="mo">${esc(r.mo)}</td>
+                    <td>${nf(r.plan)}</td>
+                    <td>${nf(r.fact)}</td>
+                    <td class="pct ${pctCls(r.pct)}">${r.pct ?? '—'}</td>
+                    <td class="${r.week > 0 ? 'inp-green' : ''}" style="font-weight:700;">${r.week > 0 ? '+ ' + r.week : '0'}</td>
+                </tr>`).join('')}</tbody>
+            </table>`;
+        }
+
+        function renderTables() {
+            const d = lastData;
+            const notMet = sortRows(d.rows.filter(r => r.pct != null && r.pct < 100));
+            const met    = d.rows.filter(r => r.pct != null && r.pct >= 100);
+            const tables = document.getElementById('amb-tables');
+            if (notMet.length) {
+                const half = Math.ceil(notMet.length / 2);
+                tables.innerHTML =
+                    `<div class="inp-banner inp-span">Не выполнили план — ${notMet.length} МО</div>` +
+                    `<div>${table(notMet.slice(0, half), 1)}</div>` +
+                    (notMet.length > half ? `<div>${table(notMet.slice(half), half + 1)}</div>` : '');
+            } else {
+                tables.innerHTML = '<div class="inp-banner ok inp-span">Все МО выполнили план</div>';
+            }
+            document.getElementById('amb-done').textContent = met.length
+                ? 'Выполнили план (' + met.length + '): ' + met.map(r => r.mo + ' ' + r.fact + '/' + r.plan).join(', ')
+                : '';
+        }
+
+        function render(d) {
+            document.getElementById('amb-empty').style.display = 'none';
+            document.getElementById('amb-body').style.display = 'block';
+            document.getElementById('amb-period').style.display = '';
+
+            const sameYear = d.weekStart.slice(0, 4) === d.reportDate.slice(0, 4);
+            periodLbl = d.weekStart === d.reportDate ? dmy(d.reportDate)
+                : (sameYear ? dm(d.weekStart) : dmy(d.weekStart)) + ' – ' + dm(d.reportDate);
+
+            document.getElementById('amb-sub').textContent = d.hasFact
+                ? 'Факт на ' + dmy(d.reportDate) + ' — пациенты из пофамильного плана, получившие препарат'
+                : 'Выгрузка отпуска препаратов не загружена — факт не посчитан';
+            document.getElementById('amb-plan').textContent = nf(d.totalPlan);
+            document.getElementById('amb-fact').textContent = nf(d.totalFact);
+            const pctEl = document.getElementById('amb-pct');
+            pctEl.textContent = (d.totalPct ?? '—') + ' %';
+            pctEl.classList.remove('inp-red', 'inp-amber', 'inp-green');
+            if (pctCls(d.totalPct)) pctEl.classList.add(pctCls(d.totalPct));
+            document.getElementById('amb-week').textContent = '+ ' + nf(d.totalWeek);
+            document.getElementById('amb-week-sub').textContent = '(' + periodLbl + ')';
+
+            lastData = d;
+            renderTables();
+
+            const task = (d.task || '').trim();
+            document.getElementById('amb-task').textContent = task;
+            document.getElementById('amb-deadline').textContent = d.deadline ? dmy(d.deadline) : '';
+            document.getElementById('amb-deadline-box').style.display = d.deadline ? '' : 'none';
+            document.getElementById('amb-task-row').style.display = task ? '' : 'none';
+
+            fromEl.value = d.weekStart;
+            toEl.value   = d.reportDate;
+            if (d.minDate) { fromEl.min = d.minDate.slice(0, 4) + '-01-01'; toEl.min = fromEl.min; }
+            if (d.maxDate) { const max = d.maxDate > d.defaultTo ? d.maxDate : d.defaultTo; fromEl.max = max; toEl.max = max; }
+            document.querySelectorAll('#amb-period [data-preset]').forEach(b => {
+                const p = presetRange(b.dataset.preset);
+                b.classList.toggle('active', !!p && p.from === d.weekStart && p.to === d.reportDate);
+            });
+        }
+
+        function load(from, to) {
+            errEl.textContent = '';
+            const qs = from && to ? '?from=' + from + '&to=' + to : '';
+            fetch(AMB_BASE + '/api/amb/dashboard' + qs)
+                .then(r => r.json().then(j => ({ ok: r.ok, j })))
+                .then(({ ok, j }) => {
+                    if (!ok) { errEl.textContent = j.error || 'Ошибка загрузки'; return; }
+                    if (!j.hasData) return;
+                    defaults = { from: j.defaultFrom, to: j.defaultTo };
+                    render(j);
+                })
+                .catch(() => { errEl.textContent = 'Ошибка соединения'; });
+        }
+
+        // Быстрые периоды считаются от конца последней полной недели
+        function presetRange(name) {
+            if (!defaults) return null;
+            const to = defaults.to;
+            if (name === 'week')  return { from: defaults.from, to };
+            if (name === 'month') return { from: to.slice(0, 8) + '01', to };
+            if (name === 'year')  return { from: to.slice(0, 5) + '01-01', to };
+            return null;
+        }
+
+        document.getElementById('amb-apply').addEventListener('click', () => {
+            if (!fromEl.value || !toEl.value) { errEl.textContent = 'Укажите обе даты'; return; }
+            if (fromEl.value > toEl.value)   { errEl.textContent = 'Дата «с» позже даты «по»'; return; }
+            load(fromEl.value, toEl.value);
+        });
+        document.querySelectorAll('#amb-period [data-preset]').forEach(b =>
+            b.addEventListener('click', () => {
+                const p = presetRange(b.dataset.preset);
+                if (p) load(p.from, p.to);
+            }));
+        // Сортировка по клику на заголовок: числа — от большего к меньшему, МО — А→Я; повторный клик — наоборот
+        document.getElementById('amb-tables').addEventListener('click', e => {
+            const h = e.target.closest('th[data-sort]');
+            if (!h || !lastData) return;
+            const key = h.dataset.sort;
+            sortState = sortState && sortState.key === key
+                ? { key, dir: -sortState.dir }
+                : { key, dir: key === 'mo' ? 1 : -1 };
+            renderTables();
+        });
+
+        load();
+    })();
+    </script>
+
     <!-- ══ СТАЦИОНАРНАЯ ПОМОЩЬ — ПЛАН / ФАКТ (ГБУЗ + ЧУЗ) ═════════ -->
     <div class="section-block" id="inpatient-section">
-        <div class="section-num">03</div>
+        <div class="section-num">05</div>
         <div class="inp-head">
             <div>
                 <div class="section-title">Стационарная помощь</div>
@@ -1208,11 +1235,32 @@
         // Пороги цвета % плана — как в еженедельной презентации
         const pctCls = p => p == null ? '' : p < 67 ? 'inp-red' : p < 86 ? 'inp-amber' : 'inp-green';
 
+        // Сортировка по клику на заголовок: 1-й клик — от большего к меньшему, повторный — наоборот.
+        // null — порядок по умолчанию (лучшие — по убыванию %, худшие — по возрастанию).
+        let sortState = null;   // {key, dir: -1 | 1}
+
+        function sortRows(rows) {
+            if (!sortState) return rows;
+            const { key, dir } = sortState;
+            return rows.slice().sort((a, b) => {
+                const x = a[key], y = b[key];
+                const c = key === 'mo' ? String(x).localeCompare(String(y), 'ru') : (x ?? -Infinity) - (y ?? -Infinity);
+                return c * dir || String(a.mo).localeCompare(String(b.mo), 'ru');
+            });
+        }
+
+        function th(key, label, style) {
+            const active = sortState && sortState.key === key;
+            const arrow = active ? (sortState.dir < 0 ? ' ▼' : ' ▲') : '';
+            return `<th class="inp-sortable${active ? ' sorted' : ''}" data-sort="${key}"${style ? ` style="${style}"` : ''}
+                        title="Сортировать">${label}${arrow}</th>`;
+        }
+
         function table(rows, startNo, weekLbl) {
             return `<table class="inp-table">
                 <thead><tr>
-                    <th>№</th><th style="text-align:left;">Мед. организация</th>
-                    <th>План 2026</th><th>Факт 2026</th><th>% плана</th><th>Динамика<br>${weekLbl}</th>
+                    <th>№</th>${th('mo', 'Мед. организация', 'text-align:left;')}
+                    ${th('plan', 'План 2026')}${th('fact', 'Факт 2026')}${th('pct', '% плана')}${th('week', 'Динамика<br>' + weekLbl)}
                 </tr></thead>
                 <tbody>${rows.map((r, i) => `<tr>
                     <td class="num">${startNo + i}</td>
@@ -1242,20 +1290,21 @@
             const btn     = document.getElementById('inp-toggle-all');
 
             if (showAllNotMet) {
-                if (notMet.length) {
+                const list = sortRows(notMet);
+                if (list.length) {
                     const half = Math.ceil(notMet.length / 2);
                     tables.innerHTML =
                         `<div class="inp-banner inp-span">Не выполнили план — ${notMet.length} МО</div>` +
-                        `<div>${table(notMet.slice(0, half), 1, lastWeekLbl)}</div>` +
-                        (notMet.length > half ? `<div>${table(notMet.slice(half), half + 1, lastWeekLbl)}</div>` : '');
+                        `<div>${table(list.slice(0, half), 1, lastWeekLbl)}</div>` +
+                        (list.length > half ? `<div>${table(list.slice(half), half + 1, lastWeekLbl)}</div>` : '');
                 } else {
                     tables.innerHTML = '<div class="inp-banner ok inp-span">Все МО выполнили план</div>';
                 }
                 btn.textContent = '← Топ-10 лучших и худших';
                 btn.disabled = false;
             } else {
-                const best  = ranked.slice().reverse().slice(0, TOP_N);
-                const worst = ranked.slice(0, TOP_N);
+                const best  = sortRows(ranked.slice().reverse().slice(0, TOP_N));
+                const worst = sortRows(ranked.slice(0, TOP_N));
                 tables.innerHTML =
                     `<div><div class="inp-banner ok">▲ Топ-${TOP_N} лучших</div>${table(best, 1, lastWeekLbl)}</div>` +
                     `<div><div class="inp-banner">▼ Топ-${TOP_N} худших</div>${table(worst, 1, lastWeekLbl)}</div>`;
@@ -1265,6 +1314,18 @@
                 btn.disabled = !notMet.length;
             }
         }
+
+        document.getElementById('inp-tables').addEventListener('click', e => {
+            const h = e.target.closest('th[data-sort]');
+            if (!h || !lastData) return;
+            const key = h.dataset.sort;
+            // Название — первым кликом А→Я, числа — от большего к меньшему
+            const firstDir = key === 'mo' ? 1 : -1;
+            sortState = sortState && sortState.key === key
+                ? { key, dir: -sortState.dir }
+                : { key, dir: firstDir };
+            renderTables();
+        });
 
         document.getElementById('inp-toggle-all').addEventListener('click', () => {
             showAllNotMet = !showAllNotMet;
@@ -1350,350 +1411,200 @@
     })();
     </script>
 
-    <!-- ══ ТФОМС ДС — ЛЕЧЕНИЕ ══════════════════════════════════ -->
-    <div class="section-block" id="tfoms-section">
-        <div class="section-num">03</div>
-        <div class="sec-hd">
-            <div class="section-title">Дневной стационар — пролеченные пациенты</div>
-        </div>
-
-        <!-- KPI панель -->
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
-            <div class="kpi-card" style="padding:18px 20px;border-left:3px solid rgba(255,255,255,.2);">
-                <div style="font-size:1.85rem;font-weight:800;color:#e2e8f0;line-height:1;" id="tfoms-total-records">—</div>
-                <div style="font-size:.72rem;color:rgba(255,255,255,.4);margin-top:6px;">всего записей</div>
+    <!-- ══ ГОСПИТАЛИЗАЦИЯ ПАЦИЕНТОВ ПО ЛПУ (где лечат) ══════════════ -->
+    <div class="section-block" id="hosp-lpu-section">
+        <div class="section-num">06</div>
+        <div class="inp-head">
+            <div>
+                <div class="section-title">Госпитализация пациентов</div>
+                <div class="inp-sub" id="hl-sub">Факт 2026 — по ЛПУ госпитализации</div>
             </div>
-            <div class="kpi-card" style="padding:18px 20px;border-left:3px solid #2A78D6;">
-                <div style="font-size:1.85rem;font-weight:800;color:#2A78D6;line-height:1;" id="tfoms-course1">—</div>
-                <div style="font-size:.72rem;color:rgba(255,255,255,.4);margin-top:6px;">прошли 1 курс</div>
-            </div>
-            <div class="kpi-card" style="padding:18px 20px;border-left:3px solid #EDA100;">
-                <div style="font-size:1.85rem;font-weight:800;color:#EDA100;line-height:1;" id="tfoms-course2">—</div>
-                <div style="font-size:.72rem;color:rgba(255,255,255,.4);margin-top:6px;">прошли 2 курса</div>
-            </div>
-            <div class="kpi-card" style="padding:18px 20px;border-left:3px solid #E34948;">
-                <div style="font-size:1.85rem;font-weight:800;color:#E34948;line-height:1;" id="tfoms-course3">—</div>
-                <div style="font-size:.72rem;color:rgba(255,255,255,.4);margin-top:6px;">прошли 3+ курса</div>
+            <div class="inp-kpis">
+                <div class="inp-kpi"><div class="inp-kpi-lbl">План 2026</div><div class="inp-kpi-val" id="hl-plan">—</div><div class="inp-kpi-sub" id="hl-plan-sub"></div></div>
+                <div class="inp-kpi"><div class="inp-kpi-lbl">Факт 2026</div><div class="inp-kpi-val" id="hl-fact">—</div><div class="inp-kpi-sub" id="hl-fact-sub"></div></div>
+                <div class="inp-kpi"><div class="inp-kpi-lbl">% плана</div><div class="inp-kpi-val" id="hl-pct">—</div></div>
+                <div class="inp-kpi"><div class="inp-kpi-lbl">Динамика</div><div class="inp-kpi-val inp-up" id="hl-week">—</div><div class="inp-kpi-sub" id="hl-week-sub"></div></div>
             </div>
         </div>
 
-        <!-- Вкладки -->
-        <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:0;">
-            <button class="tfoms-tab active" data-tab="mo" onclick="switchTfomsTab('mo',this)"
-                style="padding:8px 18px;font-size:.82rem;font-weight:600;background:none;border:none;border-bottom:2px solid #2A78D6;color:#2A78D6;cursor:pointer;margin-bottom:-1px;">
-                По МО
-            </button>
-            <button class="tfoms-tab" data-tab="dynamics" onclick="switchTfomsTab('dynamics',this)"
-                style="padding:8px 18px;font-size:.82rem;font-weight:600;background:none;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,.45);cursor:pointer;margin-bottom:-1px;">
-                Динамика по месяцам
-            </button>
-            <button class="tfoms-tab" data-tab="schemes" onclick="switchTfomsTab('schemes',this)"
-                style="padding:8px 18px;font-size:.82rem;font-weight:600;background:none;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,.45);cursor:pointer;margin-bottom:-1px;">
-                Схемы лечения
-            </button>
+        <div class="inp-period no-print" id="hl-period" style="display:none;">
+            <span class="inp-period-lbl">Период динамики:</span>
+            <label>с <input type="date" id="hl-from"></label>
+            <label>по <input type="date" id="hl-to"></label>
+            <button type="button" class="inp-btn inp-btn-primary" id="hl-apply">Показать</button>
+            <span class="inp-period-sep"></span>
+            <button type="button" class="inp-btn" data-preset="week">Прошлая неделя</button>
+            <button type="button" class="inp-btn" data-preset="month">Текущий месяц</button>
+            <button type="button" class="inp-btn" data-preset="year">С начала года</button>
+            <span class="inp-period-err" id="hl-period-err"></span>
         </div>
 
-        <!-- Tab: По МО -->
-        <div id="tfoms-tab-mo">
-            <div style="font-size:.75rem;color:rgba(255,255,255,.35);margin-bottom:14px;">
-                Нажмите на название МО для просмотра пациентов&nbsp;&nbsp;
-                <span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#2A78D6;"></span>1 курс</span>
-                <span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#EDA100;"></span>2 курса</span>
-                <span style="display:inline-flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#E34948;"></span>3+ курса</span>
-            </div>
-            <div id="tfoms-mo-list" class="rating-card" style="padding:16px 20px;">
-                <div id="tfoms-empty" style="text-align:center;padding:40px;color:rgba(255,255,255,.3);font-size:.85rem;">Данные ТФОМС ДС не загружены</div>
-            </div>
-        </div>
-
-        <!-- Tab: Динамика -->
-        <div id="tfoms-tab-dynamics" style="display:none;">
-            <div class="rating-card" style="padding:20px;">
-                <canvas id="tfomsDynamicsChart" height="220"></canvas>
-                <div style="margin-top:20px;overflow-x:auto;">
-                    <table style="width:100%;border-collapse:collapse;font-size:.82rem;color:rgba(255,255,255,.75);">
-                        <thead>
-                            <tr style="background:rgba(255,255,255,.04);">
-                                <th style="padding:8px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);">Месяц</th>
-                                <th style="padding:8px 12px;text-align:right;border-bottom:1px solid rgba(255,255,255,.08);">Начато курсов</th>
-                                <th style="padding:8px 12px;text-align:right;border-bottom:1px solid rgba(255,255,255,.08);">Доля от итого</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tfomsDynamicsBody"></tbody>
-                    </table>
+        <div id="hl-body" style="display:none;">
+            <div id="hl-table"></div>
+            <div class="inp-task" id="hl-task-row">
+                <div class="inp-task-text"><span><span class="hl-task-lbl">Поручение:</span> <span id="hl-task"></span></span></div>
+                <div class="inp-deadline" id="hl-deadline-box">
+                    <div class="inp-deadline-lbl">Срок</div>
+                    <div class="inp-deadline-val" id="hl-deadline"></div>
                 </div>
             </div>
         </div>
-
-        <!-- Tab: Схемы лечения -->
-        <div id="tfoms-tab-schemes" style="display:none;">
-            <div class="rating-card" style="padding:20px;display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start;">
-                <div style="display:flex;justify-content:center;">
-                    <canvas id="tfomsSchemeChart" width="260" height="260"></canvas>
-                </div>
-                <div style="overflow-x:auto;">
-                    <table style="width:100%;border-collapse:collapse;font-size:.82rem;color:rgba(255,255,255,.75);">
-                        <thead>
-                            <tr style="background:rgba(255,255,255,.04);">
-                                <th style="padding:8px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);">Код схемы</th>
-                                <th style="padding:8px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);">Препарат</th>
-                                <th style="padding:8px 12px;text-align:right;border-bottom:1px solid rgba(255,255,255,.08);">Курсов</th>
-                                <th style="padding:8px 12px;text-align:right;border-bottom:1px solid rgba(255,255,255,.08);">%</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tfomsSchemeBody"></tbody>
-                    </table>
-                </div>
-            </div>
+        <div id="hl-empty" class="rating-card" style="text-align:center;padding:40px;color:rgba(255,255,255,.3);font-size:.85rem;">
+            Данные не загружены — загрузите «План госпитализации по ЛПУ» и «Госпитализировано в дневной стационар» в панели администратора
         </div>
     </div>
-
-    <!-- Модальное окно: пациенты МО -->
-    <div id="tfomsPatientsModal" style="display:none;position:fixed;inset:0;z-index:9100;background:rgba(0,0,0,.75);overflow-y:auto;">
-        <div style="max-width:680px;margin:50px auto;background:#111827;border-radius:16px;border:1px solid rgba(255,255,255,.1);padding:28px;">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
-                <div>
-                    <div id="tfomsPatientsModalTitle" style="font-size:1rem;font-weight:700;color:#fff;"></div>
-                    <div id="tfomsPatientsModalSub" style="font-size:.75rem;color:rgba(255,255,255,.4);margin-top:4px;"></div>
-                </div>
-                <button onclick="closeTfomsPatientsModal()"
-                        style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:#e2e8f0;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:.82rem;flex-shrink:0;margin-left:16px;">
-                    ✕
-                </button>
-            </div>
-            <div style="margin:14px 0 12px;">
-                <select id="tfomsCourseFilter" onchange="filterTfomsPatients()"
-                    style="background:#1f2937;border:1px solid rgba(255,255,255,.15);color:#e2e8f0;border-radius:8px;padding:6px 12px;font-size:.82rem;cursor:pointer;">
-                    <option value="0">Все курсы</option>
-                    <option value="1">1 курс</option>
-                    <option value="2">2 курса</option>
-                    <option value="3">3+ курса</option>
-                </select>
-            </div>
-            <div style="max-height:440px;overflow-y:auto;">
-                <table style="width:100%;border-collapse:collapse;font-size:.82rem;color:rgba(255,255,255,.75);">
-                    <thead>
-                        <tr style="background:rgba(255,255,255,.04);position:sticky;top:0;">
-                            <th style="padding:8px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);">Фамилия</th>
-                            <th style="padding:8px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.08);">Курсов всего</th>
-                            <th style="padding:8px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);">Дата начала</th>
-                            <th style="padding:8px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);">Схема</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tfomsPatientsBody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
     <script th:inline="javascript">
     (function() {
-        const C1 = '#2A78D6', C2 = '#EDA100', C3 = '#E34948';
+        const HL_BASE = /*[[${basePath}]]*/ '';
+        const nf  = n => Number(n || 0).toLocaleString('ru-RU');
+        const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const dm  = iso => { const [y, m, d] = iso.split('-'); return d + '.' + m; };
+        const dmy = iso => { const [y, m, d] = iso.split('-'); return d + '.' + m + '.' + y; };
+        // Пороги цвета % плана — как в еженедельной презентации «Госпитализация пациентов»
+        const pctCls = p => p == null ? '' : p >= 90 ? 'inp-green' : p >= 80 ? 'inp-amber' : 'inp-red';
 
-        function fmtMln(n) { return n ? (n / 1_000_000).toFixed(1) + ' млн ₽' : '0'; }
-        function courseBadge(c) {
-            const col = c === 1 ? C1 : c === 2 ? C2 : C3;
-            const lbl = c === 1 ? '1 курс' : c === 2 ? '2 курса' : c + ' курса';
-            return `<span style="display:inline-block;padding:2px 8px;border-radius:4px;background:${col}33;color:${col};font-size:.72rem;font-weight:700;">${lbl}</span>`;
-        }
+        const fromEl = document.getElementById('hl-from');
+        const toEl   = document.getElementById('hl-to');
+        const errEl  = document.getElementById('hl-period-err');
+        let defaults = null, lastData = null, periodLbl = '';
+        let sortState = null;   // {key, dir}; null — по убыванию % плана
 
-        const TFOMS_BASE = /*[[${basePath}]]*/ '';
-        let _tfomsPatients = [];
-        let _dynamicsChart = null, _schemeChart = null;
-        let _dynamicsLoaded = false, _schemesLoaded = false;
-
-        function loadTfomsDashboard() {
-            fetch(TFOMS_BASE + '/api/tfoms-ds/dashboard')
-                .then(r => r.ok ? r.json() : null)
-                .then(data => {
-                    if (!data || !data.rows || !data.rows.length) return;
-
-                    document.getElementById('tfoms-total-records').textContent = (data.totalRecords || 0).toLocaleString('ru-RU');
-                    document.getElementById('tfoms-course1').textContent = (data.globalCourse1 || 0).toLocaleString('ru-RU');
-                    document.getElementById('tfoms-course2').textContent = (data.globalCourse2 || 0).toLocaleString('ru-RU');
-                    document.getElementById('tfoms-course3').textContent = (data.globalCourse3 || 0).toLocaleString('ru-RU');
-
-                    const maxRec = Math.max(...data.rows.map(r => r.totalRecords || 0));
-                    const container = document.getElementById('tfoms-mo-list');
-                    document.getElementById('tfoms-empty').style.display = 'none';
-
-                    data.rows.forEach(mo => {
-                        const total = mo.totalRecords || 0;
-                        const c1 = mo.course1 || 0;
-                        const c2 = mo.course2 || 0;
-                        const c3 = mo.course3plus || 0;
-                        const bw1 = maxRec > 0 ? (c1 / maxRec * 100).toFixed(1) : 0;
-                        const bw2 = maxRec > 0 ? (c2 / maxRec * 100).toFixed(1) : 0;
-                        const bw3 = maxRec > 0 ? (c3 / maxRec * 100).toFixed(1) : 0;
-
-                        const row = document.createElement('div');
-                        row.style.cssText = 'display:grid;grid-template-columns:160px 1fr auto;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);';
-
-                        const nameEl = document.createElement('div');
-                        nameEl.style.cssText = 'text-align:right;font-size:.82rem;font-weight:600;color:#60a5fa;cursor:pointer;';
-                        nameEl.textContent = mo.moShort;
-                        nameEl.title = mo.moFull || mo.moShort;
-                        nameEl.onclick = () => openTfomsPatientsModal(mo.moShort, mo.moFull, mo);
-                        row.appendChild(nameEl);
-
-                        const barWrap = document.createElement('div');
-                        barWrap.style.cssText = 'display:flex;height:24px;border-radius:4px;overflow:hidden;gap:1px;';
-                        const segs = [{cnt:c1,w:bw1,col:C1},{cnt:c2,w:bw2,col:C2},{cnt:c3,w:bw3,col:C3}];
-                        segs.forEach(({cnt, w, col}) => {
-                            if (!cnt) return;
-                            const seg = document.createElement('div');
-                            seg.style.cssText = `width:${w}%;background:${col};display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;min-width:20px;`;
-                            seg.textContent = cnt >= 4 ? cnt : '';
-                            barWrap.appendChild(seg);
-                        });
-                        row.appendChild(barWrap);
-
-                        const info = document.createElement('div');
-                        info.style.cssText = 'font-size:.72rem;white-space:nowrap;text-align:right;line-height:1.7;';
-                        const parts = [];
-                        if (c1) parts.push(`<span style="color:${C1};">${c1} — 1 курс</span>`);
-                        if (c2) parts.push(`<span style="color:${C2};">${c2} — 2 курса</span>`);
-                        if (c3) parts.push(`<span style="color:${C3};">${c3} — 3+ курса</span>`);
-                        info.innerHTML = parts.join('&nbsp; ') + `<br><span style="color:rgba(255,255,255,.3);">${fmtMln(mo.totalCost)}</span>`;
-                        row.appendChild(info);
-                        container.appendChild(row);
-                    });
-                })
-                .catch(() => {});
-        }
-
-        window.switchTfomsTab = function(tab, btn) {
-            document.querySelectorAll('.tfoms-tab').forEach(b => {
-                b.style.borderBottomColor = 'transparent';
-                b.style.color = 'rgba(255,255,255,.45)';
+        function sortRows(rows) {
+            if (!sortState) return rows;
+            const { key, dir } = sortState;
+            return rows.slice().sort((a, b) => {
+                const x = a[key], y = b[key];
+                const c = key === 'mo' ? String(x).localeCompare(String(y), 'ru') : (x ?? -Infinity) - (y ?? -Infinity);
+                return c * dir || String(a.mo).localeCompare(String(b.mo), 'ru');
             });
-            btn.style.borderBottomColor = '#2A78D6';
-            btn.style.color = '#2A78D6';
-            document.getElementById('tfoms-tab-mo').style.display = tab === 'mo' ? '' : 'none';
-            document.getElementById('tfoms-tab-dynamics').style.display = tab === 'dynamics' ? '' : 'none';
-            document.getElementById('tfoms-tab-schemes').style.display = tab === 'schemes' ? '' : 'none';
-            if (tab === 'dynamics' && !_dynamicsLoaded) loadTfomsDynamics();
-            if (tab === 'schemes' && !_schemesLoaded) loadTfomsSchemes();
-        };
-
-        function loadTfomsDynamics() {
-            _dynamicsLoaded = true;
-            fetch(TFOMS_BASE + '/api/tfoms-ds/dynamics')
-                .then(r => r.ok ? r.json() : [])
-                .then(rows => {
-                    const labels = rows.map(r => r.month);
-                    const counts = rows.map(r => r.count);
-                    const ctx = document.getElementById('tfomsDynamicsChart').getContext('2d');
-                    if (_dynamicsChart) _dynamicsChart.destroy();
-                    _dynamicsChart = new Chart(ctx, {
-                        type: 'bar',
-                        data: { labels, datasets: [{ data: counts, backgroundColor: C1, borderRadius: 4, label: 'Курсов' }] },
-                        options: { responsive:true, plugins: { legend:{display:false} }, scales: {
-                            x: { ticks:{color:'rgba(255,255,255,.5)',font:{size:11}}, grid:{color:'rgba(255,255,255,.05)'} },
-                            y: { ticks:{color:'rgba(255,255,255,.5)',font:{size:11}}, grid:{color:'rgba(255,255,255,.05)'} }
-                        }}
-                    });
-                    const total = counts.reduce((s, v) => s + v, 0);
-                    document.getElementById('tfomsDynamicsBody').innerHTML = rows.map((r, i) =>
-                        `<tr style="border-bottom:1px solid rgba(255,255,255,.04);background:${i%2?'rgba(255,255,255,.02)':''}">
-                            <td style="padding:7px 12px;">${r.month}</td>
-                            <td style="padding:7px 12px;text-align:right;color:#60a5fa;font-weight:600;">${r.count}</td>
-                            <td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.45);">${r.pct}%</td>
-                        </tr>`).join('');
-                })
-                .catch(() => {});
         }
 
-        const SCHEME_COLORS = ['#2A78D6','#EDA100','#E34948','#22c55e','#a855f7','#06b6d4','#f97316','#8b5cf6'];
-
-        function loadTfomsSchemes() {
-            _schemesLoaded = true;
-            fetch(TFOMS_BASE + '/api/tfoms-ds/schemes')
-                .then(r => r.ok ? r.json() : [])
-                .then(rows => {
-                    const labels = rows.map(r => r.display);
-                    const counts = rows.map(r => r.count);
-                    const colors = rows.map((_, i) => SCHEME_COLORS[i % SCHEME_COLORS.length]);
-                    const ctx = document.getElementById('tfomsSchemeChart').getContext('2d');
-                    if (_schemeChart) _schemeChart.destroy();
-                    _schemeChart = new Chart(ctx, {
-                        type: 'doughnut',
-                        data: { labels, datasets: [{ data: counts, backgroundColor: colors, borderWidth: 2, borderColor: '#111827' }] },
-                        options: { responsive:false, plugins: {
-                            legend:{ position:'bottom', labels:{ color:'rgba(255,255,255,.6)', font:{size:11}, padding:10 } }
-                        }}
-                    });
-                    document.getElementById('tfomsSchemeBody').innerHTML = rows.map((r, i) =>
-                        `<tr style="border-bottom:1px solid rgba(255,255,255,.04);background:${i%2?'rgba(255,255,255,.02)':''}">
-                            <td style="padding:7px 12px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${colors[i]};margin-right:6px;"></span>${r.code || '—'}</td>
-                            <td style="padding:7px 12px;">${r.display}</td>
-                            <td style="padding:7px 12px;text-align:right;font-weight:600;color:#60a5fa;">${r.count}</td>
-                            <td style="padding:7px 12px;text-align:right;color:rgba(255,255,255,.45);">${r.pct}%</td>
-                        </tr>`).join('');
-                })
-                .catch(() => {});
+        function th(key, label, style) {
+            const active = sortState && sortState.key === key;
+            const arrow = active ? (sortState.dir < 0 ? ' ▼' : ' ▲') : '';
+            return `<th class="inp-sortable${active ? ' sorted' : ''}" data-sort="${key}"${style ? ` style="${style}"` : ''}
+                        title="Сортировать">${label}${arrow}</th>`;
         }
 
-        window.openTfomsPatientsModal = function(moShort, moFull, mo) {
-            _tfomsPatients = [];
-            document.getElementById('tfomsCourseFilter').value = '0';
-            const modal = document.getElementById('tfomsPatientsModal');
-            document.getElementById('tfomsPatientsModalTitle').textContent = moFull || moShort;
-            const tbody = document.getElementById('tfomsPatientsBody');
-            tbody.innerHTML = '<tr><td colspan="4" style="padding:16px;text-align:center;color:rgba(255,255,255,.3);">Загрузка...</td></tr>';
-            modal.style.display = 'block';
+        function row(r, cls) {
+            const week = r.week == null ? '—' : (r.week > 0 ? '+' + r.week : '0');
+            const weekCls = r.week == null ? '' : (r.week > 0 ? 'inp-green' : 'inp-red');
+            return `<tr class="${cls || ''}">
+                <td class="mo">${esc(r.mo)}</td>
+                <td>${nf(r.plan)}</td>
+                <td class="pct ${pctCls(r.pct)}">${nf(r.fact)}</td>
+                <td class="pct ${pctCls(r.pct)}">${r.pct ?? '—'}</td>
+                <td class="${weekCls}" style="font-weight:700;">${week}</td>
+            </tr>`;
+        }
 
-            const sub = mo ? `${mo.unique || 0} пациентов · ${mo.course1 || 0} прошли 1 курс · ${mo.course2 || 0} прошли 2 курса` : '';
-            document.getElementById('tfomsPatientsModalSub').textContent = sub;
+        function renderTable() {
+            const d = lastData;
+            const total = { mo: 'ИТОГО', plan: d.gbuzPlan, fact: d.gbuzFact, pct: d.gbuzPct, week: d.gbuzWeek };
+            document.getElementById('hl-table').innerHTML = `<table class="inp-table hl-table">
+                <thead><tr>
+                    ${th('mo', 'МО', 'text-align:left;')}${th('plan', 'План 2026')}${th('fact', 'Факт 2026')}
+                    ${th('pct', '% от плана')}${th('week', 'Динамика за период<br>' + periodLbl)}
+                </tr></thead>
+                <tbody>
+                    ${d.chuzRow ? row(d.chuzRow, 'hl-chuz') : ''}
+                    ${sortRows(d.rows).map(r => row(r)).join('')}
+                    ${row(total, 'hl-total')}
+                </tbody>
+            </table>`;
+        }
 
-            fetch(TFOMS_BASE + '/api/tfoms-ds/patients/' + encodeURIComponent(moShort))
-                .then(r => r.ok ? r.json() : [])
-                .then(patients => {
-                    _tfomsPatients = patients;
-                    renderTfomsPatients();
-                })
-                .catch(() => { tbody.innerHTML = '<tr><td colspan="4" style="padding:16px;text-align:center;color:#f87171;">Ошибка загрузки</td></tr>'; });
-        };
+        function render(d) {
+            document.getElementById('hl-empty').style.display = 'none';
+            document.getElementById('hl-body').style.display = 'block';
+            document.getElementById('hl-period').style.display = '';
 
-        window.filterTfomsPatients = function() { renderTfomsPatients(); };
+            const sameYear = d.weekStart.slice(0, 4) === d.reportDate.slice(0, 4);
+            periodLbl = d.weekStart === d.reportDate ? dmy(d.reportDate)
+                : (sameYear ? dm(d.weekStart) : dmy(d.weekStart)) + ' – ' + dm(d.reportDate);
 
-        function renderTfomsPatients() {
-            const filter = parseInt(document.getElementById('tfomsCourseFilter').value, 10);
-            const list = filter === 0 ? _tfomsPatients : _tfomsPatients.filter(p => {
-                const c = p.courses || 1;
-                return filter === 3 ? c >= 3 : c === filter;
+            document.getElementById('hl-sub').textContent = 'Факт на ' + dmy(d.reportDate) + ' — по ЛПУ госпитализации';
+            document.getElementById('hl-plan').textContent = nf(d.totalPlan);
+            document.getElementById('hl-plan-sub').textContent = nf(d.gbuzPlan) + ' ГБУЗ + ' + nf(d.chuzPlan) + ' ЧУЗ';
+            document.getElementById('hl-fact').textContent = nf(d.totalFact);
+            document.getElementById('hl-fact-sub').textContent = nf(d.gbuzFact) + ' ГБУЗ + ' + nf(d.chuzFact) + ' ЧУЗ';
+            const pctEl = document.getElementById('hl-pct');
+            pctEl.textContent = (d.totalPct ?? '—') + ' %';
+            pctEl.classList.remove('inp-red', 'inp-amber', 'inp-green');
+            if (pctCls(d.totalPct)) pctEl.classList.add(pctCls(d.totalPct));
+            document.getElementById('hl-week').textContent = '+ ' + nf(d.gbuzWeek);
+            document.getElementById('hl-week-sub').textContent = '(' + periodLbl + ')';
+
+            lastData = d;
+            renderTable();
+
+            const task = (d.task || '').trim();
+            document.getElementById('hl-task').textContent = task;
+            document.getElementById('hl-deadline').textContent = d.deadline ? dmy(d.deadline) : '';
+            document.getElementById('hl-deadline-box').style.display = d.deadline ? '' : 'none';
+            document.getElementById('hl-task-row').style.display = task ? '' : 'none';
+
+            fromEl.value = d.weekStart;
+            toEl.value   = d.reportDate;
+            if (d.minDate) { fromEl.min = d.minDate.slice(0, 4) + '-01-01'; toEl.min = fromEl.min; }
+            if (d.maxDate) { const max = d.maxDate > d.defaultTo ? d.maxDate : d.defaultTo; fromEl.max = max; toEl.max = max; }
+            document.querySelectorAll('#hl-period [data-preset]').forEach(b => {
+                const p = presetRange(b.dataset.preset);
+                b.classList.toggle('active', !!p && p.from === d.weekStart && p.to === d.reportDate);
             });
-            const tbody = document.getElementById('tfomsPatientsBody');
-            if (!list.length) {
-                tbody.innerHTML = '<tr><td colspan="4" style="padding:16px;text-align:center;color:rgba(255,255,255,.3);">Нет данных</td></tr>';
-                return;
-            }
-            tbody.innerHTML = list.map((p, i) => {
-                const c = p.courses || 1;
-                const ds = p.dateStart ? p.dateStart.split('-').reverse().join('.') : '—';
-                return `<tr style="border-bottom:1px solid rgba(255,255,255,.05);background:${i%2?'rgba(255,255,255,.02)':''}">
-                    <td style="padding:7px 10px;">${p.lastName || '—'}</td>
-                    <td style="padding:7px 10px;text-align:center;">${courseBadge(c)}</td>
-                    <td style="padding:7px 10px;color:rgba(255,255,255,.55);">${ds}</td>
-                    <td style="padding:7px 10px;color:rgba(255,255,255,.55);">${p.scheme || '—'}</td>
-                </tr>`;
-            }).join('');
         }
 
-        window.closeTfomsPatientsModal = function() {
-            document.getElementById('tfomsPatientsModal').style.display = 'none';
-        };
+        function load(from, to) {
+            errEl.textContent = '';
+            const qs = from && to ? '?from=' + from + '&to=' + to : '';
+            fetch(HL_BASE + '/api/ds-hosp-lpu/dashboard' + qs)
+                .then(r => r.json().then(j => ({ ok: r.ok, j })))
+                .then(({ ok, j }) => {
+                    if (!ok) { errEl.textContent = j.error || 'Ошибка загрузки'; return; }
+                    if (!j.hasData) return;
+                    defaults = { from: j.defaultFrom, to: j.defaultTo };
+                    render(j);
+                })
+                .catch(() => { errEl.textContent = 'Ошибка соединения'; });
+        }
 
-        document.getElementById('tfomsPatientsModal').addEventListener('click', function(e) {
-            if (e.target === this) closeTfomsPatientsModal();
+        // Быстрые периоды считаются от конца последней полной недели
+        function presetRange(name) {
+            if (!defaults) return null;
+            const to = defaults.to;
+            if (name === 'week')  return { from: defaults.from, to };
+            if (name === 'month') return { from: to.slice(0, 8) + '01', to };
+            if (name === 'year')  return { from: to.slice(0, 5) + '01-01', to };
+            return null;
+        }
+
+        document.getElementById('hl-apply').addEventListener('click', () => {
+            if (!fromEl.value || !toEl.value) { errEl.textContent = 'Укажите обе даты'; return; }
+            if (fromEl.value > toEl.value)   { errEl.textContent = 'Дата «с» позже даты «по»'; return; }
+            load(fromEl.value, toEl.value);
         });
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeTfomsPatientsModal();
+        document.querySelectorAll('#hl-period [data-preset]').forEach(b =>
+            b.addEventListener('click', () => {
+                const p = presetRange(b.dataset.preset);
+                if (p) load(p.from, p.to);
+            }));
+        // Сортировка по клику на заголовок: числа — от большего к меньшему, МО — А→Я; повторный клик — наоборот.
+        // Строки ЧУЗ и ИТОГО остаются на своих местах.
+        document.getElementById('hl-table').addEventListener('click', e => {
+            const h = e.target.closest('th[data-sort]');
+            if (!h || !lastData) return;
+            const key = h.dataset.sort;
+            sortState = sortState && sortState.key === key
+                ? { key, dir: -sortState.dir }
+                : { key, dir: key === 'mo' ? 1 : -1 };
+            renderTable();
         });
 
-        loadTfomsDashboard();
+        load();
     })();
+    </script>
 
+    <script th:inline="javascript">
     (function() {
         const BASE_PATH = /*[[${basePath}]]*/ '';
         let _allContracts = [];
@@ -1901,179 +1812,6 @@
         }
 
         loadContracts();
-    })();
-
-    (function() {
-        const section = document.getElementById('weekly-rating');
-        if (!section) return;
-        const initialWeek = section.dataset.week;
-        const BASE_PATH = /*[[${basePath}]]*/ '';
-
-        function pctColor(p) {
-            if (p == null) return 'rgba(255,255,255,.2)';
-            if (p >= 80)  return '#4ade80';
-            if (p >= 50)  return '#fcd34d';
-            return '#f87171';
-        }
-        function dynColor(v) {
-            if (v == null) return 'rgba(255,255,255,.3)';
-            return v > 0 ? '#4ade80' : v < 0 ? '#f87171' : 'rgba(255,255,255,.3)';
-        }
-        function fmtDyn(v) { return v == null ? '—' : (v > 0 ? '+' : '') + v; }
-        function shortName(n) {
-            return (n || '').replace(/ГБУЗ МО\s*/gi, '').replace(/[«»"]/g, '').trim();
-        }
-        function fmtDate(iso) {
-            const d = new Date(iso);
-            const e = new Date(d); e.setDate(d.getDate() + 6);
-            const f = dt => dt.toLocaleDateString('ru-RU', {day:'2-digit',month:'2-digit',year:'numeric'});
-            return f(d) + ' – ' + f(e);
-        }
-
-        let ALL_ROWS = [];
-        let WEEKS = [];
-        let PREV_WEEK_FACT_AMB = {};
-        let PREV_WEEK_FACT_STAT = {};
-
-        // Динамика = неделя факт − неделя план; в скобках — изменение недельного факта к прошлой неделе
-        function dynCellHtml(r, weekPlanKey, weekFactKey, prevMap) {
-            const wp = r[weekPlanKey], wf = r[weekFactKey];
-            const d = (wp == null || wf == null) ? null : wf - wp;
-            const prev = prevMap[r.orgName];
-            const delta = (wf == null || prev == null) ? null : wf - prev;
-            const deltaStr = delta == null ? '' : ` (${fmtDyn(delta)})`;
-            return `<td style="text-align:right;font-weight:600;color:${dynColor(d)};">${fmtDyn(d)}${deltaStr}</td>`;
-        }
-
-        function renderRating(tbodyId, rows, opts, ascending) {
-            const { pctKey, actualKey, planKey, weekPlanKey, weekFactKey, prevMap, rank } = opts;
-            const sorted = rows
-                .filter(r => r.orgName)
-                .slice()
-                .sort((a, b) => ascending
-                    ? (a[pctKey] ?? 9999) - (b[pctKey] ?? 9999)
-                    : (b[pctKey] ?? -1)   - (a[pctKey] ?? -1))
-                .slice(0, 10);
-            document.getElementById(tbodyId).innerHTML = sorted.map((r, i) => {
-                const p = r[pctKey];
-                const rankCell = rank ? `<td style="text-align:center;white-space:nowrap;color:rgba(255,255,255,.3);">${i + 1}</td>` : '';
-                return `<tr>
-                    ${rankCell}
-                    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.orgName}">${shortName(r.orgName)}</td>
-                    <td style="text-align:right;color:rgba(255,255,255,.3);">${r[planKey] ?? '—'}</td>
-                    <td style="text-align:right;color:rgba(255,255,255,.5);">${r[actualKey] ?? '—'}</td>
-                    <td style="text-align:right;font-weight:700;color:${pctColor(p)};">${p != null ? p + '%' : '—'}</td>
-                    <td style="text-align:right;color:rgba(255,255,255,.3);">${r[weekPlanKey] ?? '—'}</td>
-                    <td style="text-align:right;color:rgba(255,255,255,.5);">${r[weekFactKey] ?? '—'}</td>
-                    ${dynCellHtml(r, weekPlanKey, weekFactKey, prevMap)}
-                </tr>`;
-            }).join('');
-        }
-
-        function renderAll(rows) {
-            ALL_ROWS = rows;
-            renderRating('amb-top-body',  rows, {pctKey:'pctAmb',  actualKey:'factYearAmb',   planKey:'planYearAmb',  weekPlanKey:'weeklyPlanAmb',  weekFactKey:'weeklyFactAmb',  prevMap:PREV_WEEK_FACT_AMB,  rank:true}, false);
-            renderRating('amb-bot-body',  rows, {pctKey:'pctAmb',  actualKey:'factYearAmb',   planKey:'planYearAmb',  weekPlanKey:'weeklyPlanAmb',  weekFactKey:'weeklyFactAmb',  prevMap:PREV_WEEK_FACT_AMB,  rank:true}, true);
-            renderRating('stat-top-body', rows, {pctKey:'pctStat', actualKey:'referralsStat', planKey:'planYearStat', weekPlanKey:'weeklyPlanStat', weekFactKey:'weeklyFactStat', prevMap:PREV_WEEK_FACT_STAT}, false);
-            renderRating('stat-bot-body', rows, {pctKey:'pctStat', actualKey:'referralsStat', planKey:'planYearStat', weekPlanKey:'weeklyPlanStat', weekFactKey:'weeklyFactStat', prevMap:PREV_WEEK_FACT_STAT}, true);
-        }
-
-        function loadPrevWeekMap(week) {
-            const idx = WEEKS.indexOf(week);
-            const prevWeek = (idx >= 0 && idx + 1 < WEEKS.length) ? WEEKS[idx + 1] : null;
-            if (!prevWeek) { PREV_WEEK_FACT_AMB = {}; PREV_WEEK_FACT_STAT = {}; return Promise.resolve(); }
-            return fetch(BASE_PATH + '/api/hcv/weekly-plan?week=' + prevWeek)
-                .then(r => r.json())
-                .then(rows => {
-                    const ambMap = {}, statMap = {};
-                    rows.forEach(r => {
-                        if (!r.orgName) return;
-                        ambMap[r.orgName]  = r.weeklyFactAmb;
-                        statMap[r.orgName] = r.weeklyFactStat;
-                    });
-                    PREV_WEEK_FACT_AMB = ambMap;
-                    PREV_WEEK_FACT_STAT = statMap;
-                })
-                .catch(() => { PREV_WEEK_FACT_AMB = {}; PREV_WEEK_FACT_STAT = {}; });
-        }
-
-        function loadWeek(week) {
-            const label = 'Неделя ' + fmtDate(week);
-            const ambLabel = document.getElementById('amb-week-label');
-            const statLabel = document.getElementById('stat-week-label');
-            if (ambLabel) ambLabel.textContent = label;
-            if (statLabel) statLabel.textContent = label;
-
-            loadPrevWeekMap(week).then(() => {
-                fetch(BASE_PATH + '/api/hcv/weekly-plan?week=' + week)
-                    .then(r => r.json())
-                    .then(renderAll)
-                    .catch(console.error);
-            });
-        }
-
-        const weekSelect = document.getElementById('weekly-rating-week-select');
-        const weeksLoaded = fetch(BASE_PATH + '/api/hcv/weekly-plan/weeks')
-            .then(r => r.json())
-            .then(weeks => {
-                if (!Array.isArray(weeks) || weeks.length === 0) return;
-                WEEKS = weeks;
-                if (weekSelect) {
-                    weekSelect.innerHTML = weeks.map(w =>
-                        `<option value="${w}"${w === initialWeek ? ' selected' : ''}>Неделя ${fmtDate(w)}</option>`
-                    ).join('');
-                }
-            })
-            .catch(() => {});
-
-        if (weekSelect) {
-            weekSelect.addEventListener('change', () => loadWeek(weekSelect.value));
-        }
-
-        weeksLoaded.then(() => { if (initialWeek) loadWeek(initialWeek); });
-
-        window.openWeeklyPlanModal = function() {
-            const sorted = [...ALL_ROWS].sort((a, b) => (a.orgName || '').localeCompare(b.orgName || '', 'ru'));
-            const pctClr = p => p == null ? '' : p >= 80 ? 'color:#4ade80;font-weight:700;' : p >= 50 ? 'color:#fcd34d;font-weight:700;' : 'color:#f87171;font-weight:700;';
-            const dynClr = v => v == null ? '' : v > 0 ? 'color:#4ade80;font-weight:600;' : v < 0 ? 'color:#f87171;font-weight:600;' : '';
-            const modalDynCell = (r, weekPlanKey, weekFactKey, prevMap) => {
-                const wp = r[weekPlanKey], wf = r[weekFactKey];
-                const d = (wp == null || wf == null) ? null : wf - wp;
-                const prev = prevMap[r.orgName];
-                const delta = (wf == null || prev == null) ? null : wf - prev;
-                const deltaStr = delta == null ? '' : ` (${fmtDyn(delta)})`;
-                return `<td style="padding:6px 10px;text-align:right;${dynClr(d)}">${fmtDyn(d)}${deltaStr}</td>`;
-            };
-            document.getElementById('weeklyPlanModalBody').innerHTML = sorted.map((r, i) => {
-                return `<tr style="border-bottom:.5px solid rgba(255,255,255,.05);">
-                    <td style="padding:6px 12px;text-align:center;white-space:nowrap;color:rgba(255,255,255,.3);">${i + 1}</td>
-                    <td style="padding:6px 12px;">${r.orgName}</td>
-                    <td style="padding:6px 10px;text-align:right;border-left:1px solid rgba(255,255,255,.08);">${r.planYearAmb ?? '—'}</td>
-                    <td style="padding:6px 10px;text-align:right;">${r.factYearAmb ?? '—'}</td>
-                    <td style="padding:6px 10px;text-align:right;${pctClr(r.pctAmb)}">${r.pctAmb != null ? r.pctAmb + '%' : '—'}</td>
-                    <td style="padding:6px 10px;text-align:right;">${r.weeklyPlanAmb ?? '—'}</td>
-                    <td style="padding:6px 10px;text-align:right;">${r.weeklyFactAmb ?? '—'}</td>
-                    ${modalDynCell(r, 'weeklyPlanAmb', 'weeklyFactAmb', PREV_WEEK_FACT_AMB)}
-                    <td style="padding:6px 10px;text-align:right;border-left:1px solid rgba(255,255,255,.08);">${r.planYearStat ?? '—'}</td>
-                    <td style="padding:6px 10px;text-align:right;">${r.referralsStat ?? '—'}</td>
-                    <td style="padding:6px 10px;text-align:right;${pctClr(r.pctStat)}">${r.pctStat != null ? r.pctStat + '%' : '—'}</td>
-                    <td style="padding:6px 10px;text-align:right;">${r.weeklyPlanStat ?? '—'}</td>
-                    <td style="padding:6px 10px;text-align:right;">${r.weeklyFactStat ?? '—'}</td>
-                    ${modalDynCell(r, 'weeklyPlanStat', 'weeklyFactStat', PREV_WEEK_FACT_STAT)}
-                </tr>`;
-            }).join('');
-            document.getElementById('weeklyPlanModal').style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        };
-
-        window.closeWeeklyPlanModal = function() {
-            document.getElementById('weeklyPlanModal').style.display = 'none';
-            document.body.style.overflow = '';
-        };
-
-        document.getElementById('weeklyPlanModal').addEventListener('click', function(e) {
-            if (e.target === this) closeWeeklyPlanModal();
-        });
     })();
     </script>
 
@@ -2332,7 +2070,7 @@
 
     <!-- ══ ПУТЬ ПАЦИЕНТА ══════════════════════════════════════ -->
     <div class="section-block" id="pathway">
-        <div class="section-num">04</div>
+        <div class="section-num">07</div>
         <div class="sec-hd">
             <div style="display:flex;align-items:center;gap:10px;">
                 <div class="section-title">Путь пациента</div>
@@ -2441,48 +2179,6 @@
         </div>
     </div>
 
-    <!-- ══ ПЛАН ДЕЙСТВИЙ ════════════════════════════════════ -->
-    <div class="section-block" id="plan">
-        <div class="section-num">05</div>
-        <div class="sec-hd">
-            <div class="section-title">План мероприятий</div>
-        </div>
-        <div class="section-subtitle" id="apSubtitle"></div>
-        <div id="apKpi" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;"></div>
-        <div id="apGroups" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;"></div>
-        <div id="apGoal" style="background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(129,140,248,.08));border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:13px 20px;text-align:center;font-size:14px;font-weight:600;color:#fff;margin-bottom:28px;"></div>
-
-        <!-- Понедельный план отработки МО -->
-        <div style="background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:24px;margin-bottom:24px;">
-            <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);margin-bottom:4px;">Распределение по МО</div>
-            <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:4px;">
-                <div style="font-size:1.1rem;font-weight:700;color:#fff;">Понедельный план отработки медорганизаций</div>
-                <div id="moWorkPlanMonthLabel" style="display:none;font-size:.78rem;font-weight:600;color:#818cf8;background:rgba(129,140,248,.12);border:1px solid rgba(129,140,248,.3);border-radius:20px;padding:2px 10px;"></div>
-            </div>
-            <div style="font-size:.78rem;color:rgba(255,255,255,.35);margin-bottom:16px;">Данные загружаются из админки. Столбец «Всего» — сумма недель 1–4.</div>
-            <div id="moWorkPlanEmpty" style="display:none;padding:24px;text-align:center;color:rgba(255,255,255,.3);font-size:.85rem;">Данные не загружены. Загрузите файл в <a th:href="${basePath + '/admin'}" style="color:#818cf8;">разделе администратора</a>.</div>
-            <div id="moWorkPlanTableWrap" style="max-height:520px;overflow-y:auto;border-radius:8px;border:1px solid rgba(255,255,255,.07);">
-                <table style="width:100%;border-collapse:collapse;font-size:.8rem;color:rgba(255,255,255,.75);">
-                    <thead style="position:sticky;top:0;z-index:1;background:#1a2235;">
-                        <tr>
-                            <th style="padding:10px 12px;text-align:center;width:36px;color:rgba(255,255,255,.35);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">№</th>
-                            <th style="padding:10px 12px;text-align:left;color:rgba(255,255,255,.35);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Медицинская организация</th>
-                            <th style="padding:10px 12px;text-align:right;color:rgba(255,255,255,.35);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Всего</th>
-                            <th style="padding:10px 12px;text-align:right;color:#818cf8;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Неделя 1</th>
-                            <th style="padding:10px 12px;text-align:right;color:#34d399;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Неделя 2</th>
-                            <th style="padding:10px 12px;text-align:right;color:#fbbf24;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Неделя 3</th>
-                            <th style="padding:10px 12px;text-align:right;color:#f87171;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Неделя 4</th>
-                            <th style="padding:10px 12px;text-align:right;color:#a3e635;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.1);">Отработано</th>
-                        </tr>
-                    </thead>
-                    <tbody id="moWorkPlanDashBody"></tbody>
-                    <tfoot id="moWorkPlanDashFoot"></tfoot>
-                </table>
-            </div>
-        </div>
-
-    </div>
-
     <!-- ══ РЕЙТИНГ МО ════════════════════════════════════════ -->
     <div class="section-block" id="rating" style="display:none">
         <div class="section-num">06</div>
@@ -2580,7 +2276,7 @@
 
     <!-- ══ ПОРУЧЕНИЯ ════════════════════════════════════════ -->
     <div class="section-block" id="porucheniya">
-        <div class="section-num">06</div>
+        <div class="section-num">08</div>
         <div class="sec-hd">
             <div class="section-title">Поручения МО</div>
         </div>
@@ -2722,7 +2418,7 @@
     }
 
     /* Автоактивация пункта при скролле */
-    const sections = ['kvc','kpi','contracts-section','tfoms-section','pathway','drugs','rating','porucheniya'];
+    const sections = ['kvc','kpi','contracts-section','amb-section','inpatient-section','hosp-lpu-section','pathway','porucheniya'];
     window.addEventListener('scroll', () => {
         let cur = sections[0];
         sections.forEach(id => {
@@ -3024,56 +2720,6 @@ drsRenderAll();
 </script>
 
 <script th:inline="javascript">
-/* ── План мероприятий ── */
-(function () {
-    const BASE_PATH = /*[[${basePath}]]*/ '';
-    const GROUP_COLORS = {
-        green: { border: 'rgba(34,197,94,.2)', text: '#22c55e', dot: '#22c55e', bg: 'rgba(34,197,94,.12)' },
-        amber: { border: 'rgba(245,158,11,.2)', text: '#f59e0b', dot: '#f59e0b', bg: 'rgba(245,158,11,.12)' }
-    };
-
-    fetch(BASE_PATH + '/api/hcv/action-plan')
-        .then(r => r.json())
-        .then(d => {
-            const firstVal = (d.kpi && d.kpi[0]) ? d.kpi[0].value : '';
-            const deadline = d.deadline || '';
-            const daysLeft = deadline ? Math.max(0, Math.ceil((new Date(deadline.split('.').reverse().join('-')) - new Date()) / 86400000)) : '';
-            const sub = document.getElementById('apSubtitle');
-            if (sub) sub.textContent = `${firstVal} пациента не отработаны · Дедлайн: ${deadline} · Осталось ${daysLeft} дней`;
-
-            const kpiEl = document.getElementById('apKpi');
-            if (kpiEl && d.kpi) {
-                kpiEl.innerHTML = d.kpi.map(k => `
-                    <div style="background:#111827;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px 20px;">
-                        <div style="font-size:2rem;font-weight:800;color:${k.color};margin-bottom:4px;">${k.value}</div>
-                        <div style="font-size:.75rem;color:rgba(255,255,255,.4);">${k.desc}</div>
-                    </div>`).join('');
-            }
-
-            const grEl = document.getElementById('apGroups');
-            if (grEl && d.groups) {
-                grEl.innerHTML = d.groups.map(g => {
-                    const c = GROUP_COLORS[g.color] || GROUP_COLORS.amber;
-                    const items = (g.items || []).map(item => `
-                        <div style="display:flex;gap:9px;font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;">
-                            <div style="width:5px;height:5px;border-radius:50%;background:${c.dot};flex-shrink:0;margin-top:7px;"></div>${item}
-                        </div>`).join('');
-                    return `<div style="background:#111827;border:1px solid ${c.border};border-radius:12px;padding:22px;">
-                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-                            <div style="width:34px;height:34px;border-radius:50%;background:${c.bg};display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;">${g.icon}</div>
-                            <div style="font-size:14px;font-weight:600;color:${c.text};">${g.title}</div>
-                        </div>
-                        <div style="display:flex;flex-direction:column;gap:7px;">${items}</div>
-                    </div>`;
-                }).join('');
-            }
-
-            const goalEl = document.getElementById('apGoal');
-            if (goalEl) goalEl.textContent = `🎯 Цель: все ${firstVal} пациента должны быть отработаны и начать лечение до ${deadline}`;
-        })
-        .catch(() => {});
-})();
-
 /* ── Риски проекта ── */
 (function () {
     const BASE_PATH = /*[[${basePath}]]*/ '';
@@ -3149,84 +2795,6 @@ drsRenderAll();
             renderItems('kvc1-lagging', d.lagging);
         })
         .catch(() => {});
-})();
-
-/* ── Понедельный план отработки МО (дашборд) ── */
-(function () {
-    const BASE_PATH = /*[[${basePath}]]*/ '';
-    const MONTHS_RU = ['январь','февраль','март','апрель','май','июнь',
-                       'июль','август','сентябрь','октябрь','ноябрь','декабрь'];
-
-    function fmtMonth(ym) {
-        const [y, m] = ym.split('-');
-        return MONTHS_RU[parseInt(m, 10) - 1] + ' ' + y;
-    }
-
-    function fmtCell(v, color) {
-        const s = v != null ? v : '—';
-        const c = v != null ? color : 'rgba(255,255,255,.2)';
-        return `<td style="padding:7px 12px;text-align:right;color:${c};">${s}</td>`;
-    }
-
-    function load() {
-        fetch(BASE_PATH + '/api/hcv/mo-work-plan')
-            .then(r => r.json())
-            .then(rows => {
-                if (!rows.length) {
-                    document.getElementById('moWorkPlanEmpty').style.display = 'block';
-                    document.getElementById('moWorkPlanTableWrap').style.display = 'none';
-                    return;
-                }
-
-                let totTotal = 0, totW1 = 0, totW2 = 0, totW3 = 0, totW4 = 0, totWorked = 0;
-
-                document.getElementById('moWorkPlanDashBody').innerHTML = rows.map((r, i) => {
-                    const total = (r.week1 || 0) + (r.week2 || 0) + (r.week3 || 0) + (r.week4 || 0);
-                    totTotal  += total;
-                    totW1     += r.week1  || 0;
-                    totW2     += r.week2  || 0;
-                    totW3     += r.week3  || 0;
-                    totW4     += r.week4  || 0;
-                    totWorked += r.worked || 0;
-                    return `<tr style="border-bottom:.5px solid rgba(255,255,255,.05);">
-                        <td style="padding:7px 12px;text-align:center;color:rgba(255,255,255,.3);">${i + 1}</td>
-                        <td style="padding:7px 12px;">${r.orgName}</td>
-                        <td style="padding:7px 12px;text-align:right;font-weight:600;">${total || '—'}</td>
-                        ${fmtCell(r.week1,  '#818cf8')}
-                        ${fmtCell(r.week2,  '#34d399')}
-                        ${fmtCell(r.week3,  '#fbbf24')}
-                        ${fmtCell(r.week4,  '#f87171')}
-                        ${fmtCell(r.worked, '#a3e635')}
-                    </tr>`;
-                }).join('');
-
-                document.getElementById('moWorkPlanDashFoot').innerHTML = `
-                    <tr style="background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.15);">
-                        <td colspan="2" style="padding:10px 12px;font-weight:700;color:#fff;font-size:.85rem;">ИТОГО</td>
-                        <td style="padding:10px 12px;text-align:right;font-weight:700;color:#fff;">${totTotal}</td>
-                        <td style="padding:10px 12px;text-align:right;font-weight:700;color:#818cf8;">${totW1}</td>
-                        <td style="padding:10px 12px;text-align:right;font-weight:700;color:#34d399;">${totW2}</td>
-                        <td style="padding:10px 12px;text-align:right;font-weight:700;color:#fbbf24;">${totW3}</td>
-                        <td style="padding:10px 12px;text-align:right;font-weight:700;color:#f87171;">${totW4}</td>
-                        <td style="padding:10px 12px;text-align:right;font-weight:700;color:#a3e635;">${totWorked}</td>
-                    </tr>`;
-            })
-            .catch(() => {});
-
-        // метка месяца
-        fetch(BASE_PATH + '/api/hcv/mo-work-plan/months')
-            .then(r => r.json())
-            .then(months => {
-                const el = document.getElementById('moWorkPlanMonthLabel');
-                if (months.length) {
-                    el.textContent = fmtMonth(months[0]);
-                    el.style.display = 'block';
-                }
-            })
-            .catch(() => {});
-    }
-
-    document.addEventListener('DOMContentLoaded', load);
 })();
 </script>
 </body>

@@ -1,8 +1,10 @@
 package com.emias.dashboard.service;
 
 import com.emias.dashboard.entity.DsChuzPlan;
+import com.emias.dashboard.entity.DsHospPlan;
 import com.emias.dashboard.entity.DsHospitalization;
 import com.emias.dashboard.repository.DsChuzPlanRepository;
+import com.emias.dashboard.repository.DsHospPlanRepository;
 import com.emias.dashboard.repository.DsHospitalizationRepository;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,8 @@ public class DsInpatientService {
 
     public static final String TASK_KEY     = "inpatient.task";
     public static final String DEADLINE_KEY = "inpatient.deadline";
+    public static final String HOSP_TASK_KEY     = "hosp-lpu.task";
+    public static final String HOSP_DEADLINE_KEY = "hosp-lpu.deadline";
 
     /**
      * ЛПУ прикрепления → город из плана. Ключ — фрагмент нормализованного названия
@@ -64,13 +68,16 @@ public class DsInpatientService {
 
     private final DsHospitalizationRepository hospRepo;
     private final DsChuzPlanRepository chuzRepo;
+    private final DsHospPlanRepository hospPlanRepo;
     private final SettingsService settingsService;
 
     public DsInpatientService(DsHospitalizationRepository hospRepo,
                               DsChuzPlanRepository chuzRepo,
+                              DsHospPlanRepository hospPlanRepo,
                               SettingsService settingsService) {
         this.hospRepo = hospRepo;
         this.chuzRepo = chuzRepo;
+        this.hospPlanRepo = hospPlanRepo;
         this.settingsService = settingsService;
     }
 
@@ -82,9 +89,22 @@ public class DsInpatientService {
      * @param from начало периода динамики (включительно); null — за 6 дней до {@code to}
      * @param to   дата, на которую считается факт (включительно); null — конец последней полной недели
      */
-    public Map<String, Object> getDashboard(LocalDate from, LocalDate to) {
-        List<DsChuzPlan> plans = chuzRepo.findAllByOrderByMoAsc();
-        List<DsHospitalization> patients = hospRepo.findAll();
+    /** Выбранный период и границы данных — общие для обоих блоков. */
+    private record Period(LocalDate defaultFrom, LocalDate defaultTo,
+                          LocalDate from, LocalDate to,
+                          LocalDate minDate, LocalDate maxDate) {
+
+        void putInto(Map<String, Object> result) {
+            result.put("defaultFrom", defaultFrom);
+            result.put("defaultTo",   defaultTo);
+            result.put("minDate",     minDate);
+            result.put("maxDate",     maxDate);
+            result.put("reportDate",  to);
+            result.put("weekStart",   from);
+        }
+    }
+
+    private Period period(List<DsHospitalization> patients, LocalDate from, LocalDate to) {
         LocalDateTime uploadedAt = hospRepo.lastUploadedAt();
 
         // По умолчанию — последняя полная неделя (пн–вс) перед загрузкой выгрузки
@@ -105,6 +125,14 @@ public class DsInpatientService {
             if (minDate == null || d.isBefore(minDate)) minDate = d;
             if (maxDate == null || d.isAfter(maxDate)) maxDate = d;
         }
+        return new Period(defaultFrom, defaultTo, weekStart, reportDate, minDate, maxDate);
+    }
+
+    public Map<String, Object> getDashboard(LocalDate from, LocalDate to) {
+        List<DsChuzPlan> plans = chuzRepo.findAllByOrderByMoAsc();
+        List<DsHospitalization> patients = hospRepo.findAll();
+        Period per = period(patients, from, to);
+        LocalDate reportDate = per.to(), weekStart = per.from();
 
         Map<String, Integer> factByCity = new HashMap<>();
         Map<String, Integer> weekByCity = new HashMap<>();
@@ -153,12 +181,7 @@ public class DsInpatientService {
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("hasData",    !plans.isEmpty());
-        result.put("defaultFrom", defaultFrom);
-        result.put("defaultTo",  defaultTo);
-        result.put("minDate",    minDate);
-        result.put("maxDate",    maxDate);
-        result.put("reportDate", reportDate);
-        result.put("weekStart",  weekStart);
+        per.putInto(result);
         result.put("totalPlan",  totalPlan);
         result.put("totalFact",  totalFact);
         result.put("totalGbuz",  totalGbuz);
@@ -174,10 +197,121 @@ public class DsInpatientService {
     }
 
     public void saveTask(String task, String deadline) {
+        saveSettings(TASK_KEY, task, DEADLINE_KEY, deadline);
+    }
+
+    public void saveHospTask(String task, String deadline) {
+        saveSettings(HOSP_TASK_KEY, task, HOSP_DEADLINE_KEY, deadline);
+    }
+
+    private void saveSettings(String taskKey, String task, String deadlineKey, String deadline) {
         Map<String, String> values = new LinkedHashMap<>();
-        values.put(TASK_KEY, task == null ? "" : task.trim());
-        values.put(DEADLINE_KEY, deadline == null ? "" : deadline.trim());
+        values.put(taskKey, task == null ? "" : task.trim());
+        values.put(deadlineKey, deadline == null ? "" : deadline.trim());
         settingsService.save(values);
+    }
+
+    /**
+     * Блок «Госпитализация пациентов»: План 2026 — по ЛПУ госпитализации («стационар по госпитализации.xlsx»),
+     * Факт 2026 — пациенты из «Путь пациента» по столбцу «ЛПУ» (где лечат), строка ЧУЗ — из загрузчика ЧУЗ.
+     */
+    public Map<String, Object> getHospitalDashboard(LocalDate from, LocalDate to) {
+        List<DsHospPlan> plans = hospPlanRepo.findAllByOrderBySortOrderAsc();
+        List<DsHospitalization> patients = hospRepo.findAll();
+        Period per = period(patients, from, to);
+
+        Map<String, Integer> factByLpu = new HashMap<>();
+        Map<String, Integer> weekByLpu = new HashMap<>();
+        Map<String, String>  keyToLpu  = new HashMap<>();
+        Map<String, Integer> unmatched = new TreeMap<>();
+        for (DsHospitalization p : patients) {
+            LocalDate d = p.getHospDate1();
+            if (d != null && d.isAfter(per.to())) continue;
+            String city = cityOfHospital(p.getMo());
+            if (city == null) {
+                unmatched.merge(p.getMo() == null ? "(не указано)" : p.getMo(), 1, Integer::sum);
+                continue;
+            }
+            String key = cityKey(city);
+            factByLpu.merge(key, 1, Integer::sum);
+            keyToLpu.putIfAbsent(key, p.getMo());
+            if (d != null && !d.isBefore(per.from())) weekByLpu.merge(key, 1, Integer::sum);
+        }
+        // Пациенты больниц, которых нет в плане, тоже показываем в админке
+        Set<String> planKeys = new HashSet<>();
+        for (DsHospPlan pl : plans) if (!pl.isChuz()) planKeys.add(cityKey(pl.getMo()));
+
+        int chuzFact = chuzRepo.findAll().stream()
+                .mapToInt(c -> c.getChuzTreated() != null ? c.getChuzTreated() : 0).sum();
+
+        List<Map<String, Object>> rows = new ArrayList<>();
+        Map<String, Object> chuzRow = null;
+        long gbuzPlan = 0, gbuzFact = 0, gbuzWeek = 0, chuzPlan = 0;
+        for (DsHospPlan pl : plans) {
+            int plan = pl.getPlan2026() != null ? pl.getPlan2026() : 0;
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("mo",   pl.getMo());
+            m.put("plan", plan);
+            if (pl.isChuz()) {
+                m.put("chuz", true);
+                m.put("fact", chuzFact);
+                m.put("pct",  plan > 0 ? (int) Math.round(chuzFact * 100.0 / plan) : null);
+                m.put("week", null);   // в файле ЧУЗ нет дат — динамику не посчитать
+                chuzRow = m;
+                chuzPlan += plan;
+                continue;
+            }
+            String key = cityKey(pl.getMo());
+            int fact = factByLpu.getOrDefault(key, 0);
+            int week = weekByLpu.getOrDefault(key, 0);
+            m.put("chuz", false);
+            m.put("fact", fact);
+            m.put("pct",  plan > 0 ? (int) Math.round(fact * 100.0 / plan) : null);
+            m.put("week", week);
+            rows.add(m);
+            gbuzPlan += plan; gbuzFact += fact; gbuzWeek += week;
+        }
+        // По убыванию % выполнения, как в еженедельной таблице
+        rows.sort(Comparator.comparingDouble((Map<String, Object> m) -> {
+            Integer plan = (Integer) m.get("plan");
+            return plan == null || plan == 0 ? -1 : ((Integer) m.get("fact")) * 1.0 / plan;
+        }).reversed());
+
+        for (Map.Entry<String, Integer> e : factByLpu.entrySet()) {
+            if (!planKeys.contains(e.getKey())) unmatched.merge(keyToLpu.get(e.getKey()), e.getValue(), Integer::sum);
+        }
+
+        long chuzFactTotal = chuzRow != null ? chuzFact : 0;
+        long totalPlan = gbuzPlan + chuzPlan, totalFact = gbuzFact + chuzFactTotal;
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("hasData",   !plans.isEmpty());
+        per.putInto(result);
+        result.put("chuzRow",   chuzRow);
+        result.put("rows",      rows);
+        result.put("gbuzPlan",  gbuzPlan);
+        result.put("gbuzFact",  gbuzFact);
+        result.put("gbuzPct",   gbuzPlan > 0 ? Math.round(gbuzFact * 100.0 / gbuzPlan) : null);
+        result.put("gbuzWeek",  gbuzWeek);
+        result.put("chuzPlan",  chuzPlan);
+        result.put("chuzFact",  chuzFactTotal);
+        result.put("totalPlan", totalPlan);
+        result.put("totalFact", totalFact);
+        result.put("totalPct",  totalPlan > 0 ? Math.round(totalFact * 100.0 / totalPlan) : null);
+        result.put("unmatched", unmatched);
+        result.put("task",      settingsService.get(HOSP_TASK_KEY,
+                "Всем МО организовать взаимодействие с ДС по формированию очереди ожидания на указанные схемы, "
+                + "ДС предоставлять еженедельно информацию в чат Гепатит С о наборе пациентов"));
+        result.put("deadline",  settingsService.get(HOSP_DEADLINE_KEY, ""));
+        return result;
+    }
+
+    /** Город больницы по столбцу «ЛПУ» вида «[070101] ГБУЗ ... "ДУБНЕНСКАЯ БОЛЬНИЦА"». */
+    static String cityOfHospital(String lpu) {
+        if (lpu == null) return null;
+        String s = lpu.replaceFirst("^\\s*\\[[^\\]]*\\]\\s*", "");
+        if (normalize(s).contains("МОНИКИ")) return "МОНИКИ";
+        return cityOfAttachment(s);
     }
 
     /** Город из плана по названию ЛПУ прикрепления, или null, если МО не из плана. */

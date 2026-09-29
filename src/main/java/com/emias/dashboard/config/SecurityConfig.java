@@ -65,7 +65,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/hcv/risks").permitAll()
                 .requestMatchers("/api/hcv/action-plan").permitAll()
                 .requestMatchers("/api/contracts", "/api/contracts/stats").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/ds-inpatient/dashboard").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/ds-inpatient/dashboard", "/api/ds-hosp-lpu/dashboard", "/api/amb/dashboard").permitAll()
                 .requestMatchers("/api/tfoms-ds/dashboard", "/api/tfoms-ds/patients/**", "/api/tfoms-ds/count", "/api/tfoms-ds/summary", "/api/tfoms-ds/dynamics", "/api/tfoms-ds/schemes").permitAll()
                 .anyRequest().authenticated()
             )
