@@ -3,6 +3,7 @@ package com.emias.dashboard.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -64,6 +65,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/hcv/risks").permitAll()
                 .requestMatchers("/api/hcv/action-plan").permitAll()
                 .requestMatchers("/api/contracts", "/api/contracts/stats").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/ds-inpatient/dashboard").permitAll()
                 .requestMatchers("/api/tfoms-ds/dashboard", "/api/tfoms-ds/patients/**", "/api/tfoms-ds/count", "/api/tfoms-ds/summary", "/api/tfoms-ds/dynamics", "/api/tfoms-ds/schemes").permitAll()
                 .anyRequest().authenticated()
             )

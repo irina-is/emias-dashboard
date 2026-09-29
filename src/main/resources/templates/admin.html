@@ -793,6 +793,119 @@
                 </div>
             </div>
 
+            <!-- Госпитализировано в дневной стационар -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="mb-1">
+                        <span class="badge bg-info text-dark me-2" style="font-size:.7rem;vertical-align:middle;">ДС</span>Госпитализировано в дневной стационар
+                    </h5>
+                    <p class="text-muted mb-3" style="font-size:0.85rem;">
+                        Выгрузка ЕМИАС <strong>«Путь пациента при лечении гепатита.xlsx»</strong> — по строке на пациента,
+                        до трёх курсов (отделение, дата госпитализации, препарат, количество).
+                        Строка 1 — заголовки, строка 2 — итоговые суммы (пропускается), со строки 3 — пациенты.
+                        При загрузке все старые записи заменяются.
+                    </p>
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <input type="file" id="dsHospFile" accept=".xlsx" class="form-control" style="max-width:360px;">
+                        <button class="btn btn-primary" onclick="uploadDsHosp()">
+                            <i class="bi bi-upload me-1"></i>Загрузить
+                        </button>
+                        <a class="btn btn-outline-secondary" th:href="${basePath + '/api/ds-hospitalized/template'}">
+                            <i class="bi bi-download me-1"></i>Скачать шаблон
+                        </a>
+                        <span id="dsHospStatus" class="text-muted" style="font-size:0.85rem;"></span>
+                    </div>
+
+                    <div id="dsHospPreview" style="display:none;">
+                        <hr class="my-3">
+                        <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                            <span class="fw-semibold" style="font-size:0.88rem;">Сводная по ЛПУ госпитализации:</span>
+                            <span id="dsHospCount" class="text-muted ms-auto" style="font-size:0.82rem;"></span>
+                        </div>
+                        <div style="max-height:420px;overflow-y:auto;border-radius:8px;border:1px solid var(--emias-border,#E8ECF5);">
+                            <table class="table table-sm table-hover mb-0" style="font-size:0.8rem;">
+                                <thead style="position:sticky;top:0;z-index:1;" class="table-light">
+                                    <tr>
+                                        <th style="width:36px;">№</th>
+                                        <th>ЛПУ</th>
+                                        <th class="text-end">Пациентов</th>
+                                        <th class="text-end">1 курс</th>
+                                        <th class="text-end">2 курса</th>
+                                        <th class="text-end">3 курса</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dsHospPreviewBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Стационарная помощь: план 2026 и пролечено в ЧУЗ -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h5 class="mb-1">
+                        <span class="badge bg-info text-dark me-2" style="font-size:.7rem;vertical-align:middle;">ДС</span>План 2026 и пролечено в ЧУЗ
+                    </h5>
+                    <p class="text-muted mb-3" style="font-size:0.85rem;">
+                        Файл <strong>«дс_с чуз.xlsx»</strong>: <strong>№</strong> | <strong>МО</strong> |
+                        Стационарная помощь → <strong>План 2026</strong>, <strong>ЧУЗ (Гармония)</strong>.
+                        Строки 1–2 — шапка, со строки 3 — по строке на МО. Строки «Итого» пропускаются.
+                        При загрузке все старые записи заменяются.
+                    </p>
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <input type="file" id="dsChuzFile" accept=".xlsx" class="form-control" style="max-width:360px;">
+                        <button class="btn btn-primary" onclick="uploadDsChuz()">
+                            <i class="bi bi-upload me-1"></i>Загрузить
+                        </button>
+                        <a class="btn btn-outline-secondary" th:href="${basePath + '/api/ds-chuz/template'}">
+                            <i class="bi bi-download me-1"></i>Скачать шаблон
+                        </a>
+                        <span id="dsChuzStatus" class="text-muted" style="font-size:0.85rem;"></span>
+                    </div>
+
+                    <div id="dsChuzPreview" style="display:none;">
+                        <hr class="my-3">
+                        <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                            <span class="fw-semibold" style="font-size:0.88rem;">Данные по МО:</span>
+                            <span id="dsChuzCount" class="text-muted ms-auto" style="font-size:0.82rem;"></span>
+                        </div>
+                        <div style="max-height:420px;overflow-y:auto;border-radius:8px;border:1px solid var(--emias-border,#E8ECF5);">
+                            <table class="table table-sm table-hover mb-0" style="font-size:0.8rem;">
+                                <thead style="position:sticky;top:0;z-index:1;" class="table-light">
+                                    <tr>
+                                        <th style="width:36px;">№</th>
+                                        <th>МО</th>
+                                        <th class="text-end">План 2026</th>
+                                        <th class="text-end">ЧУЗ (Гармония)</th>
+                                        <th class="text-end">% ЧУЗ от плана</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dsChuzPreviewBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+                    <div class="fw-semibold mb-2" style="font-size:0.88rem;">Поручение под таблицей «Стационарная помощь» на дашборде</div>
+                    <div class="d-flex align-items-end gap-3 flex-wrap">
+                        <div style="flex:1;min-width:260px;">
+                            <label class="form-label mb-1" style="font-size:0.8rem;color:var(--emias-muted);">Текст поручения</label>
+                            <textarea id="dsInpTask" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div>
+                            <label class="form-label mb-1" style="font-size:0.8rem;color:var(--emias-muted);">Срок</label>
+                            <input type="date" id="dsInpDeadline" class="form-control" style="max-width:180px;">
+                        </div>
+                        <button class="btn btn-primary" onclick="saveDsInpTask()">
+                            <i class="bi bi-save me-1"></i>Сохранить
+                        </button>
+                        <span id="dsInpTaskStatus" class="text-muted" style="font-size:0.85rem;"></span>
+                    </div>
+                    <div id="dsInpUnmatched" class="mt-3" style="display:none;font-size:0.8rem;"></div>
+                </div>
+            </div>
+
             <!-- Контракты — мониторинг исполнения -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body p-4">
@@ -1753,6 +1866,174 @@
             }).catch(() => {});
     }
 
+    function uploadDsHosp() {
+        const fileInput = document.getElementById('dsHospFile');
+        const status    = document.getElementById('dsHospStatus');
+        if (!fileInput.files.length) { status.textContent = 'Выберите файл'; return; }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        status.innerHTML = '<span class="text-primary">Загрузка...</span>';
+        fetch(BASE_PATH + '/api/ds-hospitalized/upload', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    status.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>Загружено '
+                        + Number(data.count).toLocaleString('ru-RU') + ' пациентов</span>';
+                    fileInput.value = '';
+                    loadDsHospPreview();
+                } else {
+                    status.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle me-1"></i>Ошибка загрузки</span>';
+                    showErrors((data.error || 'Ошибка загрузки файла').split('; '));
+                }
+            })
+            .catch(() => {
+                status.innerHTML = '<span class="text-danger">Ошибка соединения</span>';
+                showErrors(['Ошибка соединения с сервером. Проверьте сеть и попробуйте снова.']);
+            });
+    }
+
+    function loadDsHospPreview() {
+        fetch(BASE_PATH + '/api/ds-hospitalized/summary')
+            .then(r => r.json())
+            .then(data => {
+                const preview = document.getElementById('dsHospPreview');
+                const rows = data.rows || [];
+                if (!rows.length) { preview.style.display = 'none'; return; }
+                preview.style.display = 'block';
+
+                const fmt = n => n != null ? Number(n).toLocaleString('ru-RU') : '—';
+                const when = data.uploadedAt
+                    ? ' · загружено ' + new Date(data.uploadedAt).toLocaleString('ru-RU', {
+                        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    : '';
+                document.getElementById('dsHospCount').textContent =
+                    'В базе: ' + fmt(data.count) + ' пациентов' + when;
+
+                let t = 0, c1 = 0, c2 = 0, c3 = 0;
+                document.getElementById('dsHospPreviewBody').innerHTML = rows.map((r, i) => {
+                    t += Number(r.patients || 0);  c1 += Number(r.course1 || 0);
+                    c2 += Number(r.course2 || 0);  c3 += Number(r.course3plus || 0);
+                    return `<tr>
+                        <td>${i + 1}</td>
+                        <td>${safeEsc(r.mo || '—')}</td>
+                        <td class="text-end">${fmt(r.patients)}</td>
+                        <td class="text-end">${fmt(r.course1)}</td>
+                        <td class="text-end">${fmt(r.course2)}</td>
+                        <td class="text-end">${fmt(r.course3plus)}</td>
+                    </tr>`;
+                }).join('') + `<tr class="table-secondary fw-bold">
+                    <td></td><td>ИТОГО</td>
+                    <td class="text-end">${fmt(t)}</td>
+                    <td class="text-end">${fmt(c1)}</td>
+                    <td class="text-end">${fmt(c2)}</td>
+                    <td class="text-end">${fmt(c3)}</td>
+                </tr>`;
+            }).catch(() => {});
+    }
+
+    function uploadDsChuz() {
+        const fileInput = document.getElementById('dsChuzFile');
+        const status    = document.getElementById('dsChuzStatus');
+        if (!fileInput.files.length) { status.textContent = 'Выберите файл'; return; }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        status.innerHTML = '<span class="text-primary">Загрузка...</span>';
+        fetch(BASE_PATH + '/api/ds-chuz/upload', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    status.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>Загружено '
+                        + data.count + ' МО</span>';
+                    fileInput.value = '';
+                    loadDsChuzPreview();
+                } else {
+                    status.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle me-1"></i>Ошибка загрузки</span>';
+                    showErrors((data.error || 'Ошибка загрузки файла').split('; '));
+                }
+            })
+            .catch(() => {
+                status.innerHTML = '<span class="text-danger">Ошибка соединения</span>';
+                showErrors(['Ошибка соединения с сервером. Проверьте сеть и попробуйте снова.']);
+            });
+    }
+
+    function loadDsChuzPreview() {
+        fetch(BASE_PATH + '/api/ds-chuz')
+            .then(r => r.json())
+            .then(data => {
+                const preview = document.getElementById('dsChuzPreview');
+                const rows = data.rows || [];
+                if (!rows.length) { preview.style.display = 'none'; return; }
+                preview.style.display = 'block';
+
+                const fmt = n => n != null ? Number(n).toLocaleString('ru-RU') : '—';
+                const pct = (a, b) => a != null && b ? (a * 100 / b).toFixed(1).replace('.', ',') + '%' : '—';
+                const when = data.uploadedAt
+                    ? ' · загружено ' + new Date(data.uploadedAt).toLocaleString('ru-RU', {
+                        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    : '';
+                document.getElementById('dsChuzCount').textContent = 'В базе: ' + rows.length + ' МО' + when;
+
+                let plan = 0, chuz = 0;
+                document.getElementById('dsChuzPreviewBody').innerHTML = rows.map((r, i) => {
+                    plan += Number(r.plan || 0);
+                    chuz += Number(r.chuz || 0);
+                    return `<tr>
+                        <td>${i + 1}</td>
+                        <td>${safeEsc(r.mo || '—')}</td>
+                        <td class="text-end">${fmt(r.plan)}</td>
+                        <td class="text-end">${fmt(r.chuz)}</td>
+                        <td class="text-end">${pct(r.chuz, r.plan)}</td>
+                    </tr>`;
+                }).join('') + `<tr class="table-secondary fw-bold">
+                    <td></td><td>ИТОГО</td>
+                    <td class="text-end">${fmt(plan)}</td>
+                    <td class="text-end">${fmt(chuz)}</td>
+                    <td class="text-end">${pct(chuz, plan)}</td>
+                </tr>`;
+            }).catch(() => {});
+    }
+
+    function loadDsInpTask() {
+        fetch(BASE_PATH + '/api/ds-inpatient/dashboard')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('dsInpTask').value = data.task || '';
+                document.getElementById('dsInpDeadline').value = data.deadline || '';
+                // ЛПУ прикрепления, которые не удалось отнести к городу из плана
+                const box = document.getElementById('dsInpUnmatched');
+                const entries = Object.entries(data.unmatched || {});
+                if (!entries.length) { box.style.display = 'none'; return; }
+                const total = entries.reduce((s, [, n]) => s + n, 0);
+                box.style.display = 'block';
+                box.innerHTML = `<span class="text-muted">Не входят в план МО (не учтены в факте): ${total} пациентов — </span>`
+                    + entries.map(([name, n]) => `${safeEsc(name)} (${n})`).join('; ');
+            }).catch(() => {});
+    }
+
+    function saveDsInpTask() {
+        const status = document.getElementById('dsInpTaskStatus');
+        fetch(BASE_PATH + '/api/ds-inpatient/task', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                task: document.getElementById('dsInpTask').value,
+                deadline: document.getElementById('dsInpDeadline').value
+            })
+        })
+            .then(r => r.json())
+            .then(data => {
+                status.innerHTML = data.status === 'ok'
+                    ? '<span class="text-success"><i class="bi bi-check-circle me-1"></i>Сохранено</span>'
+                    : '<span class="text-danger">Ошибка сохранения</span>';
+            })
+            .catch(() => { status.innerHTML = '<span class="text-danger">Ошибка соединения</span>'; });
+    }
+
     function uploadContracts() {
         const fileInput = document.getElementById('contractsFile');
         const status    = document.getElementById('contractsStatus');
@@ -1808,6 +2089,9 @@
     // Загружаем предпросмотры при открытии страницы
     document.addEventListener('DOMContentLoaded', function() {
         loadTfomsDsPreview();
+        loadDsHospPreview();
+        loadDsChuzPreview();
+        loadDsInpTask();
         loadContractsPreview();
     });
 

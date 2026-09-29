@@ -21,6 +21,9 @@ import com.emias.dashboard.service.KvcService;
 import com.emias.dashboard.service.RisksService;
 import com.emias.dashboard.service.ContractService;
 import com.emias.dashboard.service.TfomsDsService;
+import com.emias.dashboard.service.DsHospitalizationService;
+import com.emias.dashboard.service.DsChuzPlanService;
+import com.emias.dashboard.service.DsInpatientService;
 import com.emias.dashboard.service.MoWorkPlanService;
 import com.emias.dashboard.service.ReportService;
 import com.emias.dashboard.service.SettingsService;
@@ -52,6 +55,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -92,6 +96,9 @@ public class DataController {
     private final ActionPlanService      actionPlanService;
     private final ContractService        contractService;
     private final TfomsDsService         tfomsDsService;
+    private final DsHospitalizationService dsHospitalizationService;
+    private final DsChuzPlanService      dsChuzPlanService;
+    private final DsInpatientService     dsInpatientService;
     private final ObjectMapper           objectMapper;
 
     public DataController(ReportService reportService,
@@ -110,6 +117,9 @@ public class DataController {
                           ActionPlanService actionPlanService,
                           ContractService contractService,
                           TfomsDsService tfomsDsService,
+                          DsHospitalizationService dsHospitalizationService,
+                          DsChuzPlanService dsChuzPlanService,
+                          DsInpatientService dsInpatientService,
                           ObjectMapper objectMapper) {
         this.reportService          = reportService;
         this.screeningRepository    = screeningRepository;
@@ -127,6 +137,9 @@ public class DataController {
         this.actionPlanService      = actionPlanService;
         this.contractService        = contractService;
         this.tfomsDsService         = tfomsDsService;
+        this.dsHospitalizationService = dsHospitalizationService;
+        this.dsChuzPlanService      = dsChuzPlanService;
+        this.dsInpatientService     = dsInpatientService;
         this.objectMapper           = objectMapper;
     }
 
@@ -217,6 +230,91 @@ public class DataController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"DS_TFOMS_template.xlsx\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(bytes);
+    }
+
+    /* ── Госпитализировано в дневной стационар ── */
+    @PostMapping("/ds-hospitalized/upload")
+    public ResponseEntity<Map<String, Object>> uploadDsHospitalized(
+            @RequestParam("file") MultipartFile file) {
+        try {
+            int count = dsHospitalizationService.upload(file);
+            return ResponseEntity.ok(Map.of("status", "ok", "count", count));
+        } catch (FileValidationException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", String.join("; ", e.getErrors())));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", String.valueOf(e.getMessage())));
+        }
+    }
+
+    @GetMapping("/ds-hospitalized/summary")
+    public ResponseEntity<Map<String, Object>> getDsHospitalizedSummary() {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("count", dsHospitalizationService.count());
+        m.put("uploadedAt", dsHospitalizationService.lastUploadedAt());
+        m.put("rows", dsHospitalizationService.getSummaryByMo());
+        return ResponseEntity.ok(m);
+    }
+
+    @GetMapping("/ds-hospitalized/template")
+    public ResponseEntity<byte[]> getDsHospitalizedTemplate() throws IOException {
+        byte[] bytes = dsHospitalizationService.generateTemplate();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"DS_hospitalized_template.xlsx\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(bytes);
+    }
+
+    /* ── Стационарная помощь: план 2026 и ЧУЗ ── */
+    @PostMapping("/ds-chuz/upload")
+    public ResponseEntity<Map<String, Object>> uploadDsChuz(
+            @RequestParam("file") MultipartFile file) {
+        try {
+            int count = dsChuzPlanService.upload(file);
+            return ResponseEntity.ok(Map.of("status", "ok", "count", count));
+        } catch (FileValidationException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", String.join("; ", e.getErrors())));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", String.valueOf(e.getMessage())));
+        }
+    }
+
+    @GetMapping("/ds-chuz")
+    public ResponseEntity<Map<String, Object>> getDsChuz() {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("uploadedAt", dsChuzPlanService.lastUploadedAt());
+        m.put("rows", dsChuzPlanService.getAll());
+        return ResponseEntity.ok(m);
+    }
+
+    /* ── Блок «Стационарная помощь» на дашборде ── */
+    @GetMapping("/ds-inpatient/dashboard")
+    public ResponseEntity<Map<String, Object>> getDsInpatientDashboard(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        try {
+            return ResponseEntity.ok(dsInpatientService.getDashboard(from, to));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/ds-inpatient/task")
+    public ResponseEntity<Map<String, Object>> saveDsInpatientTask(@RequestBody Map<String, String> body) {
+        dsInpatientService.saveTask(body.get("task"), body.get("deadline"));
+        return ResponseEntity.ok(Map.of("status", "ok"));
+    }
+
+    @GetMapping("/ds-chuz/template")
+    public ResponseEntity<byte[]> getDsChuzTemplate() throws IOException {
+        byte[] bytes = dsChuzPlanService.generateTemplate();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"DS_plan_CHUZ_template.xlsx\"")
                 .contentType(MediaType.parseMediaType(
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(bytes);

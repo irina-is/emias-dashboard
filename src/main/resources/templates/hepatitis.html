@@ -109,6 +109,80 @@
         }
         .section-subtitle{font-size:.86rem;color:rgba(255,255,255,.4);line-height:1.6;max-width:680px;margin-bottom:24px;}
 
+        /* ── СТАЦИОНАРНАЯ ПОМОЩЬ ── */
+        .inp-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:18px;}
+        .inp-sub{font-size:.8rem;color:rgba(255,255,255,.4);margin-top:4px;}
+        .inp-kpis{display:flex;gap:10px;flex-wrap:wrap;}
+        .inp-kpi{background:#111827;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 18px;text-align:center;min-width:110px;}
+        .inp-kpi-lbl{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.4);}
+        .inp-kpi-val{font-size:1.5rem;font-weight:800;color:#e2e8f0;line-height:1.3;}
+        .inp-up{color:#22c55e;}
+        .inp-banner{background:#dc2626;color:#fff;text-align:center;font-weight:800;font-size:.9rem;
+            letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border-radius:8px 8px 0 0;}
+        .inp-banner.ok{background:#16a34a;}
+        .inp-tables{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
+        .inp-tables .inp-banner{border-radius:8px 8px 0 0;}
+        .inp-tables .inp-table{border-radius:0 0 10px 10px;}
+        .inp-span{grid-column:1 / -1;margin-bottom:-16px;}
+        .inp-span.inp-banner{border-radius:8px;}
+        .inp-actions{display:flex;justify-content:center;margin-top:14px;}
+        .inp-btn-all{padding:8px 22px;font-size:.84rem;border-color:#dc2626;color:#fca5a5;background:rgba(220,38,38,.1);}
+        .inp-btn-all:hover{background:rgba(220,38,38,.2);color:#fff;border-color:#ef4444;}
+        body.light .inp-btn-all{color:#b91c1c;border-color:#dc2626;background:rgba(220,38,38,.06);}
+        .inp-table{width:100%;border-collapse:collapse;font-size:.86rem;background:#111827;border-radius:10px;overflow:hidden;}
+        .inp-table th{background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);font-size:.66rem;font-weight:700;
+            text-transform:uppercase;letter-spacing:.03em;padding:7px 8px;text-align:center;line-height:1.2;}
+        .inp-table td{padding:6px 8px;border-top:1px solid rgba(255,255,255,.06);color:#e2e8f0;text-align:center;}
+        .inp-table td.mo{text-align:left;font-weight:700;}
+        .inp-table td.num{color:rgba(255,255,255,.45);}
+        .inp-table .pct{font-weight:800;}
+        .inp-red,.inp-table td.inp-red{color:#ef4444;}
+        .inp-amber,.inp-table td.inp-amber{color:#f59e0b;}
+        .inp-green,.inp-table td.inp-green{color:#22c55e;}
+        .inp-done{font-size:.78rem;color:rgba(255,255,255,.45);margin-top:10px;}
+        .inp-task{display:flex;gap:14px;margin-top:18px;align-items:stretch;}
+        .inp-task-text{flex:1;border:2px solid #dc2626;border-radius:8px;padding:12px 16px;
+            color:#fca5a5;font-weight:700;font-size:.92rem;display:flex;align-items:center;}
+        .inp-deadline{background:#dc2626;color:#fff;border-radius:8px;padding:8px 22px;text-align:center;
+            display:flex;flex-direction:column;justify-content:center;}
+        .inp-deadline-lbl{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;opacity:.85;}
+        .inp-deadline-val{font-size:1.1rem;font-weight:800;}
+        .inp-period{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;font-size:.82rem;color:rgba(255,255,255,.6);}
+        .inp-period-lbl{font-weight:700;}
+        .inp-period input[type=date]{background:#111827;color:#e2e8f0;border:1px solid rgba(255,255,255,.15);
+            border-radius:6px;padding:4px 8px;font-size:.82rem;color-scheme:dark;}
+        .inp-period-sep{width:1px;height:20px;background:rgba(255,255,255,.12);margin:0 4px;}
+        .inp-btn{background:rgba(255,255,255,.06);color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.12);
+            border-radius:6px;padding:5px 12px;font-size:.78rem;font-weight:600;cursor:pointer;}
+        .inp-btn:hover{border-color:rgba(255,255,255,.3);color:#fff;}
+        .inp-btn.active{border-color:#6366f1;color:#a5b4fc;background:rgba(99,102,241,.15);}
+        .inp-btn-primary{background:#4f46e5;border-color:#4f46e5;color:#fff;}
+        .inp-btn-primary:hover{background:#6366f1;}
+        .inp-period-err{color:#f87171;font-weight:600;}
+        body.light .inp-period{color:rgba(0,0,0,.6);}
+        body.light .inp-period input[type=date]{background:#fff;color:#0f172a;border-color:rgba(0,0,0,.15);color-scheme:light;}
+        body.light .inp-period-sep{background:rgba(0,0,0,.12);}
+        body.light .inp-btn{background:#fff;color:rgba(0,0,0,.65);border-color:rgba(0,0,0,.12);}
+        body.light .inp-btn:hover{color:#0f172a;border-color:rgba(0,0,0,.3);}
+        body.light .inp-btn.active{color:#4f46e5;border-color:#6366f1;background:rgba(99,102,241,.08);}
+        body.light .inp-btn-primary{background:#4f46e5;color:#fff;border-color:#4f46e5;}
+        body.light .inp-period-err{color:#dc2626;}
+        @media (max-width:900px){ .inp-tables{grid-template-columns:1fr;} }
+        body.light .inp-sub{color:rgba(0,0,0,.45);}
+        body.light .inp-kpi{background:#fff;border-color:rgba(0,0,0,.1);}
+        body.light .inp-kpi-lbl{color:rgba(0,0,0,.45);}
+        body.light .inp-kpi-val{color:#0f172a;}
+        body.light .inp-kpi-val.inp-up{color:#16a34a;}
+        body.light .inp-table{background:#fff;border:1px solid rgba(0,0,0,.08);}
+        body.light .inp-table th{background:rgba(0,0,0,.04);color:rgba(0,0,0,.5);}
+        body.light .inp-table td{color:#0f172a;border-top-color:rgba(0,0,0,.06);}
+        body.light .inp-table td.num{color:rgba(0,0,0,.4);}
+        body.light .inp-red,body.light .inp-table td.inp-red{color:#dc2626;}
+        body.light .inp-amber,body.light .inp-table td.inp-amber{color:#d97706;}
+        body.light .inp-green,body.light .inp-table td.inp-green{color:#16a34a;}
+        body.light .inp-done{color:rgba(0,0,0,.5);}
+        body.light .inp-task-text{color:#b91c1c;background:#fff;}
+
         /* ── KVC CARDS ── */
         .kvc-grid{display:grid;grid-template-columns:1fr;gap:20px;}
         .kvc-card{
@@ -612,6 +686,7 @@
         <a href="#kvc" class="tn-link active" onclick="navClick(this,'kvc')">КВЦ</a>
         <a href="#kpi" class="tn-link" onclick="navClick(this,'kpi')">Показатели</a>
         <a href="#contracts-section" class="tn-link" onclick="navClick(this,'contracts-section')">Контракты</a>
+        <a href="#inpatient-section" class="tn-link" onclick="navClick(this,'inpatient-section')">Стационар</a>
         <a href="#tfoms-section" class="tn-link" onclick="navClick(this,'tfoms-section')">ТФОМС ДС</a>
         <a href="#pathway" class="tn-link" onclick="navClick(this,'pathway')">Путь пациента</a>
         <span class="tn-link tn-link-disabled">План действий</span>
@@ -1077,6 +1152,203 @@
             Данные о контрактах не загружены
         </div>
     </div>
+
+    <!-- ══ СТАЦИОНАРНАЯ ПОМОЩЬ — ПЛАН / ФАКТ (ГБУЗ + ЧУЗ) ═════════ -->
+    <div class="section-block" id="inpatient-section">
+        <div class="section-num">03</div>
+        <div class="inp-head">
+            <div>
+                <div class="section-title">Стационарная помощь</div>
+                <div class="inp-sub" id="inp-sub">Факт 2026: госпитализировано ГБУЗ + ЧУЗ</div>
+            </div>
+            <div class="inp-kpis">
+                <div class="inp-kpi"><div class="inp-kpi-lbl">План 2026</div><div class="inp-kpi-val" id="inp-plan">—</div></div>
+                <div class="inp-kpi"><div class="inp-kpi-lbl">Факт 2026</div><div class="inp-kpi-val" id="inp-fact">—</div></div>
+                <div class="inp-kpi"><div class="inp-kpi-lbl">% плана</div><div class="inp-kpi-val" id="inp-pct">—</div></div>
+                <div class="inp-kpi"><div class="inp-kpi-lbl" id="inp-week-lbl">Динамика</div><div class="inp-kpi-val inp-up" id="inp-week">—</div></div>
+            </div>
+        </div>
+
+        <div class="inp-period no-print" id="inp-period" style="display:none;">
+            <span class="inp-period-lbl">Период динамики:</span>
+            <label>с <input type="date" id="inp-from"></label>
+            <label>по <input type="date" id="inp-to"></label>
+            <button type="button" class="inp-btn inp-btn-primary" id="inp-apply">Показать</button>
+            <span class="inp-period-sep"></span>
+            <button type="button" class="inp-btn" data-preset="week">Прошлая неделя</button>
+            <button type="button" class="inp-btn" data-preset="month">Текущий месяц</button>
+            <button type="button" class="inp-btn" data-preset="year">С начала года</button>
+            <span class="inp-period-err" id="inp-period-err"></span>
+        </div>
+
+        <div id="inp-body" style="display:none;">
+            <div class="inp-tables" id="inp-tables"></div>
+            <div class="inp-actions no-print">
+                <button type="button" class="inp-btn inp-btn-all" id="inp-toggle-all"></button>
+            </div>
+            <div class="inp-task" id="inp-task-row">
+                <div class="inp-task-text" id="inp-task"></div>
+                <div class="inp-deadline" id="inp-deadline-box">
+                    <div class="inp-deadline-lbl">Срок</div>
+                    <div class="inp-deadline-val" id="inp-deadline"></div>
+                </div>
+            </div>
+        </div>
+        <div id="inp-empty" class="rating-card" style="text-align:center;padding:40px;color:rgba(255,255,255,.3);font-size:.85rem;">
+            Данные не загружены — загрузите «Госпитализировано в дневной стационар» и «План 2026 и пролечено в ЧУЗ» в панели администратора
+        </div>
+    </div>
+    <script th:inline="javascript">
+    (function() {
+        const INP_BASE = /*[[${basePath}]]*/ '';
+        const nf  = n => Number(n || 0).toLocaleString('ru-RU');
+        const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const dm  = iso => { const [y, m, d] = iso.split('-'); return d + '.' + m; };
+        const dmy = iso => { const [y, m, d] = iso.split('-'); return d + '.' + m + '.' + y; };
+        // Пороги цвета % плана — как в еженедельной презентации
+        const pctCls = p => p == null ? '' : p < 67 ? 'inp-red' : p < 86 ? 'inp-amber' : 'inp-green';
+
+        function table(rows, startNo, weekLbl) {
+            return `<table class="inp-table">
+                <thead><tr>
+                    <th>№</th><th style="text-align:left;">Мед. организация</th>
+                    <th>План 2026</th><th>Факт 2026</th><th>% плана</th><th>Динамика<br>${weekLbl}</th>
+                </tr></thead>
+                <tbody>${rows.map((r, i) => `<tr>
+                    <td class="num">${startNo + i}</td>
+                    <td class="mo">${esc(r.mo)}</td>
+                    <td>${nf(r.plan)}</td>
+                    <td title="ГБУЗ: ${nf(r.gbuz)} · ЧУЗ: ${nf(r.chuz)}">${nf(r.fact)}</td>
+                    <td class="pct ${pctCls(r.pct)}">${r.pct ?? '—'}</td>
+                    <td class="${r.week > 0 ? 'inp-green' : 'inp-red'}" style="font-weight:700;">${r.week > 0 ? '+' + r.week : '0'}</td>
+                </tr>`).join('')}</tbody>
+            </table>`;
+        }
+
+        const fromEl = document.getElementById('inp-from');
+        const toEl   = document.getElementById('inp-to');
+        const errEl  = document.getElementById('inp-period-err');
+        let defaults = null;   // {from, to} — последняя полная неделя, приходит с сервера
+        let lastData = null, lastWeekLbl = '';
+        let showAllNotMet = false;   // false — топ-10 лучших/худших, true — все, кто не выполнил план
+        const TOP_N = 10;
+
+        function renderTables() {
+            const d = lastData;
+            // d.rows отсортированы по % выполнения по возрастанию
+            const ranked  = d.rows.filter(r => r.pct != null);
+            const notMet  = ranked.filter(r => r.pct < 100);
+            const tables  = document.getElementById('inp-tables');
+            const btn     = document.getElementById('inp-toggle-all');
+
+            if (showAllNotMet) {
+                if (notMet.length) {
+                    const half = Math.ceil(notMet.length / 2);
+                    tables.innerHTML =
+                        `<div class="inp-banner inp-span">Не выполнили план — ${notMet.length} МО</div>` +
+                        `<div>${table(notMet.slice(0, half), 1, lastWeekLbl)}</div>` +
+                        (notMet.length > half ? `<div>${table(notMet.slice(half), half + 1, lastWeekLbl)}</div>` : '');
+                } else {
+                    tables.innerHTML = '<div class="inp-banner ok inp-span">Все МО выполнили план</div>';
+                }
+                btn.textContent = '← Топ-10 лучших и худших';
+                btn.disabled = false;
+            } else {
+                const best  = ranked.slice().reverse().slice(0, TOP_N);
+                const worst = ranked.slice(0, TOP_N);
+                tables.innerHTML =
+                    `<div><div class="inp-banner ok">▲ Топ-${TOP_N} лучших</div>${table(best, 1, lastWeekLbl)}</div>` +
+                    `<div><div class="inp-banner">▼ Топ-${TOP_N} худших</div>${table(worst, 1, lastWeekLbl)}</div>`;
+                btn.textContent = notMet.length
+                    ? 'Посмотреть всех, кто не выполнил план (' + notMet.length + ')'
+                    : 'Все МО выполнили план';
+                btn.disabled = !notMet.length;
+            }
+        }
+
+        document.getElementById('inp-toggle-all').addEventListener('click', () => {
+            showAllNotMet = !showAllNotMet;
+            if (lastData) renderTables();
+            document.getElementById('inpatient-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        function render(d) {
+            document.getElementById('inp-empty').style.display = 'none';
+            document.getElementById('inp-body').style.display = 'block';
+            document.getElementById('inp-period').style.display = '';
+
+            const sameYear = d.weekStart.slice(0, 4) === d.reportDate.slice(0, 4);
+            const weekLbl = d.weekStart === d.reportDate ? dmy(d.reportDate)
+                : (sameYear ? dm(d.weekStart) : dmy(d.weekStart)) + '–' + dm(d.reportDate);
+            document.getElementById('inp-sub').textContent =
+                'Факт на ' + dmy(d.reportDate) + ' (госпитализировано ГБУЗ ' + nf(d.totalGbuz) + ' + ЧУЗ ' + nf(d.totalChuz) + ')';
+            document.getElementById('inp-plan').textContent = nf(d.totalPlan);
+            document.getElementById('inp-fact').textContent = nf(d.totalFact);
+            const pctEl = document.getElementById('inp-pct');
+            pctEl.textContent = (d.totalPct ?? '—') + ' %';
+            pctEl.classList.remove('inp-red', 'inp-amber', 'inp-green');
+            if (pctCls(d.totalPct)) pctEl.classList.add(pctCls(d.totalPct));
+            document.getElementById('inp-week-lbl').textContent = 'Динамика ' + weekLbl;
+            document.getElementById('inp-week').textContent = '+ ' + nf(d.totalWeek);
+
+            lastData = d;
+            lastWeekLbl = weekLbl;
+            renderTables();
+
+            const task = (d.task || '').trim();
+            document.getElementById('inp-task').textContent = task;
+            document.getElementById('inp-deadline').textContent = d.deadline ? dmy(d.deadline) : '';
+            document.getElementById('inp-deadline-box').style.display = d.deadline ? '' : 'none';
+            document.getElementById('inp-task-row').style.display = task ? '' : 'none';
+
+            fromEl.value = d.weekStart;
+            toEl.value   = d.reportDate;
+            if (d.minDate) { fromEl.min = d.minDate.slice(0, 4) + '-01-01'; toEl.min = fromEl.min; }
+            if (d.maxDate) { const max = d.maxDate > d.defaultTo ? d.maxDate : d.defaultTo; fromEl.max = max; toEl.max = max; }
+            document.querySelectorAll('#inp-period [data-preset]').forEach(b => {
+                const p = presetRange(b.dataset.preset);
+                b.classList.toggle('active', !!p && p.from === d.weekStart && p.to === d.reportDate);
+            });
+        }
+
+        function load(from, to) {
+            errEl.textContent = '';
+            const qs = from && to ? '?from=' + from + '&to=' + to : '';
+            fetch(INP_BASE + '/api/ds-inpatient/dashboard' + qs)
+                .then(r => r.json().then(j => ({ ok: r.ok, j })))
+                .then(({ ok, j }) => {
+                    if (!ok) { errEl.textContent = j.error || 'Ошибка загрузки'; return; }
+                    if (!j.hasData) return;
+                    defaults = { from: j.defaultFrom, to: j.defaultTo };
+                    render(j);
+                })
+                .catch(() => { errEl.textContent = 'Ошибка соединения'; });
+        }
+
+        // Быстрые периоды считаются от конца последней полной недели
+        function presetRange(name) {
+            if (!defaults) return null;
+            const to = defaults.to;
+            if (name === 'week')  return { from: defaults.from, to };
+            if (name === 'month') return { from: to.slice(0, 8) + '01', to };
+            if (name === 'year')  return { from: to.slice(0, 5) + '01-01', to };
+            return null;
+        }
+
+        document.getElementById('inp-apply').addEventListener('click', () => {
+            if (!fromEl.value || !toEl.value) { errEl.textContent = 'Укажите обе даты'; return; }
+            if (fromEl.value > toEl.value)   { errEl.textContent = 'Дата «с» позже даты «по»'; return; }
+            load(fromEl.value, toEl.value);
+        });
+        document.querySelectorAll('#inp-period [data-preset]').forEach(b =>
+            b.addEventListener('click', () => {
+                const p = presetRange(b.dataset.preset);
+                if (p) load(p.from, p.to);
+            }));
+
+        load();
+    })();
+    </script>
 
     <!-- ══ ТФОМС ДС — ЛЕЧЕНИЕ ══════════════════════════════════ -->
     <div class="section-block" id="tfoms-section">
